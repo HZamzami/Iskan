@@ -25,6 +25,8 @@ class CorrespondenceResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'الأرشيف';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $modelLabel = 'معاملة إدارية';
 
     protected static ?string $pluralModelLabel = 'المعاملات الإدارية';
