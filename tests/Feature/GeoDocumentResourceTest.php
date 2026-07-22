@@ -1,0 +1,128 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Enums\GeoDocumentType;
+use App\Enums\Site;
+use App\Filament\Resources\GeoDocuments\Pages\CreateGeoDocument;
+use App\Filament\Resources\GeoDocuments\Pages\ListGeoDocuments;
+use App\Models\GeoDocument;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
+use Tests\TestCase;
+
+class GeoDocumentResourceTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake('local');
+
+        $this->actingAs(User::factory()->create());
+    }
+
+    public function test_list_page_shows_geo_documents(): void
+    {
+        $documents = GeoDocument::factory()->count(3)->create();
+
+        Livewire::test(ListGeoDocuments::class)
+            ->assertCanSeeTableRecords($documents);
+    }
+
+    public function test_type_tab_filters_records(): void
+    {
+        $gis = GeoDocument::factory()
+            ->ofType(GeoDocumentType::Gis, Site::SiteA)
+            ->create();
+        $asBuilt = GeoDocument::factory()
+            ->ofType(GeoDocumentType::AsBuiltDrawing, Site::SiteB)
+            ->create();
+
+        Livewire::test(ListGeoDocuments::class)
+            ->set('activeTab', GeoDocumentType::Gis->value)
+            ->assertCanSeeTableRecords([$gis])
+            ->assertCanNotSeeTableRecords([$asBuilt]);
+    }
+
+    public function test_site_filter_narrows_records(): void
+    {
+        $siteA = GeoDocument::factory()
+            ->ofType(GeoDocumentType::Gis, Site::SiteA)
+            ->create();
+        $abraj = GeoDocument::factory()
+            ->ofType(GeoDocumentType::Gis, Site::AbrajKudanah)
+            ->create();
+
+        Livewire::test(ListGeoDocuments::class)
+            ->filterTable('site', Site::SiteA->value)
+            ->assertCanSeeTableRecords([$siteA])
+            ->assertCanNotSeeTableRecords([$abraj]);
+    }
+
+    public function test_site_is_required_for_every_type(): void
+    {
+        Livewire::test(CreateGeoDocument::class)
+            ->fillForm([
+                'type' => GeoDocumentType::Gis->value,
+                'site' => null,
+                'title' => 'خريطة GIS للموقع',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('map.pdf', 100, 'application/pdf'),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['site' => 'required']);
+    }
+
+    public function test_can_create_as_built_drawing_with_site_and_drawing_number(): void
+    {
+        Livewire::test(CreateGeoDocument::class)
+            ->fillForm([
+                'type' => GeoDocumentType::AsBuiltDrawing->value,
+                'site' => Site::SiteC->value,
+                'title' => 'مخطط كما نُفذ للموقع (ج)',
+                'drawing_number' => 'DWG-1234',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('map.pdf', 100, 'application/pdf'),
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertHasNoFormErrors()
+            ->assertRedirect();
+
+        $this->assertDatabaseHas(GeoDocument::class, [
+            'title' => 'مخطط كما نُفذ للموقع (ج)',
+            'type' => GeoDocumentType::AsBuiltDrawing->value,
+            'site' => Site::SiteC->value,
+            'drawing_number' => 'DWG-1234',
+        ]);
+
+        $document = GeoDocument::query()->firstOrFail();
+
+        Storage::disk('local')->assertExists($document->file_path);
+        $this->assertMatchesRegularExpression('/^خريطة-\d{4}-\d{4}$/', $document->reference_number);
+    }
+
+    public function test_create_validates_required_fields(): void
+    {
+        Livewire::test(CreateGeoDocument::class)
+            ->fillForm([
+                'type' => null,
+                'title' => null,
+                'document_date' => null,
+                'file_path' => null,
+            ])
+            ->call('create')
+            ->assertHasFormErrors([
+                'type' => 'required',
+                'title' => 'required',
+                'document_date' => 'required',
+                'file_path' => 'required',
+            ]);
+    }
+}
