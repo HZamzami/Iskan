@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('أرشيف الإسكان')
-            ->font('Cairo')
+            ->font('IBM Plex Sans Arabic')
             ->colors([
                 'primary' => Color::Amber,
             ])
