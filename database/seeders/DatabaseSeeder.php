@@ -12,10 +12,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'مدير النظام',
-            'email' => 'admin@iskan.test',
-        ]);
+        if (! User::query()->where('email', 'admin@iskan.test')->exists()) {
+            User::factory()->create([
+                'name' => 'مدير النظام',
+                'email' => 'admin@iskan.test',
+            ]);
+        }
 
         $this->call([
             EntitySeeder::class,

@@ -13,11 +13,13 @@ class CorrespondenceSeeder extends Seeder
      */
     public function run(): void
     {
-        $entities = Entity::all();
+        if (Correspondence::query()->exists()) {
+            return;
+        }
 
         Correspondence::factory()
             ->count(30)
-            ->recycle($entities)
+            ->recycle(Entity::all())
             ->create();
     }
 }
