@@ -4,6 +4,7 @@ namespace App\Filament\Resources\FinancialFlows\Schemas;
 
 use App\Enums\FinancialFlowType;
 use App\Enums\Site;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -108,6 +109,7 @@ class FinancialFlowForm
     private static function siteOptions(Get $get): array
     {
         return collect(self::selectedType($get)?->sites() ?? [])
+            ->filter(fn (Site $site): bool => Filament::auth()->user()->canAccessSite($site))
             ->mapWithKeys(fn (Site $site): array => [$site->value => $site->getLabel()])
             ->all();
     }

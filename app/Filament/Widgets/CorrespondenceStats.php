@@ -5,12 +5,18 @@ namespace App\Filament\Widgets;
 use App\Enums\CorrespondenceDirection;
 use App\Enums\CorrespondenceStatus;
 use App\Models\Correspondence;
+use Filament\Facades\Filament;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class CorrespondenceStats extends StatsOverviewWidget
 {
+    public static function canView(): bool
+    {
+        return Filament::auth()->user()?->can('viewAny', Correspondence::class) ?? false;
+    }
+
     protected function getStats(): array
     {
         return [

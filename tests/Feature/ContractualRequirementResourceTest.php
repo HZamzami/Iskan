@@ -8,7 +8,6 @@ use App\Enums\Site;
 use App\Filament\Resources\ContractualRequirements\Pages\CreateContractualRequirement;
 use App\Filament\Resources\ContractualRequirements\Pages\ListContractualRequirements;
 use App\Models\ContractualRequirement;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +24,7 @@ class ContractualRequirementResourceTest extends TestCase
 
         Storage::fake('local');
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->makeAdminUser());
     }
 
     public function test_list_page_shows_contractual_requirements(): void

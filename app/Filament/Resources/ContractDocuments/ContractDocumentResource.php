@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ContractDocuments;
 
+use App\Filament\Resources\Concerns\HasSiteRestrictedQuery;
 use App\Filament\Resources\ContractDocuments\Pages\CreateContractDocument;
 use App\Filament\Resources\ContractDocuments\Pages\EditContractDocument;
 use App\Filament\Resources\ContractDocuments\Pages\ListContractDocuments;
@@ -19,6 +20,8 @@ use UnitEnum;
 
 class ContractDocumentResource extends Resource
 {
+    use HasSiteRestrictedQuery;
+
     protected static ?string $model = ContractDocument::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;

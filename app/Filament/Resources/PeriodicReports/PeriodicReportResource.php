@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PeriodicReports;
 
+use App\Filament\Resources\Concerns\HasSiteRestrictedQuery;
 use App\Filament\Resources\PeriodicReports\Pages\CreatePeriodicReport;
 use App\Filament\Resources\PeriodicReports\Pages\EditPeriodicReport;
 use App\Filament\Resources\PeriodicReports\Pages\ListPeriodicReports;
@@ -19,6 +20,8 @@ use UnitEnum;
 
 class PeriodicReportResource extends Resource
 {
+    use HasSiteRestrictedQuery;
+
     protected static ?string $model = PeriodicReport::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;

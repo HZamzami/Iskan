@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\MinuteType;
 use App\Enums\Site;
 use App\Models\Concerns\HasReferenceNumber;
+use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\MinuteFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ class Minute extends Model
     use HasFactory;
 
     use HasReferenceNumber;
+    use LogsArchiveActivity;
 
     protected $fillable = [
         'reference_number',

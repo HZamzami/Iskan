@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\FinancialFlows;
 
+use App\Filament\Resources\Concerns\HasSiteRestrictedQuery;
 use App\Filament\Resources\FinancialFlows\Pages\CreateFinancialFlow;
 use App\Filament\Resources\FinancialFlows\Pages\EditFinancialFlow;
 use App\Filament\Resources\FinancialFlows\Pages\ListFinancialFlows;
@@ -19,6 +20,8 @@ use UnitEnum;
 
 class FinancialFlowResource extends Resource
 {
+    use HasSiteRestrictedQuery;
+
     protected static ?string $model = FinancialFlow::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;

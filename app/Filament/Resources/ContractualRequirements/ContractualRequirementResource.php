@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ContractualRequirements;
 
+use App\Filament\Resources\Concerns\HasSiteRestrictedQuery;
 use App\Filament\Resources\ContractualRequirements\Pages\CreateContractualRequirement;
 use App\Filament\Resources\ContractualRequirements\Pages\EditContractualRequirement;
 use App\Filament\Resources\ContractualRequirements\Pages\ListContractualRequirements;
@@ -19,6 +20,8 @@ use UnitEnum;
 
 class ContractualRequirementResource extends Resource
 {
+    use HasSiteRestrictedQuery;
+
     protected static ?string $model = ContractualRequirement::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;

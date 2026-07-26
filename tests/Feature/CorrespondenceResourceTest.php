@@ -9,7 +9,6 @@ use App\Filament\Resources\Correspondences\Pages\EditCorrespondence;
 use App\Filament\Resources\Correspondences\Pages\ListCorrespondences;
 use App\Models\Correspondence;
 use App\Models\Entity;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -27,7 +26,7 @@ class CorrespondenceResourceTest extends TestCase
         Storage::fake('local');
         Storage::disk('local')->put('correspondence-files/placeholder.pdf', '%PDF-1.4');
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->makeAdminUser());
     }
 
     public function test_list_page_shows_correspondences(): void

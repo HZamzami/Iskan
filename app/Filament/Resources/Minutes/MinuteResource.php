@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Minutes;
 
+use App\Filament\Resources\Concerns\HasSiteRestrictedQuery;
 use App\Filament\Resources\Minutes\Pages\CreateMinute;
 use App\Filament\Resources\Minutes\Pages\EditMinute;
 use App\Filament\Resources\Minutes\Pages\ListMinutes;
@@ -19,6 +20,8 @@ use UnitEnum;
 
 class MinuteResource extends Resource
 {
+    use HasSiteRestrictedQuery;
+
     protected static ?string $model = Minute::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;

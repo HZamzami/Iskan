@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\GeoDocuments;
 
+use App\Filament\Resources\Concerns\HasSiteRestrictedQuery;
 use App\Filament\Resources\GeoDocuments\Pages\CreateGeoDocument;
 use App\Filament\Resources\GeoDocuments\Pages\EditGeoDocument;
 use App\Filament\Resources\GeoDocuments\Pages\ListGeoDocuments;
@@ -19,6 +20,8 @@ use UnitEnum;
 
 class GeoDocumentResource extends Resource
 {
+    use HasSiteRestrictedQuery;
+
     protected static ?string $model = GeoDocument::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMap;

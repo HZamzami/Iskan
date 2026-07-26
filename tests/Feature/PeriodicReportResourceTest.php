@@ -7,7 +7,6 @@ use App\Enums\Site;
 use App\Filament\Resources\PeriodicReports\Pages\CreatePeriodicReport;
 use App\Filament\Resources\PeriodicReports\Pages\ListPeriodicReports;
 use App\Models\PeriodicReport;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +23,7 @@ class PeriodicReportResourceTest extends TestCase
 
         Storage::fake('local');
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->makeAdminUser());
     }
 
     public function test_list_page_shows_periodic_reports(): void

@@ -4,14 +4,18 @@ namespace App\Models;
 
 use App\Enums\CorrespondenceDirection;
 use App\Enums\CorrespondenceStatus;
+use App\Models\Concerns\LogsArchiveActivity;
+use Database\Factories\CorrespondenceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Correspondence extends Model
 {
-    /** @use HasFactory<\Database\Factories\CorrespondenceFactory> */
+    /** @use HasFactory<CorrespondenceFactory> */
     use HasFactory;
+
+    use LogsArchiveActivity;
 
     protected $fillable = [
         'reference_number',
