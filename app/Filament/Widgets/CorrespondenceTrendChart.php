@@ -16,6 +16,10 @@ class CorrespondenceTrendChart extends ChartWidget
 
     protected static ?int $sort = 5;
 
+    protected int|string|array $columnSpan = ['default' => 1, 'xl' => 2];
+
+    protected ?string $maxHeight = '280px';
+
     public static function canView(): bool
     {
         return Filament::auth()->user()?->can('viewAny', Correspondence::class) ?? false;
@@ -80,7 +84,7 @@ class CorrespondenceTrendChart extends ChartWidget
     {
         return [
             'scales' => [
-                'x' => ['reverse' => true],
+                'x' => ['reverse' => true, 'ticks' => ['maxRotation' => 0, 'autoSkipPadding' => 8]],
                 'y' => ['beginAtZero' => true, 'ticks' => ['precision' => 0]],
             ],
             'plugins' => [

@@ -16,6 +16,8 @@ class LatestDocuments extends Widget
 
     protected static ?int $sort = 7;
 
+    protected int|string|array $columnSpan = ['default' => 1, 'xl' => 2];
+
     public static function canView(): bool
     {
         $user = Filament::auth()->user();

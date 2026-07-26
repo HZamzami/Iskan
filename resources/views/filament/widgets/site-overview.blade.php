@@ -1,8 +1,8 @@
 <x-filament-widgets::widget>
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
         @foreach ($cards as $card)
             <section class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
-                <div class="h-1.5" style="background-color: rgba(var(--{{ $card['site']->getColor() }}-500), 1)"></div>
+                <div class="h-1.5" style="background-color: {{ $card['accent'] }}"></div>
 
                 <div class="space-y-3 p-4">
                     <div class="flex items-center justify-between gap-2">
@@ -18,7 +18,7 @@
                         </x-filament::badge>
                     </div>
 
-                    <dl class="space-y-1 text-xs text-gray-500 dark:text-gray-400">
+                    <dl class="space-y-1 rounded-lg bg-gray-50 p-2.5 text-xs text-gray-500 dark:bg-white/5 dark:text-gray-400">
                         <div class="flex justify-between gap-2">
                             <dt>المقاول</dt>
                             <dd class="font-medium text-gray-700 dark:text-gray-200">{{ $card['site']->contractor() }}</dd>

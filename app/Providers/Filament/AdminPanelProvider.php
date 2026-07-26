@@ -25,6 +25,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->brandName('أرشيف الإسكان')
             ->font('IBM Plex Sans Arabic')

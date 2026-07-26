@@ -54,8 +54,16 @@ class SiteOverview extends Widget
                 ->all();
         }
 
+        $accents = [
+            'info' => '#3b82f6',
+            'success' => '#22c55e',
+            'warning' => '#f59e0b',
+            'danger' => '#ef4444',
+        ];
+
         $cards = collect($sites)->map(fn (Site $site): array => [
             'site' => $site,
+            'accent' => $accents[$site->getColor()] ?? '#f59e0b',
             'modules' => collect($modules)->map(fn (Module $module): array => [
                 'module' => $module,
                 'count' => (int) ($counts[$module->value][$site->value] ?? 0),

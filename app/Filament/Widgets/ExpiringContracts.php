@@ -17,6 +17,8 @@ class ExpiringContracts extends TableWidget
 
     protected static ?int $sort = 6;
 
+    protected int|string|array $columnSpan = ['default' => 1, 'xl' => 2];
+
     public static function canView(): bool
     {
         return Filament::auth()->user()?->can('viewAny', ContractDocument::class) ?? false;

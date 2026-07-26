@@ -17,6 +17,7 @@ use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Illuminate\Support\Carbon;
 
 class Dashboard extends BaseDashboard
@@ -24,6 +25,8 @@ class Dashboard extends BaseDashboard
     use HasFiltersForm;
 
     protected static ?string $title = 'لوحة المعلومات';
+
+    protected Width|string|null $maxContentWidth = Width::Full;
 
     public function getHeading(): string
     {
@@ -60,7 +63,11 @@ class Dashboard extends BaseDashboard
 
     public function getColumns(): int|array
     {
-        return 2;
+        return [
+            'default' => 1,
+            'lg' => 2,
+            'xl' => 4,
+        ];
     }
 
     public function getWidgets(): array

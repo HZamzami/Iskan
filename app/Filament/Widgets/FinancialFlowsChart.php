@@ -17,6 +17,10 @@ class FinancialFlowsChart extends ChartWidget
 
     protected static ?int $sort = 4;
 
+    protected int|string|array $columnSpan = ['default' => 1, 'xl' => 2];
+
+    protected ?string $maxHeight = '280px';
+
     public ?string $filter = 'current';
 
     public static function canView(): bool
@@ -62,10 +66,16 @@ class FinancialFlowsChart extends ChartWidget
             'gray' => '#6b7280',
         ];
 
+        $shortLabels = [
+            FinancialFlowType::Consultant->value => 'عقد الإستشاري',
+            FinancialFlowType::Operation->value => 'الصيانة والتشغيل',
+            FinancialFlowType::InternalProjects->value => 'المشاريع الداخلية',
+        ];
+
         return [
             'labels' => $labels,
             'datasets' => collect(FinancialFlowType::cases())->map(fn (FinancialFlowType $type): array => [
-                'label' => $type->getLabel(),
+                'label' => $shortLabels[$type->value] ?? $type->getLabel(),
                 'data' => collect(range(1, 12))
                     ->map(fn (int $month): float => $byTypeMonth[$type->value][$month] ?? 0.0)
                     ->all(),
@@ -78,7 +88,7 @@ class FinancialFlowsChart extends ChartWidget
     {
         return [
             'scales' => [
-                'x' => ['stacked' => true, 'reverse' => true],
+                'x' => ['stacked' => true, 'reverse' => true, 'ticks' => ['maxRotation' => 0, 'autoSkipPadding' => 8]],
                 'y' => ['stacked' => true, 'beginAtZero' => true],
             ],
             'plugins' => [

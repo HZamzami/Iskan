@@ -96,7 +96,7 @@ class ArchiveOverviewStats extends StatsOverviewWidget
                 ->map(fn (int $monthsAgo): float => $monthly[now()->subMonths($monthsAgo)->format('Y-m')] ?? 0.0)
                 ->all();
 
-            $stats[] = Stat::make('مستخلصات آخر 30 يوماً', number_format($recentSum, 2).' ريال')
+            $stats[] = Stat::make('مستخلصات آخر 30 يوماً', number_format($recentSum).' ريال')
                 ->description('مجموع التدفقات المالية المسجلة')
                 ->descriptionIcon(Heroicon::Banknotes)
                 ->color('primary')
