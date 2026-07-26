@@ -30,8 +30,10 @@ class RolesAndPermissionsSeeder extends Seeder
         Role::findOrCreate('admin', 'web');
 
         User::query()
-            ->where('email', 'admin@iskan.test')
-            ->first()
-            ?->assignRole('admin');
+            ->firstOrCreate(
+                ['email' => 'admin@iskan.test'],
+                ['name' => 'مدير النظام', 'password' => 'password'],
+            )
+            ->assignRole('admin');
     }
 }

@@ -141,6 +141,11 @@ class UserResourceTest extends TestCase
         $admin = $this->makeAdminUser();
         $this->actingAs($admin);
 
+        User::query()
+            ->where('email', 'admin@iskan.test')
+            ->first()
+            ?->removeRole('admin');
+
         Livewire::test(EditUser::class, ['record' => $admin->id])
             ->fillForm(['is_admin' => false])
             ->call('save');
