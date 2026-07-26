@@ -51,4 +51,23 @@ enum Site: string implements HasColor, HasIcon, HasLabel
     {
         return [self::SiteA, self::SiteB, self::SiteC];
     }
+
+    public function contractor(): string
+    {
+        return match ($this) {
+            self::SiteA, self::SiteB => 'عزام الشريف',
+            self::SiteC => 'الظاهري',
+            self::AbrajKudanah => 'شركة الراجحي',
+        };
+    }
+
+    public function assetManager(): string
+    {
+        return match ($this) {
+            self::SiteA => 'راشد الرفاعي',
+            self::SiteB => 'عبد الله الأمير',
+            self::SiteC => 'أحمد الصبحي',
+            self::AbrajKudanah => 'م. أحمد',
+        };
+    }
 }

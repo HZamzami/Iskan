@@ -2,6 +2,13 @@
 
 namespace App\Enums;
 
+use App\Filament\Resources\ContractDocuments\ContractDocumentResource;
+use App\Filament\Resources\ContractualRequirements\ContractualRequirementResource;
+use App\Filament\Resources\Correspondences\CorrespondenceResource;
+use App\Filament\Resources\FinancialFlows\FinancialFlowResource;
+use App\Filament\Resources\GeoDocuments\GeoDocumentResource;
+use App\Filament\Resources\Minutes\MinuteResource;
+use App\Filament\Resources\PeriodicReports\PeriodicReportResource;
 use App\Models\ContractDocument;
 use App\Models\ContractualRequirement;
 use App\Models\Correspondence;
@@ -10,6 +17,7 @@ use App\Models\GeoDocument;
 use App\Models\Minute;
 use App\Models\PeriodicReport;
 use Filament\Support\Contracts\HasLabel;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 
 enum Module: string implements HasLabel
@@ -54,6 +62,48 @@ enum Module: string implements HasLabel
     public function isSiteScoped(): bool
     {
         return $this !== self::Correspondences;
+    }
+
+    /**
+     * @return class-string<\Filament\Resources\Resource>
+     */
+    public function resourceClass(): string
+    {
+        return match ($this) {
+            self::Correspondences => CorrespondenceResource::class,
+            self::ContractDocuments => ContractDocumentResource::class,
+            self::Minutes => MinuteResource::class,
+            self::FinancialFlows => FinancialFlowResource::class,
+            self::ContractualRequirements => ContractualRequirementResource::class,
+            self::PeriodicReports => PeriodicReportResource::class,
+            self::GeoDocuments => GeoDocumentResource::class,
+        };
+    }
+
+    public function getIcon(): Heroicon
+    {
+        return match ($this) {
+            self::Correspondences => Heroicon::OutlinedEnvelope,
+            self::ContractDocuments => Heroicon::OutlinedDocumentDuplicate,
+            self::Minutes => Heroicon::OutlinedClipboardDocumentList,
+            self::FinancialFlows => Heroicon::OutlinedBanknotes,
+            self::ContractualRequirements => Heroicon::OutlinedClipboardDocumentCheck,
+            self::PeriodicReports => Heroicon::OutlinedChartBar,
+            self::GeoDocuments => Heroicon::OutlinedMap,
+        };
+    }
+
+    public function createLabel(): string
+    {
+        return match ($this) {
+            self::Correspondences => 'معاملة جديدة',
+            self::ContractDocuments => 'مستند تعاقدي جديد',
+            self::Minutes => 'محضر جديد',
+            self::FinancialFlows => 'تدفق مالي جديد',
+            self::ContractualRequirements => 'متطلب تعاقدي جديد',
+            self::PeriodicReports => 'تقرير دوري جديد',
+            self::GeoDocuments => 'رسم جيومكاني جديد',
+        };
     }
 
     public function permission(AccessLevel $level): string
