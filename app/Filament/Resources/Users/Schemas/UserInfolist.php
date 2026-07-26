@@ -69,6 +69,7 @@ class UserInfolist
                                     fn (Site $site): string => $site->getLabel(),
                                     $record->allowedSites() ?? Site::cases(),
                                 ))
+                                ->placeholder('السجلات العامة فقط')
                                 ->columnSpanFull(),
                         ]),
                     ]),

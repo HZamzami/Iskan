@@ -82,7 +82,9 @@ class UserForm
                         CheckboxList::make('sites')
                             ->label('الأقسام / المواقع')
                             ->options(Site::class)
-                            ->helperText('اترك الحقل فارغاً للسماح بجميع المواقع. السجلات العامة (غير المرتبطة بموقع) تظهر للجميع.')
+                            ->default(array_map(fn (Site $site): string => $site->value, Site::cases()))
+                            ->bulkToggleable()
+                            ->helperText('يرى المستخدم سجلات المواقع المحددة فقط. السجلات العامة (غير المرتبطة بموقع) تظهر لجميع المستخدمين.')
                             ->columns(2),
                     ]),
             ]);

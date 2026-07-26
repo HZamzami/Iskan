@@ -137,17 +137,33 @@ class AccessControlTest extends TestCase
         $this->assertTrue($user->can('update', $general));
     }
 
-    public function test_user_without_site_restriction_sees_all_sites(): void
+    public function test_user_with_all_sites_selected_sees_all_sites(): void
     {
-        $this->actingAs($this->makeUserWithAccess([
-            Module::Minutes->value => AccessLevel::Read,
-        ]));
+        $this->actingAs($this->makeUserWithAccess(
+            [Module::Minutes->value => AccessLevel::Read],
+            Site::cases(),
+        ));
 
         $minutes = collect(Site::cases())
             ->map(fn (Site $site) => Minute::factory()->create(['site' => $site]));
 
         Livewire::test(ListMinutes::class)
             ->assertCanSeeTableRecords($minutes);
+    }
+
+    public function test_user_with_no_sites_selected_sees_only_general_records(): void
+    {
+        $this->actingAs($this->makeUserWithAccess([
+            Module::Minutes->value => AccessLevel::Read,
+        ]));
+
+        $siteMinutes = collect(Site::cases())
+            ->map(fn (Site $site) => Minute::factory()->create(['site' => $site]));
+        $general = Minute::factory()->create(['site' => null]);
+
+        Livewire::test(ListMinutes::class)
+            ->assertCanSeeTableRecords([$general])
+            ->assertCanNotSeeTableRecords($siteMinutes);
     }
 
     public function test_cascade_covers_lower_levels(): void

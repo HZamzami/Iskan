@@ -115,7 +115,7 @@ class UserResourceTest extends TestCase
 
         $this->assertNull($user->accessLevelFor(Module::Minutes));
         $this->assertSame(AccessLevel::Read, $user->accessLevelFor(Module::GeoDocuments));
-        $this->assertNull($user->allowedSites());
+        $this->assertSame([], $user->allowedSites());
     }
 
     public function test_blank_password_keeps_existing_password_on_edit(): void

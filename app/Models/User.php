@@ -59,7 +59,8 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * المواقع المسموح بها للمستخدم، أو null إذا كان غير مقيّد بمواقع.
+     * المواقع المسموح بها للمستخدم، أو null لمدير النظام (غير مقيّد).
+     * المصفوفة الفارغة تعني الاطلاع على السجلات العامة فقط.
      *
      * @return array<int, Site>|null
      */
@@ -69,12 +70,10 @@ class User extends Authenticatable implements FilamentUser
             return null;
         }
 
-        $sites = array_values(array_filter(
+        return array_values(array_filter(
             Site::cases(),
             fn (Site $site): bool => $this->permissions->contains('name', "site.{$site->value}"),
         ));
-
-        return $sites === [] ? null : $sites;
     }
 
     public function canAccessSite(Site $site): bool
