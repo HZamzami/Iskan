@@ -29,11 +29,28 @@ class UserInfolist
                                 ->label('البريد الإلكتروني')
                                 ->copyable()
                                 ->columnSpan(1),
+                            TextEntry::make('phone')
+                                ->label('رقم الهاتف')
+                                ->placeholder('—')
+                                ->columnSpan(1),
+                            TextEntry::make('entity.name')
+                                ->label('الجهة')
+                                ->formatStateUsing(fn (User $record): ?string => $record->entity === null ? null : trim(
+                                    $record->entity->name.($record->entity->entityType ? " ({$record->entity->entityType->name})" : ''),
+                                ))
+                                ->placeholder('—')
+                                ->columnSpan(1),
                             TextEntry::make('role')
                                 ->label('الدور')
                                 ->badge()
                                 ->state(fn (User $record): string => $record->isAdmin() ? 'مدير النظام' : 'مستخدم')
                                 ->color(fn (string $state): string => $state === 'مدير النظام' ? 'danger' : 'gray')
+                                ->columnSpan(1),
+                            TextEntry::make('is_active')
+                                ->label('الحالة')
+                                ->badge()
+                                ->state(fn (User $record): string => $record->is_active ? 'نشط' : 'غير نشط')
+                                ->color(fn (User $record): string => $record->is_active ? 'success' : 'gray')
                                 ->columnSpan(1),
                             TextEntry::make('created_at')
                                 ->label('تاريخ الإنشاء')
@@ -54,8 +71,9 @@ class UserInfolist
                                     ->badge()
                                     ->state(fn (User $record): string => $record->accessLevelFor($module)?->getLabel() ?? 'بدون')
                                     ->color(fn (string $state): string => match ($state) {
-                                        'تعديل' => 'danger',
-                                        'إضافة' => 'warning',
+                                        'حذف' => 'danger',
+                                        'تعديل' => 'warning',
+                                        'إضافة' => 'success',
                                         'قراءة' => 'info',
                                         default => 'gray',
                                     })

@@ -21,7 +21,7 @@ class GeoDocumentFactory extends Factory
     {
         return [
             'type' => GeoDocumentType::Gis,
-            'site' => Site::SiteA,
+            'sites' => [Site::SiteA],
             'title' => fake()->sentence(4),
             'drawing_number' => fake()->bothify('DWG-####'),
             'document_date' => fake()->dateTimeBetween('-1 year', 'now'),
@@ -33,7 +33,7 @@ class GeoDocumentFactory extends Factory
     {
         return $this->state([
             'type' => $type,
-            'site' => $site,
+            'sites' => $site !== null ? [$site] : null,
         ]);
     }
 }

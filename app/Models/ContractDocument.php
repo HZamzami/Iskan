@@ -7,6 +7,7 @@ use App\Enums\Site;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\ContractDocumentFactory;
+use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,7 @@ class ContractDocument extends Model
     protected $fillable = [
         'reference_number',
         'type',
-        'site',
+        'sites',
         'title',
         'contract_number',
         'contracting_party',
@@ -44,7 +45,7 @@ class ContractDocument extends Model
     {
         return [
             'type' => ContractDocumentType::class,
-            'site' => Site::class,
+            'sites' => AsEnumCollection::of(Site::class),
             'start_date' => 'date',
             'end_date' => 'date',
             'document_date' => 'date',

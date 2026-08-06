@@ -68,10 +68,24 @@ class AccessControlTest extends TestCase
         $this->assertFalse($user->can('delete', $document));
     }
 
-    public function test_edit_level_allows_everything(): void
+    public function test_edit_level_allows_updating_but_not_deleting(): void
     {
         $user = $this->makeUserWithAccess([
             Module::ContractDocuments->value => AccessLevel::Edit,
+        ]);
+
+        $document = ContractDocument::factory()->create();
+
+        $this->assertTrue($user->can('viewAny', ContractDocument::class));
+        $this->assertTrue($user->can('create', ContractDocument::class));
+        $this->assertTrue($user->can('update', $document));
+        $this->assertFalse($user->can('delete', $document));
+    }
+
+    public function test_delete_level_allows_everything(): void
+    {
+        $user = $this->makeUserWithAccess([
+            Module::ContractDocuments->value => AccessLevel::Delete,
         ]);
 
         $document = ContractDocument::factory()->create();
@@ -145,7 +159,7 @@ class AccessControlTest extends TestCase
         ));
 
         $minutes = collect(Site::cases())
-            ->map(fn (Site $site) => Minute::factory()->create(['site' => $site]));
+            ->map(fn (Site $site) => Minute::factory()->create(['sites' => [$site]]));
 
         Livewire::test(ListMinutes::class)
             ->assertCanSeeTableRecords($minutes);
@@ -158,8 +172,8 @@ class AccessControlTest extends TestCase
         ]));
 
         $siteMinutes = collect(Site::cases())
-            ->map(fn (Site $site) => Minute::factory()->create(['site' => $site]));
-        $general = Minute::factory()->create(['site' => null]);
+            ->map(fn (Site $site) => Minute::factory()->create(['sites' => [$site]]));
+        $general = Minute::factory()->create(['sites' => null]);
 
         Livewire::test(ListMinutes::class)
             ->assertCanSeeTableRecords([$general])
@@ -171,7 +185,11 @@ class AccessControlTest extends TestCase
         $this->assertTrue(AccessLevel::Edit->covers(AccessLevel::Read));
         $this->assertTrue(AccessLevel::Edit->covers(AccessLevel::Write));
         $this->assertTrue(AccessLevel::Write->covers(AccessLevel::Read));
+        $this->assertTrue(AccessLevel::Delete->covers(AccessLevel::Edit));
+        $this->assertTrue(AccessLevel::Delete->covers(AccessLevel::Write));
+        $this->assertTrue(AccessLevel::Delete->covers(AccessLevel::Read));
         $this->assertFalse(AccessLevel::Read->covers(AccessLevel::Write));
         $this->assertFalse(AccessLevel::Write->covers(AccessLevel::Edit));
+        $this->assertFalse(AccessLevel::Edit->covers(AccessLevel::Delete));
     }
 }

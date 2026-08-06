@@ -21,7 +21,7 @@ class FinancialFlowFactory extends Factory
     {
         return [
             'type' => FinancialFlowType::Consultant,
-            'site' => null,
+            'sites' => null,
             'title' => fake()->sentence(4),
             'period_month' => fake()->dateTimeBetween('-1 year', 'now'),
             'amount' => fake()->randomFloat(2, 10000, 5000000),
@@ -34,7 +34,7 @@ class FinancialFlowFactory extends Factory
     {
         return $this->state([
             'type' => $type,
-            'site' => $site,
+            'sites' => $site !== null ? [$site] : null,
         ]);
     }
 }

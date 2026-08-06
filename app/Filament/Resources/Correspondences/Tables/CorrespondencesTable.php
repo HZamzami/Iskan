@@ -86,12 +86,21 @@ class CorrespondencesTable
                         ->when($data['until'], fn (Builder $q, $date) => $q->whereDate('document_date', '<=', $date))),
             ])
             ->recordActions([
+                Action::make('preview')
+                    ->label('معاينة')
+                    ->icon(Heroicon::Eye)
+                    ->color('gray')
+                    ->url(fn (Correspondence $record): string => Storage::disk('local')->temporaryUrl(
+                        $record->file_path,
+                        now()->addMinutes(5),
+                    ))
+                    ->openUrlInNewTab(),
                 Action::make('download')
                     ->label('تنزيل')
                     ->icon(Heroicon::ArrowDownTray)
                     ->color('gray')
                     ->action(fn (Correspondence $record) => Storage::disk('local')
-                        ->download($record->file_path, $record->reference_number.'.pdf')),
+                        ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
                 ViewAction::make(),
                 EditAction::make(),
             ])

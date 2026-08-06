@@ -17,6 +17,15 @@ class ViewGeoDocument extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('preview')
+                ->label('معاينة الملف')
+                ->icon(Heroicon::Eye)
+                ->color('gray')
+                ->url(fn (GeoDocument $record): string => Storage::disk('local')->temporaryUrl(
+                    $record->file_path,
+                    now()->addMinutes(5),
+                ))
+                ->openUrlInNewTab(),
             Action::make('download')
                 ->label('تنزيل الملف')
                 ->icon(Heroicon::ArrowDownTray)

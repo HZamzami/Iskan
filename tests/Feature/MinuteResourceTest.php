@@ -59,7 +59,7 @@ class MinuteResourceTest extends TestCase
             ->create();
 
         Livewire::test(ListMinutes::class)
-            ->filterTable('site', Site::SiteA->value)
+            ->filterTable('sites', Site::SiteA->value)
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -69,13 +69,13 @@ class MinuteResourceTest extends TestCase
         Livewire::test(CreateMinute::class)
             ->fillForm([
                 'type' => MinuteType::AssetTagging->value,
-                'site' => null,
+                'sites' => null,
                 'title' => 'محضر تسليم علامات ترميز',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('minute.pdf', 100, 'application/pdf'),
             ])
             ->call('create')
-            ->assertHasFormErrors(['site' => 'required']);
+            ->assertHasFormErrors(['sites' => 'required']);
     }
 
     public function test_asset_tagging_rejects_abraj_kudanah_site(): void
@@ -83,13 +83,13 @@ class MinuteResourceTest extends TestCase
         Livewire::test(CreateMinute::class)
             ->fillForm([
                 'type' => MinuteType::AssetTagging->value,
-                'site' => Site::AbrajKudanah->value,
+                'sites' => [Site::AbrajKudanah->value],
                 'title' => 'محضر تسليم علامات ترميز',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('minute.pdf', 100, 'application/pdf'),
             ])
             ->call('create')
-            ->assertHasFormErrors(['site']);
+            ->assertHasFormErrors(['sites']);
     }
 
     public function test_can_create_project_handover_without_site(): void
@@ -110,7 +110,7 @@ class MinuteResourceTest extends TestCase
         $this->assertDatabaseHas(Minute::class, [
             'title' => 'محضر تسليم مشروع',
             'type' => MinuteType::ProjectHandover->value,
-            'site' => null,
+            'sites' => null,
         ]);
 
         $minute = Minute::query()->firstOrFail();

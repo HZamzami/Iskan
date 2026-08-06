@@ -113,7 +113,7 @@ class UserResource extends Resource
         foreach (Module::cases() as $module) {
             $modules[$module->value] = null;
 
-            foreach ([AccessLevel::Edit, AccessLevel::Write, AccessLevel::Read] as $level) {
+            foreach ([AccessLevel::Delete, AccessLevel::Edit, AccessLevel::Write, AccessLevel::Read] as $level) {
                 if ($user->permissions->contains('name', $module->permission($level))) {
                     $modules[$module->value] = $level->value;
                     break;

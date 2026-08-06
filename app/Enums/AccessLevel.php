@@ -9,6 +9,7 @@ enum AccessLevel: string implements HasLabel
     case Read = 'read';
     case Write = 'write';
     case Edit = 'edit';
+    case Delete = 'delete';
 
     public function getLabel(): string
     {
@@ -16,6 +17,7 @@ enum AccessLevel: string implements HasLabel
             self::Read => 'قراءة',
             self::Write => 'إضافة',
             self::Edit => 'تعديل',
+            self::Delete => 'حذف',
         };
     }
 
@@ -28,6 +30,7 @@ enum AccessLevel: string implements HasLabel
             self::Read => 1,
             self::Write => 2,
             self::Edit => 3,
+            self::Delete => 4,
         };
     }
 

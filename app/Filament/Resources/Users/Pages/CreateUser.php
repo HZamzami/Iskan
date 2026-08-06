@@ -14,7 +14,7 @@ class CreateUser extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        $user = User::create(Arr::only($data, ['name', 'email', 'password']));
+        $user = User::create(Arr::only($data, ['name', 'email', 'phone', 'entity_id', 'is_active', 'password']));
 
         UserResource::syncAccess($user, $data);
 

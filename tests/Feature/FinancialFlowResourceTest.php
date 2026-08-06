@@ -59,7 +59,7 @@ class FinancialFlowResourceTest extends TestCase
             ->create();
 
         Livewire::test(ListFinancialFlows::class)
-            ->filterTable('site', Site::SiteA->value)
+            ->filterTable('sites', Site::SiteA->value)
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -69,14 +69,14 @@ class FinancialFlowResourceTest extends TestCase
         Livewire::test(CreateFinancialFlow::class)
             ->fillForm([
                 'type' => FinancialFlowType::Operation->value,
-                'site' => null,
+                'sites' => null,
                 'title' => 'تدفق مالي لعقد الصيانة والتشغيل',
                 'period_month' => '2026-07-01',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('flow.pdf', 100, 'application/pdf'),
             ])
             ->call('create')
-            ->assertHasFormErrors(['site' => 'required']);
+            ->assertHasFormErrors(['sites' => 'required']);
     }
 
     public function test_can_create_consultant_flow_without_site(): void
@@ -98,7 +98,7 @@ class FinancialFlowResourceTest extends TestCase
         $this->assertDatabaseHas(FinancialFlow::class, [
             'title' => 'تدفق مالي لعقد الإستشاري',
             'type' => FinancialFlowType::Consultant->value,
-            'site' => null,
+            'sites' => null,
             'amount' => 150000,
         ]);
 

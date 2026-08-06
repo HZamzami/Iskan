@@ -7,6 +7,7 @@ use App\Enums\Site;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\GeoDocumentFactory;
+use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,7 @@ class GeoDocument extends Model
     protected $fillable = [
         'reference_number',
         'type',
-        'site',
+        'sites',
         'title',
         'drawing_number',
         'document_date',
@@ -41,7 +42,7 @@ class GeoDocument extends Model
     {
         return [
             'type' => GeoDocumentType::class,
-            'site' => Site::class,
+            'sites' => AsEnumCollection::of(Site::class),
             'document_date' => 'date',
         ];
     }

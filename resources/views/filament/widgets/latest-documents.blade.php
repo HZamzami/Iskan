@@ -16,10 +16,14 @@
                         </div>
                     </div>
 
-                    @if ($item['site'])
-                        <x-filament::badge :color="$item['site']->getColor()">
-                            {{ $item['site']->getLabel() }}
-                        </x-filament::badge>
+                    @if ($item['sites']->isNotEmpty())
+                        <div class="flex shrink-0 flex-wrap justify-end gap-1">
+                            @foreach ($item['sites'] as $site)
+                                <x-filament::badge :color="$site->getColor()">
+                                    {{ $site->getLabel() }}
+                                </x-filament::badge>
+                            @endforeach
+                        </div>
                     @endif
                 </li>
             @empty

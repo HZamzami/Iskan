@@ -59,7 +59,7 @@ class PeriodicReportResourceTest extends TestCase
             ->create();
 
         Livewire::test(ListPeriodicReports::class)
-            ->filterTable('site', Site::SiteA->value)
+            ->filterTable('sites', Site::SiteA->value)
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -69,14 +69,14 @@ class PeriodicReportResourceTest extends TestCase
         Livewire::test(CreatePeriodicReport::class)
             ->fillForm([
                 'type' => PeriodicReportType::MonthlyReport->value,
-                'site' => null,
+                'sites' => null,
                 'title' => 'التقرير الشهري',
                 'period' => '2026-07-01',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('report.pdf', 100, 'application/pdf'),
             ])
             ->call('create')
-            ->assertHasFormErrors(['site' => 'required']);
+            ->assertHasFormErrors(['sites' => 'required']);
     }
 
     public function test_can_create_weekly_progress_report_for_abraj(): void
@@ -84,7 +84,7 @@ class PeriodicReportResourceTest extends TestCase
         Livewire::test(CreatePeriodicReport::class)
             ->fillForm([
                 'type' => PeriodicReportType::WeeklyProgress->value,
-                'site' => Site::AbrajKudanah->value,
+                'sites' => [Site::AbrajKudanah->value],
                 'title' => 'تقرير إنجاز الأعمال الأسبوعي',
                 'period' => '2026-07-15',
                 'document_date' => '2026-07-20',
@@ -98,11 +98,11 @@ class PeriodicReportResourceTest extends TestCase
         $this->assertDatabaseHas(PeriodicReport::class, [
             'title' => 'تقرير إنجاز الأعمال الأسبوعي',
             'type' => PeriodicReportType::WeeklyProgress->value,
-            'site' => Site::AbrajKudanah->value,
         ]);
 
         $report = PeriodicReport::query()->firstOrFail();
 
+        $this->assertSame([Site::AbrajKudanah], $report->sites->all());
         Storage::disk('local')->assertExists($report->file_path);
         $this->assertMatchesRegularExpression('/^تقرير-\d{4}-\d{4}$/', $report->reference_number);
     }

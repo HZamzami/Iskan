@@ -75,7 +75,7 @@ class ContractualRequirementResourceTest extends TestCase
             ->create();
 
         Livewire::test(ListContractualRequirements::class)
-            ->filterTable('site', Site::SiteA->value)
+            ->filterTable('sites', Site::SiteA->value)
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$siteB]);
     }
@@ -85,13 +85,13 @@ class ContractualRequirementResourceTest extends TestCase
         Livewire::test(CreateContractualRequirement::class)
             ->fillForm([
                 'type' => ContractualRequirementType::LaborCount->value,
-                'site' => null,
+                'sites' => null,
                 'title' => 'حصر العمالة لشهر يوليو',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('req.pdf', 100, 'application/pdf'),
             ])
             ->call('create')
-            ->assertHasFormErrors(['site' => 'required']);
+            ->assertHasFormErrors(['sites' => 'required']);
     }
 
     public function test_abraj_site_is_rejected_for_management_plan(): void
@@ -99,13 +99,13 @@ class ContractualRequirementResourceTest extends TestCase
         Livewire::test(CreateContractualRequirement::class)
             ->fillForm([
                 'type' => ContractualRequirementType::QualityPlan->value,
-                'site' => Site::AbrajKudanah->value,
+                'sites' => [Site::AbrajKudanah->value],
                 'title' => 'خطة إدارة الجودة',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('req.pdf', 100, 'application/pdf'),
             ])
             ->call('create')
-            ->assertHasFormErrors(['site']);
+            ->assertHasFormErrors(['sites']);
     }
 
     public function test_can_create_management_plan_for_camp_site(): void
@@ -113,7 +113,7 @@ class ContractualRequirementResourceTest extends TestCase
         Livewire::test(CreateContractualRequirement::class)
             ->fillForm([
                 'type' => ContractualRequirementType::QualityPlan->value,
-                'site' => Site::SiteB->value,
+                'sites' => [Site::SiteB->value],
                 'title' => 'خطة إدارة الجودة - موقع (ب)',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('req.pdf', 100, 'application/pdf'),
@@ -126,13 +126,67 @@ class ContractualRequirementResourceTest extends TestCase
         $this->assertDatabaseHas(ContractualRequirement::class, [
             'title' => 'خطة إدارة الجودة - موقع (ب)',
             'type' => ContractualRequirementType::QualityPlan->value,
-            'site' => Site::SiteB->value,
         ]);
 
         $requirement = ContractualRequirement::query()->firstOrFail();
 
+        $this->assertSame([Site::SiteB], $requirement->sites->all());
         Storage::disk('local')->assertExists($requirement->file_path);
         $this->assertMatchesRegularExpression('/^متطلب-\d{4}-\d{4}$/', $requirement->reference_number);
+    }
+
+    public function test_labor_count_rejects_word_file(): void
+    {
+        Livewire::test(CreateContractualRequirement::class)
+            ->fillForm([
+                'type' => ContractualRequirementType::LaborCount->value,
+                'sites' => [Site::SiteA->value],
+                'title' => 'حصر العمالة لشهر يوليو',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('req.docx', 100),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['file_path']);
+    }
+
+    public function test_can_create_sop_with_word_file(): void
+    {
+        Livewire::test(CreateContractualRequirement::class)
+            ->fillForm([
+                'type' => ContractualRequirementType::Sop->value,
+                'sites' => [Site::SiteA->value],
+                'title' => 'إجراءات التشغيل الموحد',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('sop.docx', 100),
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertHasNoFormErrors()
+            ->assertRedirect();
+
+        $requirement = ContractualRequirement::query()->where('title', 'إجراءات التشغيل الموحد')->firstOrFail();
+
+        Storage::disk('local')->assertExists($requirement->file_path);
+    }
+
+    public function test_can_create_master_plan_with_excel_file(): void
+    {
+        Livewire::test(CreateContractualRequirement::class)
+            ->fillForm([
+                'type' => ContractualRequirementType::MasterPlan->value,
+                'sites' => [Site::SiteA->value],
+                'title' => 'الجداول الزمنية',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('plan.xlsx', 100),
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertHasNoFormErrors()
+            ->assertRedirect();
+
+        $requirement = ContractualRequirement::query()->where('title', 'الجداول الزمنية')->firstOrFail();
+
+        Storage::disk('local')->assertExists($requirement->file_path);
     }
 
     public function test_create_validates_required_fields(): void

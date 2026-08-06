@@ -21,7 +21,7 @@ class ContractDocumentFactory extends Factory
     {
         return [
             'type' => ContractDocumentType::ConsultantContract,
-            'site' => null,
+            'sites' => null,
             'title' => fake()->sentence(4),
             'contracting_party' => fake()->company(),
             'document_date' => fake()->dateTimeBetween('-1 year', 'now'),
@@ -33,7 +33,7 @@ class ContractDocumentFactory extends Factory
     {
         return $this->state([
             'type' => $type,
-            'site' => $site,
+            'sites' => $site !== null ? [$site] : null,
         ]);
     }
 }

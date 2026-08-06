@@ -10,6 +10,7 @@ enum ContractualRequirementType: string implements HasLabel
     case EquipmentCount = 'equipment_count';
     case SparePartsCount = 'spare_parts_count';
     case ToolsCount = 'tools_count';
+    case ComponentsCount = 'components_count';
     case OrgStructure = 'org_structure';
     case Sop = 'sop';
     case CompletionCertificates = 'completion_certificates';
@@ -31,6 +32,7 @@ enum ContractualRequirementType: string implements HasLabel
             self::EquipmentCount => 'حصر المعدات الشهري',
             self::SparePartsCount => 'حصر قطع الغيار الشهري',
             self::ToolsCount => 'حصر الأدوات الشهري',
+            self::ComponentsCount => 'حصر المكونات',
             self::OrgStructure => 'الهيكل التنظيمي للاستشاري والمقاول',
             self::Sop => 'إجراءات التشغيل الموحد (SOP)',
             self::CompletionCertificates => 'شهادات إنجاز الأعمال',
@@ -56,7 +58,8 @@ enum ContractualRequirementType: string implements HasLabel
             self::LaborCount,
             self::EquipmentCount,
             self::SparePartsCount,
-            self::ToolsCount => RequirementGroup::MonthlyCounts,
+            self::ToolsCount,
+            self::ComponentsCount => RequirementGroup::MonthlyCounts,
 
             self::OrgStructure,
             self::Sop,
@@ -85,6 +88,20 @@ enum ContractualRequirementType: string implements HasLabel
         return match ($this->group()) {
             RequirementGroup::ManagementPlans => Site::campSites(),
             default => Site::cases(),
+        };
+    }
+
+    /**
+     * امتدادات الملفات المسموحة لهذا النوع.
+     *
+     * @return array<int, string>
+     */
+    public function acceptedExtensions(): array
+    {
+        return match ($this) {
+            self::Sop => ['pdf', 'doc', 'docx'],
+            self::MasterPlan, self::JobPlan => ['pdf', 'xls', 'xlsx'],
+            default => ['pdf'],
         };
     }
 }

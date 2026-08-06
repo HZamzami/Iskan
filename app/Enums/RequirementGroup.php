@@ -14,7 +14,7 @@ enum RequirementGroup: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::MonthlyCounts => 'الحصور الشهرية',
+            self::MonthlyCounts => 'قوائم الحصر الشهرية',
             self::OperationDocs => 'وثائق التشغيل',
             self::ManagementPlans => 'الخطط الإدارية',
         };

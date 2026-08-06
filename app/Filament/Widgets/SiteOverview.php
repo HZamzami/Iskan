@@ -41,17 +41,16 @@ class SiteOverview extends Widget
             $this->accessibleModules(),
             fn (Module $module): bool => $module->isSiteScoped(),
         ));
-        $siteValues = array_map(fn (Site $site): string => $site->value, $sites);
-
         $counts = [];
 
         foreach ($modules as $module) {
-            $counts[$module->value] = $module->modelClass()::query()
-                ->whereIn('site', $siteValues)
-                ->selectRaw('site, count(*) as total')
-                ->groupBy('site')
-                ->pluck('total', 'site')
-                ->all();
+            $counts[$module->value] = collect($sites)->mapWithKeys(
+                fn (Site $site): array => [
+                    $site->value => $module->modelClass()::query()
+                        ->whereJsonContains('sites', $site->value)
+                        ->count(),
+                ],
+            )->all();
         }
 
         $accents = [

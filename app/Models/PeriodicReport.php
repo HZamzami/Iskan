@@ -7,6 +7,7 @@ use App\Enums\Site;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\PeriodicReportFactory;
+use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,7 @@ class PeriodicReport extends Model
     protected $fillable = [
         'reference_number',
         'type',
-        'site',
+        'sites',
         'title',
         'period',
         'document_date',
@@ -41,7 +42,7 @@ class PeriodicReport extends Model
     {
         return [
             'type' => PeriodicReportType::class,
-            'site' => Site::class,
+            'sites' => AsEnumCollection::of(Site::class),
             'period' => 'date',
             'document_date' => 'date',
         ];

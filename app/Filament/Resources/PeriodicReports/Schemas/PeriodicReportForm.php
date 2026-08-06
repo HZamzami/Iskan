@@ -4,7 +4,9 @@ namespace App\Filament\Resources\PeriodicReports\Schemas;
 
 use App\Enums\PeriodicReportType;
 use App\Enums\Site;
+use Closure;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -33,12 +35,22 @@ class PeriodicReportForm
                                 ->live()
                                 ->required()
                                 ->columnSpan(1),
-                            Select::make('site')
+                            CheckboxList::make('sites')
                                 ->label('القسم / الموقع')
                                 ->options(fn (Get $get): array => self::siteOptions($get))
                                 ->visible(fn (Get $get): bool => self::isSiteScoped($get))
                                 ->required(fn (Get $get): bool => self::isSiteScoped($get))
-                                ->columnSpan(1),
+                                ->rule(fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get): void {
+                                    $allowed = array_keys(self::siteOptions($get));
+
+                                    if (array_diff((array) $value, $allowed) !== []) {
+                                        $fail('يجب اختيار مواقع متاحة لهذا النوع فقط.');
+                                    }
+                                })
+                                ->bulkToggleable()
+                                ->columns(4)
+                                ->dehydrateStateUsing(fn (?array $state): ?array => filled($state) ? $state : null)
+                                ->columnSpanFull(),
                             TextInput::make('reference_number')
                                 ->label('الرقم المرجعي')
                                 ->placeholder('يُولَّد تلقائياً عند الترك فارغاً')

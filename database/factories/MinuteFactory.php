@@ -21,7 +21,7 @@ class MinuteFactory extends Factory
     {
         return [
             'type' => MinuteType::WeeklyMeeting,
-            'site' => Site::SiteA,
+            'sites' => [Site::SiteA],
             'title' => fake()->sentence(4),
             'parties' => fake()->company(),
             'document_date' => fake()->dateTimeBetween('-1 year', 'now'),
@@ -33,7 +33,7 @@ class MinuteFactory extends Factory
     {
         return $this->state([
             'type' => $type,
-            'site' => $site,
+            'sites' => $site !== null ? [$site] : null,
         ]);
     }
 }

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * يقصر استعلام المورد على سجلات المواقع المسموح بها للمستخدم، مع إبقاء
- * السجلات العامة (بدون موقع) ظاهرة للجميع.
+ * السجلات العامة (بدون مواقع) ظاهرة للجميع.
  */
 trait HasSiteRestrictedQuery
 {
@@ -22,9 +22,14 @@ trait HasSiteRestrictedQuery
         $allowed = $user?->allowedSites();
 
         if ($allowed !== null) {
-            $values = array_map(fn (Site $site): string => $site->value, $allowed);
+            $query->where(function (Builder $q) use ($allowed): void {
+                $q->whereNull('sites')->orWhereJsonLength('sites', 0);
 
-            $query->where(fn (Builder $q) => $q->whereNull('site')->orWhereIn('site', $values));
+                /** @var Site $site */
+                foreach ($allowed as $site) {
+                    $q->orWhereJsonContains('sites', $site->value);
+                }
+            });
         }
 
         return $query;

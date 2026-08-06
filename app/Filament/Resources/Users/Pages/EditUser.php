@@ -44,7 +44,10 @@ class EditUser extends EditRecord
         /** @var User $user */
         $user = $this->getRecord();
 
-        if (! ($this->data['is_admin'] ?? false) && UsersTable::isLastAdmin($user)) {
+        $losingAdminRole = ! ($this->data['is_admin'] ?? false);
+        $losingActiveStatus = ! ($this->data['is_active'] ?? true);
+
+        if (($losingAdminRole || $losingActiveStatus) && UsersTable::isLastAdmin($user)) {
             UsersTable::notifyLastAdmin();
 
             $this->halt();
@@ -53,7 +56,7 @@ class EditUser extends EditRecord
 
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        $record->update(Arr::only($data, ['name', 'email', 'password']));
+        $record->update(Arr::only($data, ['name', 'email', 'phone', 'entity_id', 'is_active', 'password']));
 
         UserResource::syncAccess($record, $data);
 

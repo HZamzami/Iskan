@@ -34,7 +34,7 @@ class ContractualRequirementInfolist
                                 ->badge()
                                 ->color(fn (ContractualRequirement $record): string => $record->type->group()->getColor())
                                 ->columnSpan(1),
-                            TextEntry::make('site')
+                            TextEntry::make('sites')
                                 ->label('القسم / الموقع')
                                 ->badge()
                                 ->placeholder('غير مرتبط بموقع')

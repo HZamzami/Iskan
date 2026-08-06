@@ -15,7 +15,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -40,7 +39,7 @@ class ContractDocumentsTable
                 TextColumn::make('type')
                     ->label('نوع العقد')
                     ->badge(),
-                TextColumn::make('site')
+                TextColumn::make('sites')
                     ->label('القسم / الموقع')
                     ->badge()
                     ->placeholder('—'),
@@ -64,15 +63,24 @@ class ContractDocumentsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('document_date', 'desc')
-            ->groups([
-                Group::make('site')
-                    ->label('الموقع')
-                    ->getTitleFromRecordUsing(fn (ContractDocument $record): string => $record->site?->getLabel() ?? 'غير مرتبط بموقع'),
-            ])
             ->filters([
-                SelectFilter::make('site')
+                SelectFilter::make('sites')
                     ->label('القسم / الموقع')
-                    ->options(Site::class),
+                    ->options(Site::class)
+                    ->multiple()
+                    ->query(function (Builder $query, array $data): Builder {
+                        $values = $data['values'] ?? [];
+
+                        if (blank($values)) {
+                            return $query;
+                        }
+
+                        return $query->where(function (Builder $q) use ($values): void {
+                            foreach ($values as $value) {
+                                $q->orWhereJsonContains('sites', $value);
+                            }
+                        });
+                    }),
                 Filter::make('document_date')
                     ->label('تاريخ الملف')
                     ->schema([
@@ -84,12 +92,21 @@ class ContractDocumentsTable
                         ->when($data['until'], fn (Builder $q, $date) => $q->whereDate('document_date', '<=', $date))),
             ])
             ->recordActions([
+                Action::make('preview')
+                    ->label('معاينة')
+                    ->icon(Heroicon::Eye)
+                    ->color('gray')
+                    ->url(fn (ContractDocument $record): string => Storage::disk('local')->temporaryUrl(
+                        $record->file_path,
+                        now()->addMinutes(5),
+                    ))
+                    ->openUrlInNewTab(),
                 Action::make('download')
                     ->label('تنزيل')
                     ->icon(Heroicon::ArrowDownTray)
                     ->color('gray')
                     ->action(fn (ContractDocument $record) => Storage::disk('local')
-                        ->download($record->file_path, $record->reference_number.'.pdf')),
+                        ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
                 ViewAction::make(),
                 EditAction::make(),
             ])

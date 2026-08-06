@@ -30,7 +30,7 @@ class FinancialFlowInfolist
                             TextEntry::make('title')
                                 ->label('عنوان المستند')
                                 ->columnSpanFull(),
-                            TextEntry::make('site')
+                            TextEntry::make('sites')
                                 ->label('القسم / الموقع')
                                 ->badge()
                                 ->placeholder('غير مرتبط بموقع')

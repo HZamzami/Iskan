@@ -59,7 +59,7 @@ class GeoDocumentResourceTest extends TestCase
             ->create();
 
         Livewire::test(ListGeoDocuments::class)
-            ->filterTable('site', Site::SiteA->value)
+            ->filterTable('sites', Site::SiteA->value)
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -69,13 +69,13 @@ class GeoDocumentResourceTest extends TestCase
         Livewire::test(CreateGeoDocument::class)
             ->fillForm([
                 'type' => GeoDocumentType::Gis->value,
-                'site' => null,
+                'sites' => null,
                 'title' => 'خريطة GIS للموقع',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('map.pdf', 100, 'application/pdf'),
             ])
             ->call('create')
-            ->assertHasFormErrors(['site' => 'required']);
+            ->assertHasFormErrors(['sites' => 'required']);
     }
 
     public function test_can_create_as_built_drawing_with_site_and_drawing_number(): void
@@ -83,7 +83,7 @@ class GeoDocumentResourceTest extends TestCase
         Livewire::test(CreateGeoDocument::class)
             ->fillForm([
                 'type' => GeoDocumentType::AsBuiltDrawing->value,
-                'site' => Site::SiteC->value,
+                'sites' => [Site::SiteC->value],
                 'title' => 'مخطط كما نُفذ للموقع (ج)',
                 'drawing_number' => 'DWG-1234',
                 'document_date' => '2026-07-20',
@@ -97,14 +97,62 @@ class GeoDocumentResourceTest extends TestCase
         $this->assertDatabaseHas(GeoDocument::class, [
             'title' => 'مخطط كما نُفذ للموقع (ج)',
             'type' => GeoDocumentType::AsBuiltDrawing->value,
-            'site' => Site::SiteC->value,
             'drawing_number' => 'DWG-1234',
         ]);
 
         $document = GeoDocument::query()->firstOrFail();
 
+        $this->assertSame([Site::SiteC], $document->sites->all());
         Storage::disk('local')->assertExists($document->file_path);
         $this->assertMatchesRegularExpression('/^خريطة-\d{4}-\d{4}$/', $document->reference_number);
+    }
+
+    public function test_gis_type_rejects_pdf_file(): void
+    {
+        Livewire::test(CreateGeoDocument::class)
+            ->fillForm([
+                'type' => GeoDocumentType::Gis->value,
+                'sites' => [Site::SiteA->value],
+                'title' => 'خريطة GIS للموقع',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('map.pdf', 100, 'application/pdf'),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['file_path']);
+    }
+
+    public function test_can_create_gis_document_with_gpkg_file(): void
+    {
+        Livewire::test(CreateGeoDocument::class)
+            ->fillForm([
+                'type' => GeoDocumentType::Gis->value,
+                'sites' => [Site::SiteA->value],
+                'title' => 'خريطة GIS للموقع',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('map.gpkg', 100),
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertHasNoFormErrors()
+            ->assertRedirect();
+
+        $document = GeoDocument::query()->where('title', 'خريطة GIS للموقع')->firstOrFail();
+
+        Storage::disk('local')->assertExists($document->file_path);
+    }
+
+    public function test_kml_kmz_type_rejects_dwg_file(): void
+    {
+        Livewire::test(CreateGeoDocument::class)
+            ->fillForm([
+                'type' => GeoDocumentType::KmlKmz->value,
+                'sites' => [Site::SiteA->value],
+                'title' => 'خريطة KML للموقع',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('map.dwg', 100),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['file_path']);
     }
 
     public function test_create_validates_required_fields(): void

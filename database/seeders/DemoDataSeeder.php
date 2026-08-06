@@ -86,19 +86,19 @@ class DemoDataSeeder extends Seeder
             [
                 'title' => 'عقد الإشراف الإستشاري - إيهاف',
                 'type' => ContractDocumentType::ConsultantContract,
-                'site' => null,
+                'sites' => null,
                 'contracting_party' => 'إيهاف',
             ],
             [
                 'title' => 'عقد الصيانة والتشغيل - موقع (أ)',
                 'type' => ContractDocumentType::OperationContract,
-                'site' => Site::SiteA,
+                'sites' => [Site::SiteA],
                 'contracting_party' => 'عزام الشريف',
             ],
             [
                 'title' => 'عقد الصيانة والتشغيل - أبراج كدانة الوادي',
                 'type' => ContractDocumentType::OperationContract,
-                'site' => Site::AbrajKudanah,
+                'sites' => [Site::AbrajKudanah],
                 'contracting_party' => 'شركة الراجحي',
             ],
         ];
@@ -117,19 +117,19 @@ class DemoDataSeeder extends Seeder
             [
                 'title' => 'محضر الاجتماع الأسبوعي - موقع (ب)',
                 'type' => MinuteType::WeeklyMeeting,
-                'site' => Site::SiteB,
+                'sites' => [Site::SiteB],
                 'parties' => 'إدارة إسكان الحجاج، عزام الشريف، إيهاف',
             ],
             [
                 'title' => 'محضر استلام مشروع تطوير المخيمات',
                 'type' => MinuteType::ProjectHandover,
-                'site' => null,
+                'sites' => null,
                 'parties' => 'إدارة إسكان الحجاج، المقاول المنفذ',
             ],
             [
                 'title' => 'محضر ترميز الأصول - موقع (أ)',
                 'type' => MinuteType::AssetTagging,
-                'site' => Site::SiteA,
+                'sites' => [Site::SiteA],
                 'parties' => 'إدارة إسكان الحجاج، عزام الشريف',
             ],
         ];
@@ -148,19 +148,19 @@ class DemoDataSeeder extends Seeder
             [
                 'title' => 'مستخلص الإستشاري - شهر يونيو 2026',
                 'type' => FinancialFlowType::Consultant,
-                'site' => null,
+                'sites' => null,
                 'amount' => 850000,
             ],
             [
                 'title' => 'مستخلص الصيانة والتشغيل - موقع (أ) - يونيو 2026',
                 'type' => FinancialFlowType::Operation,
-                'site' => Site::SiteA,
+                'sites' => [Site::SiteA],
                 'amount' => 2400000,
             ],
             [
                 'title' => 'مستخلص الصيانة والتشغيل - موقع (ج) - يونيو 2026',
                 'type' => FinancialFlowType::Operation,
-                'site' => Site::SiteC,
+                'sites' => [Site::SiteC],
                 'amount' => 1750000,
             ],
         ];
@@ -179,17 +179,17 @@ class DemoDataSeeder extends Seeder
             [
                 'title' => 'حصر أعداد العمالة - موقع (أ) - يونيو 2026',
                 'type' => ContractualRequirementType::LaborCount,
-                'site' => Site::SiteA,
+                'sites' => [Site::SiteA],
             ],
             [
                 'title' => 'حصر المعدات - أبراج كدانة الوادي - يونيو 2026',
                 'type' => ContractualRequirementType::EquipmentCount,
-                'site' => Site::AbrajKudanah,
+                'sites' => [Site::AbrajKudanah],
             ],
             [
                 'title' => 'الهيكل التنظيمي لفريق التشغيل - موقع (ب)',
                 'type' => ContractualRequirementType::OrgStructure,
-                'site' => Site::SiteB,
+                'sites' => [Site::SiteB],
             ],
         ];
 
@@ -207,17 +207,17 @@ class DemoDataSeeder extends Seeder
             [
                 'title' => 'التقرير الشهري - أبراج كدانة الوادي - يونيو 2026',
                 'type' => PeriodicReportType::MonthlyReport,
-                'site' => Site::AbrajKudanah,
+                'sites' => [Site::AbrajKudanah],
             ],
             [
                 'title' => 'تقرير إنجاز الأعمال الأسبوعي - موقع (أ)',
                 'type' => PeriodicReportType::WeeklyProgress,
-                'site' => Site::SiteA,
+                'sites' => [Site::SiteA],
             ],
             [
                 'title' => 'تقرير الحصر والترميز الأسبوعي - موقع (ج)',
                 'type' => PeriodicReportType::WeeklyInventoryCoding,
-                'site' => Site::SiteC,
+                'sites' => [Site::SiteC],
             ],
         ];
 
@@ -235,13 +235,13 @@ class DemoDataSeeder extends Seeder
             [
                 'title' => 'خريطة GIS لمخيمات موقع (أ)',
                 'type' => GeoDocumentType::Gis,
-                'site' => Site::SiteA,
+                'sites' => [Site::SiteA],
                 'drawing_number' => 'GIS-2026-001',
             ],
             [
                 'title' => 'المخطط التنفيذي (As-Built) - أبراج كدانة الوادي',
                 'type' => GeoDocumentType::AsBuiltDrawing,
-                'site' => Site::AbrajKudanah,
+                'sites' => [Site::AbrajKudanah],
                 'drawing_number' => 'DWG-2026-014',
             ],
         ];

@@ -59,7 +59,7 @@ class ContractDocumentResourceTest extends TestCase
             ->create();
 
         Livewire::test(ListContractDocuments::class)
-            ->filterTable('site', Site::SiteA->value)
+            ->filterTable('sites', Site::SiteA->value)
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -69,13 +69,13 @@ class ContractDocumentResourceTest extends TestCase
         Livewire::test(CreateContractDocument::class)
             ->fillForm([
                 'type' => ContractDocumentType::OperationContract->value,
-                'site' => null,
+                'sites' => null,
                 'title' => 'عقد صيانة وتشغيل',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('contract.pdf', 100, 'application/pdf'),
             ])
             ->call('create')
-            ->assertHasFormErrors(['site' => 'required']);
+            ->assertHasFormErrors(['sites' => 'required']);
     }
 
     public function test_can_create_consultant_contract_without_site(): void
@@ -96,7 +96,7 @@ class ContractDocumentResourceTest extends TestCase
         $this->assertDatabaseHas(ContractDocument::class, [
             'title' => 'عقد الإستشاري',
             'type' => ContractDocumentType::ConsultantContract->value,
-            'site' => null,
+            'sites' => null,
         ]);
 
         $document = ContractDocument::query()->firstOrFail();
@@ -110,7 +110,7 @@ class ContractDocumentResourceTest extends TestCase
         Livewire::test(CreateContractDocument::class)
             ->fillForm([
                 'type' => ContractDocumentType::OperationContract->value,
-                'site' => Site::AbrajKudanah->value,
+                'sites' => [Site::AbrajKudanah->value],
                 'title' => 'عقد صيانة أبراج كدانة',
                 'contracting_party' => 'شركة الراجحي',
                 'document_date' => '2026-07-20',
@@ -122,8 +122,11 @@ class ContractDocumentResourceTest extends TestCase
 
         $this->assertDatabaseHas(ContractDocument::class, [
             'title' => 'عقد صيانة أبراج كدانة',
-            'site' => Site::AbrajKudanah->value,
         ]);
+
+        $document = ContractDocument::query()->where('title', 'عقد صيانة أبراج كدانة')->firstOrFail();
+
+        $this->assertSame([Site::AbrajKudanah], $document->sites->all());
     }
 
     public function test_create_validates_required_fields(): void

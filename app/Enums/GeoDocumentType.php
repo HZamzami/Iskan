@@ -38,4 +38,18 @@ enum GeoDocumentType: string implements HasColor, HasLabel
     {
         return Site::cases();
     }
+
+    /**
+     * امتدادات الملفات المسموحة لهذا النوع.
+     *
+     * @return array<int, string>
+     */
+    public function acceptedExtensions(): array
+    {
+        return match ($this) {
+            self::Gis => ['gpkg', 'rar', 'zip'],
+            self::KmlKmz => ['kml', 'kmz'],
+            self::AsBuiltDrawing => ['pdf', 'dwg'],
+        };
+    }
 }

@@ -5,6 +5,9 @@ namespace App\Filament\Resources\Users\Schemas;
 use App\Enums\AccessLevel;
 use App\Enums\Module;
 use App\Enums\Site;
+use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -38,6 +41,36 @@ class UserForm
                                 ->unique(ignoreRecord: true)
                                 ->maxLength(255)
                                 ->columnSpan(1),
+                            TextInput::make('phone')
+                                ->label('رقم الهاتف')
+                                ->tel()
+                                ->maxLength(255)
+                                ->columnSpan(1),
+                            Select::make('entity_id')
+                                ->label('الجهة')
+                                ->relationship('entity', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->createOptionForm([
+                                    TextInput::make('name')
+                                        ->label('اسم الجهة')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->unique('entities', 'name'),
+                                    Select::make('entity_type_id')
+                                        ->label('نوع الجهة')
+                                        ->relationship('entityType', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->createOptionForm([
+                                            TextInput::make('name')
+                                                ->label('اسم النوع')
+                                                ->required()
+                                                ->maxLength(255)
+                                                ->unique('entity_types', 'name'),
+                                        ]),
+                                ])
+                                ->columnSpan(1),
                             TextInput::make('password')
                                 ->label('كلمة المرور')
                                 ->password()
@@ -55,11 +88,20 @@ class UserForm
                                 ->live()
                                 ->inline(false)
                                 ->columnSpan(1),
+                            Toggle::make('is_active')
+                                ->label('نشط')
+                                ->helperText('المستخدم غير النشط لا يستطيع تسجيل الدخول إلى النظام')
+                                ->default(true)
+                                ->disabled(fn (?User $record): bool => $record !== null && (
+                                    $record->is(Filament::auth()->user()) || UsersTable::isLastAdmin($record)
+                                ))
+                                ->inline(false)
+                                ->columnSpan(1),
                         ]),
                     ]),
                 Section::make('صلاحيات الوحدات')
                     ->icon(Heroicon::LockClosed)
-                    ->description('قراءة: عرض فقط • إضافة: إنشاء وعرض • تعديل: تعديل وحذف وإنشاء وعرض. اترك الحقل «بدون» لإخفاء الوحدة عن المستخدم.')
+                    ->description('قراءة: عرض فقط • إضافة: إنشاء وعرض • تعديل: تعديل وإنشاء وعرض • حذف: كل الصلاحيات بما فيها الحذف. اترك الحقل «بدون» لإخفاء الوحدة عن المستخدم.')
                     ->columnSpanFull()
                     ->visible(fn (Get $get): bool => ! $get('is_admin'))
                     ->schema([

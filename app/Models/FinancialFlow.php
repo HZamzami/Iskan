@@ -7,6 +7,7 @@ use App\Enums\Site;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\FinancialFlowFactory;
+use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,7 @@ class FinancialFlow extends Model
     protected $fillable = [
         'reference_number',
         'type',
-        'site',
+        'sites',
         'title',
         'period_month',
         'amount',
@@ -42,7 +43,7 @@ class FinancialFlow extends Model
     {
         return [
             'type' => FinancialFlowType::class,
-            'site' => Site::class,
+            'sites' => AsEnumCollection::of(Site::class),
             'period_month' => 'date',
             'document_date' => 'date',
             'amount' => 'decimal:2',

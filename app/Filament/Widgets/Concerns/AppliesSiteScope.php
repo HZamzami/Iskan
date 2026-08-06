@@ -46,7 +46,7 @@ trait AppliesSiteScope
         $filtered = $this->filteredSite();
 
         if ($filtered !== null) {
-            return $query->where('site', $filtered->value);
+            return $query->whereJsonContains('sites', $filtered->value);
         }
 
         $allowed = $this->currentUser()?->allowedSites();
@@ -55,9 +55,14 @@ trait AppliesSiteScope
             return $query;
         }
 
-        $values = array_map(fn (Site $site): string => $site->value, $allowed);
+        return $query->where(function (Builder $q) use ($allowed): void {
+            $q->whereNull('sites')->orWhereJsonLength('sites', 0);
 
-        return $query->where(fn (Builder $q) => $q->whereNull('site')->orWhereIn('site', $values));
+            /** @var Site $site */
+            foreach ($allowed as $site) {
+                $q->orWhereJsonContains('sites', $site->value);
+            }
+        });
     }
 
     /**

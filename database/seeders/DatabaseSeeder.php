@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolesAndPermissionsSeeder::class,
+            EntityTypeSeeder::class,
             EntitySeeder::class,
             CorrespondenceSeeder::class,
         ]);

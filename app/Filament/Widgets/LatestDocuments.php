@@ -53,7 +53,7 @@ class LatestDocuments extends Widget
                 $items->push([
                     'module' => $module,
                     'title' => $record->subject ?? $record->title,
-                    'site' => $record->site ?? null,
+                    'sites' => collect($record->sites ?? []),
                     'created_at' => $record->created_at,
                     'url' => $module->resourceClass()::getUrl('view', ['record' => $record]),
                 ]);

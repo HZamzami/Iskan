@@ -4,7 +4,9 @@ namespace App\Filament\Resources\GeoDocuments\Schemas;
 
 use App\Enums\GeoDocumentType;
 use App\Enums\Site;
+use Closure;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -33,12 +35,22 @@ class GeoDocumentForm
                                 ->live()
                                 ->required()
                                 ->columnSpan(1),
-                            Select::make('site')
+                            CheckboxList::make('sites')
                                 ->label('القسم / الموقع')
                                 ->options(fn (Get $get): array => self::siteOptions($get))
                                 ->visible(fn (Get $get): bool => self::isSiteScoped($get))
                                 ->required(fn (Get $get): bool => self::isSiteScoped($get))
-                                ->columnSpan(1),
+                                ->rule(fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get): void {
+                                    $allowed = array_keys(self::siteOptions($get));
+
+                                    if (array_diff((array) $value, $allowed) !== []) {
+                                        $fail('يجب اختيار مواقع متاحة لهذا النوع فقط.');
+                                    }
+                                })
+                                ->bulkToggleable()
+                                ->columns(4)
+                                ->dehydrateStateUsing(fn (?array $state): ?array => filled($state) ? $state : null)
+                                ->columnSpanFull(),
                             TextInput::make('reference_number')
                                 ->label('الرقم المرجعي')
                                 ->placeholder('يُولَّد تلقائياً عند الترك فارغاً')
@@ -70,17 +82,10 @@ class GeoDocumentForm
                             ->label('ملف الخريطة / المخطط')
                             ->disk('local')
                             ->directory('geo-documents')
-                            ->acceptedFileTypes([
-                                'application/pdf',
-                                'application/vnd.google-earth.kml+xml',
-                                'application/vnd.google-earth.kmz',
-                                'application/zip',
-                                'image/vnd.dwg',
-                                'image/png',
-                                'image/jpeg',
-                            ])
+                            ->acceptedFileTypes(fn (Get $get): array => self::acceptedMimeTypesFor(self::acceptedExtensions($get)))
+                            ->rule(fn (Get $get): string => 'extensions:'.implode(',', self::acceptedExtensions($get)))
                             ->maxSize(51200)
-                            ->helperText('PDF، KML/KMZ، ZIP، DWG أو صور')
+                            ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get)))
                             ->downloadable()
                             ->required()
                             ->columnSpanFull(),
@@ -117,5 +122,41 @@ class GeoDocumentForm
         }
 
         return $type ? GeoDocumentType::tryFrom($type) : null;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function acceptedExtensions(Get $get): array
+    {
+        return self::selectedType($get)?->acceptedExtensions() ?? ['pdf'];
+    }
+
+    /**
+     * @param  array<int, string>  $extensions
+     * @return array<int, string>
+     */
+    private static function acceptedMimeTypesFor(array $extensions): array
+    {
+        $mimeTypes = [
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls' => 'application/vnd.ms-excel',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'kml' => 'application/vnd.google-earth.kml+xml',
+            'kmz' => 'application/vnd.google-earth.kmz',
+            'zip' => 'application/zip',
+            'rar' => 'application/vnd.rar',
+            'gpkg' => 'application/geopackage+sqlite3',
+            'dwg' => 'image/vnd.dwg',
+        ];
+
+        return collect($extensions)
+            ->map(fn (string $extension): string => $mimeTypes[$extension] ?? 'application/octet-stream')
+            ->push('application/octet-stream')
+            ->unique()
+            ->values()
+            ->all();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Dashboard;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -15,6 +16,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -27,7 +29,13 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
-            ->brandName('أرشيف الإسكان')
+            ->profile(EditProfile::class)
+            ->brandName(new HtmlString(<<<'HTML'
+                <span class="flex flex-col leading-tight">
+                    <span class="font-bold">ميسر</span>
+                    <span class="text-xs font-normal opacity-70">منصة التعاملات الادارية الرقمية</span>
+                </span>
+                HTML))
             ->font('IBM Plex Sans Arabic')
             ->colors([
                 'primary' => Color::Amber,

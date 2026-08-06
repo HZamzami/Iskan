@@ -40,7 +40,7 @@ class ExpiringContracts extends TableWidget
                 TextColumn::make('title')
                     ->label('العنوان')
                     ->limit(40),
-                TextColumn::make('site')
+                TextColumn::make('sites')
                     ->label('الموقع')
                     ->badge()
                     ->placeholder('عام'),

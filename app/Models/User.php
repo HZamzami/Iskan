@@ -8,26 +8,29 @@ use App\Enums\Module;
 use App\Enums\Site;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'phone', 'entity_id', 'avatar_path', 'is_active', 'password'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, LogsActivity, Notifiable;
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->is_active;
     }
 
     public function isAdmin(): bool
@@ -41,10 +44,10 @@ class User extends Authenticatable implements FilamentUser
     public function accessLevelFor(Module $module): ?AccessLevel
     {
         if ($this->isAdmin()) {
-            return AccessLevel::Edit;
+            return AccessLevel::Delete;
         }
 
-        foreach ([AccessLevel::Edit, AccessLevel::Write, AccessLevel::Read] as $level) {
+        foreach ([AccessLevel::Delete, AccessLevel::Edit, AccessLevel::Write, AccessLevel::Read] as $level) {
             if ($this->permissions->contains('name', $module->permission($level))) {
                 return $level;
             }
@@ -83,10 +86,20 @@ class User extends Authenticatable implements FilamentUser
         return $allowed === null || in_array($site, $allowed, true);
     }
 
+    public function entity(): BelongsTo
+    {
+        return $this->belongsTo(Entity::class);
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatar_path ? Storage::disk('public')->url($this->avatar_path) : null;
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email'])
+            ->logOnly(['name', 'email', 'phone', 'entity_id', 'is_active'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
     }
@@ -101,6 +114,7 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 }
