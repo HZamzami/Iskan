@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\ContractualRequirements\Schemas;
 
-use App\Enums\ContractualRequirementType;
-use App\Enums\RequirementGroup;
-use App\Enums\Site;
+use App\Models\ContractualRequirementType;
+use App\Models\Location;
+use App\Models\RequirementGroup;
+use App\Support\FileTypes;
 use Closure;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
@@ -32,7 +33,8 @@ class ContractualRequirementForm
                         Grid::make(2)->schema([
                             Select::make('type')
                                 ->label('نوع المتطلب')
-                                ->options(self::groupedTypeOptions())
+                                ->options(fn (Get $get): array => self::groupedTypeOptions($get('type')))
+                                ->helperText(fn (Get $get): ?string => self::selectedType($get)?->description)
                                 ->live()
                                 ->required()
                                 ->columnSpan(1),
@@ -83,9 +85,9 @@ class ContractualRequirementForm
                             ->label('ملف المستند')
                             ->disk('local')
                             ->directory('contractual-requirements')
-                            ->acceptedFileTypes(fn (Get $get): array => self::acceptedMimeTypesFor(self::acceptedExtensions($get)))
+                            ->acceptedFileTypes(fn (Get $get): array => FileTypes::mimeTypesFor(self::acceptedExtensions($get)))
                             ->rule(fn (Get $get): string => 'extensions:'.implode(',', self::acceptedExtensions($get)))
-                            ->maxSize(20480)
+                            ->maxSize(fn (Get $get): int => self::selectedType($get)?->maxFileSizeKb() ?? 20480)
                             ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get)))
                             ->downloadable()
                             ->required()
@@ -99,24 +101,28 @@ class ContractualRequirementForm
     }
 
     /**
-     * خيارات نوع المتطلب مجمّعة حسب المجموعة.
+     * خيارات نوع المتطلب مجمّعة حسب المجموعة: الأنواع النشطة، بالإضافة إلى
+     * النوع الحالي إن كان غير نشط حتى لا يختفي من نموذج تعديل سجل قديم.
      *
      * @return array<string, array<string, string>>
      */
-    private static function groupedTypeOptions(): array
+    private static function groupedTypeOptions(?string $currentSlug): array
     {
-        return collect(RequirementGroup::cases())
-            ->mapWithKeys(fn (RequirementGroup $group): array => [
-                $group->getLabel() => collect($group->types())
-                    ->mapWithKeys(fn (ContractualRequirementType $type): array => [$type->value => $type->getLabel()])
-                    ->all(),
-            ])
+        return RequirementGroup::active()->ordered()->with('types')->get()
+            ->mapWithKeys(function (RequirementGroup $group) use ($currentSlug): array {
+                $types = $group->types
+                    ->filter(fn (ContractualRequirementType $type): bool => $type->is_active || $type->slug === $currentSlug)
+                    ->sortBy('sort_order');
+
+                return [$group->name => $types->pluck('name', 'slug')->all()];
+            })
+            ->filter(fn (array $types): bool => $types !== [])
             ->all();
     }
 
     private static function isSiteScoped(Get $get): bool
     {
-        return self::selectedType($get)?->sites() !== null;
+        return self::selectedType($get)?->isSiteScoped() ?? false;
     }
 
     /**
@@ -124,9 +130,9 @@ class ContractualRequirementForm
      */
     private static function siteOptions(Get $get): array
     {
-        return collect(self::selectedType($get)?->sites() ?? [])
-            ->filter(fn (Site $site): bool => Filament::auth()->user()->canAccessSite($site))
-            ->mapWithKeys(fn (Site $site): array => [$site->value => $site->getLabel()])
+        return collect(self::selectedType($get)?->allowedLocations() ?? [])
+            ->filter(fn (Location $location): bool => Filament::auth()->user()->canAccessSite($location))
+            ->mapWithKeys(fn (Location $location): array => [$location->slug => $location->name])
             ->all();
     }
 
@@ -134,11 +140,7 @@ class ContractualRequirementForm
     {
         $type = $get('type');
 
-        if ($type instanceof ContractualRequirementType) {
-            return $type;
-        }
-
-        return $type ? ContractualRequirementType::tryFrom($type) : null;
+        return filled($type) ? ContractualRequirementType::cached()->firstWhere('slug', $type) : null;
     }
 
     /**
@@ -147,27 +149,5 @@ class ContractualRequirementForm
     private static function acceptedExtensions(Get $get): array
     {
         return self::selectedType($get)?->acceptedExtensions() ?? ['pdf'];
-    }
-
-    /**
-     * @param  array<int, string>  $extensions
-     * @return array<int, string>
-     */
-    private static function acceptedMimeTypesFor(array $extensions): array
-    {
-        $mimeTypes = [
-            'pdf' => 'application/pdf',
-            'doc' => 'application/msword',
-            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'xls' => 'application/vnd.ms-excel',
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ];
-
-        return collect($extensions)
-            ->map(fn (string $extension): string => $mimeTypes[$extension] ?? 'application/octet-stream')
-            ->push('application/octet-stream')
-            ->unique()
-            ->values()
-            ->all();
     }
 }

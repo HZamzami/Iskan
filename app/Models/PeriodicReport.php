@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\PeriodicReportType;
-use App\Enums\Site;
+use App\Models\Concerns\BelongsToDocumentType;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\PeriodicReportFactory;
-use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PeriodicReport extends Model
 {
+    use BelongsToDocumentType;
+
     /** @use HasFactory<PeriodicReportFactory> */
     use HasFactory;
 
@@ -41,10 +41,14 @@ class PeriodicReport extends Model
     protected function casts(): array
     {
         return [
-            'type' => PeriodicReportType::class,
-            'sites' => AsEnumCollection::of(Site::class),
+            'sites' => 'array',
             'period' => 'date',
             'document_date' => 'date',
         ];
+    }
+
+    public static function documentTypeClass(): string
+    {
+        return PeriodicReportType::class;
     }
 }

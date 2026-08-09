@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Filament\Resources\Concerns;
+
+use App\Enums\PaletteColor;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Table;
+
+/**
+ * جدول مشترك لأنواع المستندات ومجموعات المتطلبات: ترتيب بالسحب، تفعيل/تعطيل
+ * سريع، عدد السجلات المرتبطة، وحماية الحذف عبر LookupDeleteGuard.
+ */
+class DocumentTypesTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->reorderable('sort_order')
+            ->defaultSort('sort_order')
+            ->columns([
+                TextColumn::make('name')
+                    ->label('الاسم')
+                    ->searchable()
+                    ->weight('medium'),
+                TextColumn::make('color')
+                    ->label('اللون')
+                    ->badge()
+                    ->formatStateUsing(fn ($record): string => (PaletteColor::tryFrom($record->getColor() ?? 'gray') ?? PaletteColor::Gray)->getLabel())
+                    ->color(fn ($record) => $record->getColor() ?? 'gray'),
+                TextColumn::make('site_scope')
+                    ->label('نطاق المواقع')
+                    ->badge(),
+                TextColumn::make('documents_count')
+                    ->label('عدد السجلات')
+                    ->counts('documents')
+                    ->sortable(),
+                ToggleColumn::make('is_active')
+                    ->label('نشط'),
+            ])
+            ->recordActions([
+                EditAction::make(),
+                LookupDeleteGuard::action(DeleteAction::make()),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    LookupDeleteGuard::bulkAction(DeleteBulkAction::make()),
+                ]),
+            ]);
+    }
+}

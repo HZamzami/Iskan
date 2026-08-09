@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Concerns;
 
-use App\Enums\Site;
+use App\Models\Location;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,7 +15,7 @@ trait HasSiteRestrictedQuery
 {
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with('documentType');
 
         /** @var User|null $user */
         $user = Filament::auth()->user();
@@ -25,9 +25,9 @@ trait HasSiteRestrictedQuery
             $query->where(function (Builder $q) use ($allowed): void {
                 $q->whereNull('sites')->orWhereJsonLength('sites', 0);
 
-                /** @var Site $site */
-                foreach ($allowed as $site) {
-                    $q->orWhereJsonContains('sites', $site->value);
+                /** @var Location $location */
+                foreach ($allowed as $location) {
+                    $q->orWhereJsonContains('sites', $location->slug);
                 }
             });
         }

@@ -2,8 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\PeriodicReportType;
-use App\Enums\Site;
 use App\Models\PeriodicReport;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,8 +18,8 @@ class PeriodicReportFactory extends Factory
     public function definition(): array
     {
         return [
-            'type' => PeriodicReportType::WeeklyProgress,
-            'sites' => [Site::SiteA],
+            'type' => 'weekly_progress',
+            'sites' => ['site_a'],
             'title' => fake()->sentence(4),
             'period' => fake()->dateTimeBetween('-1 year', 'now'),
             'document_date' => fake()->dateTimeBetween('-1 year', 'now'),
@@ -29,11 +27,11 @@ class PeriodicReportFactory extends Factory
         ];
     }
 
-    public function ofType(PeriodicReportType $type, ?Site $site = null): static
+    public function ofType(string $typeSlug, ?string $siteSlug = null): static
     {
         return $this->state([
-            'type' => $type,
-            'sites' => $site !== null ? [$site] : null,
+            'type' => $typeSlug,
+            'sites' => $siteSlug !== null ? [$siteSlug] : null,
         ]);
     }
 }

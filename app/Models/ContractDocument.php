@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\ContractDocumentType;
-use App\Enums\Site;
+use App\Models\Concerns\BelongsToDocumentType;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\ContractDocumentFactory;
-use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ContractDocument extends Model
 {
+    use BelongsToDocumentType;
+
     /** @use HasFactory<ContractDocumentFactory> */
     use HasFactory;
 
@@ -44,11 +44,15 @@ class ContractDocument extends Model
     protected function casts(): array
     {
         return [
-            'type' => ContractDocumentType::class,
-            'sites' => AsEnumCollection::of(Site::class),
+            'sites' => 'array',
             'start_date' => 'date',
             'end_date' => 'date',
             'document_date' => 'date',
         ];
+    }
+
+    public static function documentTypeClass(): string
+    {
+        return ContractDocumentType::class;
     }
 }

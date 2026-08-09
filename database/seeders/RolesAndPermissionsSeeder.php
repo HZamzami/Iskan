@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
-use App\Enums\Site;
+use App\Models\Location;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -23,8 +23,8 @@ class RolesAndPermissionsSeeder extends Seeder
             }
         }
 
-        foreach (Site::cases() as $site) {
-            Permission::findOrCreate("site.{$site->value}", 'web');
+        foreach (Location::all() as $location) {
+            Permission::findOrCreate($location->permissionName(), 'web');
         }
 
         Role::findOrCreate('admin', 'web');

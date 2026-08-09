@@ -2,8 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\GeoDocumentType;
-use App\Enums\Site;
 use App\Models\GeoDocument;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,8 +18,8 @@ class GeoDocumentFactory extends Factory
     public function definition(): array
     {
         return [
-            'type' => GeoDocumentType::Gis,
-            'sites' => [Site::SiteA],
+            'type' => 'gis',
+            'sites' => ['site_a'],
             'title' => fake()->sentence(4),
             'drawing_number' => fake()->bothify('DWG-####'),
             'document_date' => fake()->dateTimeBetween('-1 year', 'now'),
@@ -29,11 +27,11 @@ class GeoDocumentFactory extends Factory
         ];
     }
 
-    public function ofType(GeoDocumentType $type, ?Site $site = null): static
+    public function ofType(string $typeSlug, ?string $siteSlug = null): static
     {
         return $this->state([
-            'type' => $type,
-            'sites' => $site !== null ? [$site] : null,
+            'type' => $typeSlug,
+            'sites' => $siteSlug !== null ? [$siteSlug] : null,
         ]);
     }
 }

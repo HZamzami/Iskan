@@ -4,8 +4,8 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
-use App\Enums\Site;
 use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Models\Location;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
@@ -123,8 +123,8 @@ class UserForm
                     ->schema([
                         CheckboxList::make('sites')
                             ->label('الأقسام / المواقع')
-                            ->options(Site::class)
-                            ->default(array_map(fn (Site $site): string => $site->value, Site::cases()))
+                            ->options(fn (): array => Location::active()->ordered()->pluck('name', 'slug')->all())
+                            ->default(fn (): array => Location::active()->pluck('slug')->all())
                             ->bulkToggleable()
                             ->helperText('يرى المستخدم سجلات المواقع المحددة فقط. السجلات العامة (غير المرتبطة بموقع) تظهر لجميع المستخدمين.')
                             ->columns(2),

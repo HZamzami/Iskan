@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\PeriodicReports\Pages;
 
-use App\Enums\PeriodicReportType;
 use App\Filament\Resources\PeriodicReports\PeriodicReportResource;
 use App\Models\PeriodicReport;
+use App\Models\PeriodicReportType;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -28,11 +28,11 @@ class ListPeriodicReports extends ListRecords
                 ->badge(fn (): int => PeriodicReport::count()),
         ];
 
-        foreach (PeriodicReportType::cases() as $type) {
-            $tabs[$type->value] = Tab::make($type->getLabel())
-                ->badge(fn (): int => PeriodicReport::where('type', $type)->count())
-                ->badgeColor($type->getColor())
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', $type));
+        foreach (PeriodicReportType::active()->ordered()->get() as $type) {
+            $tabs[$type->slug] = Tab::make($type->name)
+                ->badge(fn (): int => PeriodicReport::where('type', $type->slug)->count())
+                ->badgeColor($type->color)
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', $type->slug));
         }
 
         return $tabs;

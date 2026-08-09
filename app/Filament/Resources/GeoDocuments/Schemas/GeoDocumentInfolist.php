@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\GeoDocuments\Schemas;
 
+use App\Models\GeoDocument;
+use App\Models\Location;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -23,9 +25,10 @@ class GeoDocumentInfolist
                                 ->label('الرقم المرجعي')
                                 ->copyable()
                                 ->columnSpan(1),
-                            TextEntry::make('type')
+                            TextEntry::make('documentType.name')
                                 ->label('نوع الخريطة / الرسم')
                                 ->badge()
+                                ->color(fn (GeoDocument $record): string => $record->documentType?->color ?? 'gray')
                                 ->columnSpan(1),
                             TextEntry::make('title')
                                 ->label('عنوان المستند')
@@ -33,6 +36,8 @@ class GeoDocumentInfolist
                             TextEntry::make('sites')
                                 ->label('القسم / الموقع')
                                 ->badge()
+                                ->formatStateUsing(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->name ?? $state)
+                                ->color(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->color ?? 'gray')
                                 ->placeholder('غير مرتبط بموقع')
                                 ->columnSpan(1),
                             TextEntry::make('drawing_number')

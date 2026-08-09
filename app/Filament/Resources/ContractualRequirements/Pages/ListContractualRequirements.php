@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\ContractualRequirements\Pages;
 
-use App\Enums\RequirementGroup;
 use App\Filament\Resources\ContractualRequirements\ContractualRequirementResource;
 use App\Models\ContractualRequirement;
+use App\Models\RequirementGroup;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -28,12 +28,12 @@ class ListContractualRequirements extends ListRecords
                 ->badge(fn (): int => ContractualRequirement::count()),
         ];
 
-        foreach (RequirementGroup::cases() as $group) {
-            $types = array_column($group->types(), 'value');
+        foreach (RequirementGroup::active()->ordered()->with('types')->get() as $group) {
+            $types = $group->types->pluck('slug')->all();
 
-            $tabs[$group->value] = Tab::make($group->getLabel())
+            $tabs[$group->slug] = Tab::make($group->name)
                 ->badge(fn (): int => ContractualRequirement::whereIn('type', $types)->count())
-                ->badgeColor($group->getColor())
+                ->badgeColor($group->color)
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereIn('type', $types));
         }
 

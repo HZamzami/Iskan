@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ContractDocuments\Schemas;
 
+use App\Models\ContractDocument;
+use App\Models\Location;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -23,9 +25,10 @@ class ContractDocumentInfolist
                                 ->label('الرقم المرجعي')
                                 ->copyable()
                                 ->columnSpan(1),
-                            TextEntry::make('type')
+                            TextEntry::make('documentType.name')
                                 ->label('نوع العقد')
                                 ->badge()
+                                ->color(fn (ContractDocument $record): string => $record->documentType?->color ?? 'gray')
                                 ->columnSpan(1),
                             TextEntry::make('title')
                                 ->label('عنوان المستند')
@@ -33,6 +36,8 @@ class ContractDocumentInfolist
                             TextEntry::make('sites')
                                 ->label('القسم / الموقع')
                                 ->badge()
+                                ->formatStateUsing(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->name ?? $state)
+                                ->color(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->color ?? 'gray')
                                 ->placeholder('غير مرتبط بموقع')
                                 ->columnSpan(1),
                             TextEntry::make('document_date')

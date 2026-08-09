@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\ContractualRequirementType;
-use App\Enums\Site;
+use App\Models\Concerns\BelongsToDocumentType;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\ContractualRequirementFactory;
-use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ContractualRequirement extends Model
 {
+    use BelongsToDocumentType;
+
     /** @use HasFactory<ContractualRequirementFactory> */
     use HasFactory;
 
@@ -41,10 +41,14 @@ class ContractualRequirement extends Model
     protected function casts(): array
     {
         return [
-            'type' => ContractualRequirementType::class,
-            'sites' => AsEnumCollection::of(Site::class),
+            'sites' => 'array',
             'period' => 'date',
             'document_date' => 'date',
         ];
+    }
+
+    public static function documentTypeClass(): string
+    {
+        return ContractualRequirementType::class;
     }
 }

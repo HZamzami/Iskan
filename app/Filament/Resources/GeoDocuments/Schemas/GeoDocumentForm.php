@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\GeoDocuments\Schemas;
 
-use App\Enums\GeoDocumentType;
-use App\Enums\Site;
+use App\Models\GeoDocumentType;
+use App\Models\Location;
+use App\Support\FileTypes;
 use Closure;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
@@ -31,7 +32,8 @@ class GeoDocumentForm
                         Grid::make(2)->schema([
                             Select::make('type')
                                 ->label('نوع الخريطة / الرسم')
-                                ->options(GeoDocumentType::class)
+                                ->options(fn (Get $get): array => GeoDocumentType::selectOptions($get('type')))
+                                ->helperText(fn (Get $get): ?string => self::selectedType($get)?->description)
                                 ->live()
                                 ->required()
                                 ->columnSpan(1),
@@ -82,9 +84,9 @@ class GeoDocumentForm
                             ->label('ملف الخريطة / المخطط')
                             ->disk('local')
                             ->directory('geo-documents')
-                            ->acceptedFileTypes(fn (Get $get): array => self::acceptedMimeTypesFor(self::acceptedExtensions($get)))
+                            ->acceptedFileTypes(fn (Get $get): array => FileTypes::mimeTypesFor(self::acceptedExtensions($get)))
                             ->rule(fn (Get $get): string => 'extensions:'.implode(',', self::acceptedExtensions($get)))
-                            ->maxSize(51200)
+                            ->maxSize(fn (Get $get): int => self::selectedType($get)?->maxFileSizeKb() ?? 51200)
                             ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get)))
                             ->downloadable()
                             ->required()
@@ -99,7 +101,7 @@ class GeoDocumentForm
 
     private static function isSiteScoped(Get $get): bool
     {
-        return self::selectedType($get)?->sites() !== null;
+        return self::selectedType($get)?->isSiteScoped() ?? false;
     }
 
     /**
@@ -107,21 +109,10 @@ class GeoDocumentForm
      */
     private static function siteOptions(Get $get): array
     {
-        return collect(self::selectedType($get)?->sites() ?? [])
-            ->filter(fn (Site $site): bool => Filament::auth()->user()->canAccessSite($site))
-            ->mapWithKeys(fn (Site $site): array => [$site->value => $site->getLabel()])
+        return collect(self::selectedType($get)?->allowedLocations() ?? [])
+            ->filter(fn (Location $location): bool => Filament::auth()->user()->canAccessSite($location))
+            ->mapWithKeys(fn (Location $location): array => [$location->slug => $location->name])
             ->all();
-    }
-
-    private static function selectedType(Get $get): ?GeoDocumentType
-    {
-        $type = $get('type');
-
-        if ($type instanceof GeoDocumentType) {
-            return $type;
-        }
-
-        return $type ? GeoDocumentType::tryFrom($type) : null;
     }
 
     /**
@@ -132,31 +123,10 @@ class GeoDocumentForm
         return self::selectedType($get)?->acceptedExtensions() ?? ['pdf'];
     }
 
-    /**
-     * @param  array<int, string>  $extensions
-     * @return array<int, string>
-     */
-    private static function acceptedMimeTypesFor(array $extensions): array
+    private static function selectedType(Get $get): ?GeoDocumentType
     {
-        $mimeTypes = [
-            'pdf' => 'application/pdf',
-            'doc' => 'application/msword',
-            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'xls' => 'application/vnd.ms-excel',
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'kml' => 'application/vnd.google-earth.kml+xml',
-            'kmz' => 'application/vnd.google-earth.kmz',
-            'zip' => 'application/zip',
-            'rar' => 'application/vnd.rar',
-            'gpkg' => 'application/geopackage+sqlite3',
-            'dwg' => 'image/vnd.dwg',
-        ];
+        $type = $get('type');
 
-        return collect($extensions)
-            ->map(fn (string $extension): string => $mimeTypes[$extension] ?? 'application/octet-stream')
-            ->push('application/octet-stream')
-            ->unique()
-            ->values()
-            ->all();
+        return filled($type) ? GeoDocumentType::cached()->firstWhere('slug', $type) : null;
     }
 }

@@ -2,15 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ContractDocumentType;
-use App\Enums\ContractualRequirementType;
 use App\Enums\CorrespondenceDirection;
 use App\Enums\CorrespondenceStatus;
-use App\Enums\FinancialFlowType;
-use App\Enums\GeoDocumentType;
-use App\Enums\MinuteType;
-use App\Enums\PeriodicReportType;
-use App\Enums\Site;
 use App\Models\ContractDocument;
 use App\Models\ContractualRequirement;
 use App\Models\Correspondence;
@@ -85,20 +78,20 @@ class DemoDataSeeder extends Seeder
         $rows = [
             [
                 'title' => 'عقد الإشراف الإستشاري - إيهاف',
-                'type' => ContractDocumentType::ConsultantContract,
+                'type' => 'consultant_contract',
                 'sites' => null,
                 'contracting_party' => 'إيهاف',
             ],
             [
                 'title' => 'عقد الصيانة والتشغيل - موقع (أ)',
-                'type' => ContractDocumentType::OperationContract,
-                'sites' => [Site::SiteA],
+                'type' => 'operation_contract',
+                'sites' => ['site_a'],
                 'contracting_party' => 'عزام الشريف',
             ],
             [
                 'title' => 'عقد الصيانة والتشغيل - أبراج كدانة الوادي',
-                'type' => ContractDocumentType::OperationContract,
-                'sites' => [Site::AbrajKudanah],
+                'type' => 'operation_contract',
+                'sites' => ['abraj_kudanah'],
                 'contracting_party' => 'شركة الراجحي',
             ],
         ];
@@ -116,20 +109,20 @@ class DemoDataSeeder extends Seeder
         $rows = [
             [
                 'title' => 'محضر الاجتماع الأسبوعي - موقع (ب)',
-                'type' => MinuteType::WeeklyMeeting,
-                'sites' => [Site::SiteB],
+                'type' => 'weekly_meeting',
+                'sites' => ['site_b'],
                 'parties' => 'إدارة إسكان الحجاج، عزام الشريف، إيهاف',
             ],
             [
                 'title' => 'محضر استلام مشروع تطوير المخيمات',
-                'type' => MinuteType::ProjectHandover,
+                'type' => 'project_handover',
                 'sites' => null,
                 'parties' => 'إدارة إسكان الحجاج، المقاول المنفذ',
             ],
             [
                 'title' => 'محضر ترميز الأصول - موقع (أ)',
-                'type' => MinuteType::AssetTagging,
-                'sites' => [Site::SiteA],
+                'type' => 'asset_tagging',
+                'sites' => ['site_a'],
                 'parties' => 'إدارة إسكان الحجاج، عزام الشريف',
             ],
         ];
@@ -147,20 +140,20 @@ class DemoDataSeeder extends Seeder
         $rows = [
             [
                 'title' => 'مستخلص الإستشاري - شهر يونيو 2026',
-                'type' => FinancialFlowType::Consultant,
+                'type' => 'consultant',
                 'sites' => null,
                 'amount' => 850000,
             ],
             [
                 'title' => 'مستخلص الصيانة والتشغيل - موقع (أ) - يونيو 2026',
-                'type' => FinancialFlowType::Operation,
-                'sites' => [Site::SiteA],
+                'type' => 'operation',
+                'sites' => ['site_a'],
                 'amount' => 2400000,
             ],
             [
                 'title' => 'مستخلص الصيانة والتشغيل - موقع (ج) - يونيو 2026',
-                'type' => FinancialFlowType::Operation,
-                'sites' => [Site::SiteC],
+                'type' => 'operation',
+                'sites' => ['site_c'],
                 'amount' => 1750000,
             ],
         ];
@@ -178,18 +171,18 @@ class DemoDataSeeder extends Seeder
         $rows = [
             [
                 'title' => 'حصر أعداد العمالة - موقع (أ) - يونيو 2026',
-                'type' => ContractualRequirementType::LaborCount,
-                'sites' => [Site::SiteA],
+                'type' => 'labor_count',
+                'sites' => ['site_a'],
             ],
             [
                 'title' => 'حصر المعدات - أبراج كدانة الوادي - يونيو 2026',
-                'type' => ContractualRequirementType::EquipmentCount,
-                'sites' => [Site::AbrajKudanah],
+                'type' => 'equipment_count',
+                'sites' => ['abraj_kudanah'],
             ],
             [
                 'title' => 'الهيكل التنظيمي لفريق التشغيل - موقع (ب)',
-                'type' => ContractualRequirementType::OrgStructure,
-                'sites' => [Site::SiteB],
+                'type' => 'org_structure',
+                'sites' => ['site_b'],
             ],
         ];
 
@@ -206,18 +199,18 @@ class DemoDataSeeder extends Seeder
         $rows = [
             [
                 'title' => 'التقرير الشهري - أبراج كدانة الوادي - يونيو 2026',
-                'type' => PeriodicReportType::MonthlyReport,
-                'sites' => [Site::AbrajKudanah],
+                'type' => 'monthly_report',
+                'sites' => ['abraj_kudanah'],
             ],
             [
                 'title' => 'تقرير إنجاز الأعمال الأسبوعي - موقع (أ)',
-                'type' => PeriodicReportType::WeeklyProgress,
-                'sites' => [Site::SiteA],
+                'type' => 'weekly_progress',
+                'sites' => ['site_a'],
             ],
             [
                 'title' => 'تقرير الحصر والترميز الأسبوعي - موقع (ج)',
-                'type' => PeriodicReportType::WeeklyInventoryCoding,
-                'sites' => [Site::SiteC],
+                'type' => 'weekly_inventory_coding',
+                'sites' => ['site_c'],
             ],
         ];
 
@@ -234,14 +227,14 @@ class DemoDataSeeder extends Seeder
         $rows = [
             [
                 'title' => 'خريطة GIS لمخيمات موقع (أ)',
-                'type' => GeoDocumentType::Gis,
-                'sites' => [Site::SiteA],
+                'type' => 'gis',
+                'sites' => ['site_a'],
                 'drawing_number' => 'GIS-2026-001',
             ],
             [
                 'title' => 'المخطط التنفيذي (As-Built) - أبراج كدانة الوادي',
-                'type' => GeoDocumentType::AsBuiltDrawing,
-                'sites' => [Site::AbrajKudanah],
+                'type' => 'as_built_drawing',
+                'sites' => ['abraj_kudanah'],
                 'drawing_number' => 'DWG-2026-014',
             ],
         ];

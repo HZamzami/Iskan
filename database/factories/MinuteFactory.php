@@ -2,8 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\MinuteType;
-use App\Enums\Site;
 use App\Models\Minute;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,8 +18,8 @@ class MinuteFactory extends Factory
     public function definition(): array
     {
         return [
-            'type' => MinuteType::WeeklyMeeting,
-            'sites' => [Site::SiteA],
+            'type' => 'weekly_meeting',
+            'sites' => ['site_a'],
             'title' => fake()->sentence(4),
             'parties' => fake()->company(),
             'document_date' => fake()->dateTimeBetween('-1 year', 'now'),
@@ -29,11 +27,11 @@ class MinuteFactory extends Factory
         ];
     }
 
-    public function ofType(MinuteType $type, ?Site $site = null): static
+    public function ofType(string $typeSlug, ?string $siteSlug = null): static
     {
         return $this->state([
-            'type' => $type,
-            'sites' => $site !== null ? [$site] : null,
+            'type' => $typeSlug,
+            'sites' => $siteSlug !== null ? [$siteSlug] : null,
         ]);
     }
 }

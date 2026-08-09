@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\FinancialFlows\Pages;
 
-use App\Enums\FinancialFlowType;
 use App\Filament\Resources\FinancialFlows\FinancialFlowResource;
 use App\Models\FinancialFlow;
+use App\Models\FinancialFlowType;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -28,11 +28,11 @@ class ListFinancialFlows extends ListRecords
                 ->badge(fn (): int => FinancialFlow::count()),
         ];
 
-        foreach (FinancialFlowType::cases() as $type) {
-            $tabs[$type->value] = Tab::make($type->getLabel())
-                ->badge(fn (): int => FinancialFlow::where('type', $type)->count())
-                ->badgeColor($type->getColor())
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', $type));
+        foreach (FinancialFlowType::active()->ordered()->get() as $type) {
+            $tabs[$type->slug] = Tab::make($type->name)
+                ->badge(fn (): int => FinancialFlow::where('type', $type->slug)->count())
+                ->badgeColor($type->color)
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', $type->slug));
         }
 
         return $tabs;

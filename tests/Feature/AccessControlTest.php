@@ -3,9 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\AccessLevel;
-use App\Enums\ContractDocumentType;
 use App\Enums\Module;
-use App\Enums\Site;
 use App\Filament\Resources\ContractDocuments\Pages\ListContractDocuments;
 use App\Filament\Resources\Minutes\Pages\ListMinutes;
 use App\Models\ContractDocument;
@@ -113,17 +111,17 @@ class AccessControlTest extends TestCase
     {
         $this->actingAs($this->makeUserWithAccess(
             [Module::ContractDocuments->value => AccessLevel::Read],
-            [Site::SiteA],
+            ['site_a'],
         ));
 
         $siteA = ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::SiteA)
+            ->ofType('operation_contract', 'site_a')
             ->create();
         $siteB = ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::SiteB)
+            ->ofType('operation_contract', 'site_b')
             ->create();
         $general = ContractDocument::factory()
-            ->ofType(ContractDocumentType::ConsultantContract)
+            ->ofType('consultant_contract')
             ->create();
 
         Livewire::test(ListContractDocuments::class)
@@ -135,14 +133,14 @@ class AccessControlTest extends TestCase
     {
         $user = $this->makeUserWithAccess(
             [Module::ContractDocuments->value => AccessLevel::Edit],
-            [Site::SiteA],
+            ['site_a'],
         );
 
         $siteB = ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::SiteB)
+            ->ofType('operation_contract', 'site_b')
             ->create();
         $general = ContractDocument::factory()
-            ->ofType(ContractDocumentType::ConsultantContract)
+            ->ofType('consultant_contract')
             ->create();
 
         $this->assertFalse($user->can('view', $siteB));
@@ -153,13 +151,15 @@ class AccessControlTest extends TestCase
 
     public function test_user_with_all_sites_selected_sees_all_sites(): void
     {
+        $allSites = ['site_a', 'site_b', 'site_c', 'abraj_kudanah'];
+
         $this->actingAs($this->makeUserWithAccess(
             [Module::Minutes->value => AccessLevel::Read],
-            Site::cases(),
+            $allSites,
         ));
 
-        $minutes = collect(Site::cases())
-            ->map(fn (Site $site) => Minute::factory()->create(['sites' => [$site]]));
+        $minutes = collect($allSites)
+            ->map(fn (string $site) => Minute::factory()->create(['sites' => [$site]]));
 
         Livewire::test(ListMinutes::class)
             ->assertCanSeeTableRecords($minutes);
@@ -171,8 +171,8 @@ class AccessControlTest extends TestCase
             Module::Minutes->value => AccessLevel::Read,
         ]));
 
-        $siteMinutes = collect(Site::cases())
-            ->map(fn (Site $site) => Minute::factory()->create(['sites' => [$site]]));
+        $siteMinutes = collect(['site_a', 'site_b', 'site_c', 'abraj_kudanah'])
+            ->map(fn (string $site) => Minute::factory()->create(['sites' => [$site]]));
         $general = Minute::factory()->create(['sites' => null]);
 
         Livewire::test(ListMinutes::class)

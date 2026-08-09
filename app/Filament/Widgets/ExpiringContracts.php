@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\ContractDocuments\ContractDocumentResource;
 use App\Filament\Widgets\Concerns\AppliesSiteScope;
 use App\Models\ContractDocument;
+use App\Models\Location;
 use Filament\Facades\Filament;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -43,6 +44,8 @@ class ExpiringContracts extends TableWidget
                 TextColumn::make('sites')
                     ->label('الموقع')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->name ?? $state)
+                    ->color(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->color ?? 'gray')
                     ->placeholder('عام'),
                 TextColumn::make('end_date')
                     ->label('تاريخ الانتهاء')

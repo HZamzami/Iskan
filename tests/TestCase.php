@@ -4,8 +4,8 @@ namespace Tests;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
-use App\Enums\Site;
 use App\Models\User;
+use Database\Seeders\LookupSeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Spatie\Permission\PermissionRegistrar;
@@ -16,6 +16,7 @@ abstract class TestCase extends BaseTestCase
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
+        $this->seed(LookupSeeder::class);
         $this->seed(RolesAndPermissionsSeeder::class);
     }
 
@@ -31,7 +32,7 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * @param  array<string, AccessLevel>  $modules  keyed by Module value
-     * @param  array<int, Site>  $sites
+     * @param  array<int, string>  $sites  location slugs
      */
     protected function makeUserWithAccess(array $modules, array $sites = []): User
     {
@@ -44,7 +45,7 @@ abstract class TestCase extends BaseTestCase
         }
 
         foreach ($sites as $site) {
-            $user->givePermissionTo("site.{$site->value}");
+            $user->givePermissionTo("site.{$site}");
         }
 
         return $user;

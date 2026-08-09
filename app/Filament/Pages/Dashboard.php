@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Enums\Site;
 use App\Filament\Widgets\ArchiveOverviewStats;
 use App\Filament\Widgets\CorrespondenceTrendChart;
 use App\Filament\Widgets\ExpiringContracts;
@@ -11,6 +10,7 @@ use App\Filament\Widgets\LatestDocuments;
 use App\Filament\Widgets\QuickActions;
 use App\Filament\Widgets\RecentActivity;
 use App\Filament\Widgets\SiteOverview;
+use App\Models\Location;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
@@ -44,7 +44,7 @@ class Dashboard extends BaseDashboard
     {
         /** @var User|null $user */
         $user = Filament::auth()->user();
-        $sites = $user?->allowedSites() ?? Site::cases();
+        $sites = $user?->allowedSites() ?? Location::active()->ordered()->get()->all();
 
         if ($sites === []) {
             return $schema->components([]);
@@ -55,7 +55,7 @@ class Dashboard extends BaseDashboard
                 ->label('الموقع')
                 ->placeholder('جميع المواقع')
                 ->options(collect($sites)
-                    ->mapWithKeys(fn (Site $site): array => [$site->value => $site->getLabel()])
+                    ->mapWithKeys(fn (Location $location): array => [$location->slug => $location->name])
                     ->all())
                 ->native(false),
         ]);

@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
-use App\Enums\Site;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -44,7 +43,7 @@ class UserResourceTest extends TestCase
                     Module::Minutes->value => AccessLevel::Read->value,
                     Module::PeriodicReports->value => AccessLevel::Edit->value,
                 ],
-                'sites' => [Site::SiteA->value],
+                'sites' => ['site_a'],
             ])
             ->call('create')
             ->assertNotified()
@@ -56,7 +55,7 @@ class UserResourceTest extends TestCase
         $this->assertSame(AccessLevel::Read, $user->accessLevelFor(Module::Minutes));
         $this->assertSame(AccessLevel::Edit, $user->accessLevelFor(Module::PeriodicReports));
         $this->assertNull($user->accessLevelFor(Module::Correspondences));
-        $this->assertSame([Site::SiteA], $user->allowedSites());
+        $this->assertSame(['site_a'], $user->allowedSiteSlugs());
     }
 
     public function test_admin_can_create_admin_user(): void
@@ -85,13 +84,13 @@ class UserResourceTest extends TestCase
 
         $user = User::factory()->create();
         $user->givePermissionTo(Module::Minutes->permission(AccessLevel::Write));
-        $user->givePermissionTo('site.'.Site::SiteB->value);
+        $user->givePermissionTo('site.site_b');
 
         Livewire::test(EditUser::class, ['record' => $user->id])
             ->assertSchemaStateSet([
                 'is_admin' => false,
                 'modules.'.Module::Minutes->value => AccessLevel::Write,
-                'sites' => [Site::SiteB],
+                'sites' => ['site_b'],
             ]);
     }
 

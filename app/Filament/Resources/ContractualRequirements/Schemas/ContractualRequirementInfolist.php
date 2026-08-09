@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ContractualRequirements\Schemas;
 
 use App\Models\ContractualRequirement;
+use App\Models\Location;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -24,19 +25,22 @@ class ContractualRequirementInfolist
                                 ->label('الرقم المرجعي')
                                 ->copyable()
                                 ->columnSpan(1),
-                            TextEntry::make('type')
+                            TextEntry::make('documentType.name')
                                 ->label('نوع المتطلب')
                                 ->badge()
+                                ->color(fn (ContractualRequirement $record): string => $record->documentType?->color ?? 'gray')
                                 ->columnSpan(1),
-                            TextEntry::make('group')
+                            TextEntry::make('documentType.requirementGroup.name')
                                 ->label('المجموعة')
-                                ->state(fn (ContractualRequirement $record): string => $record->type->group()->getLabel())
                                 ->badge()
-                                ->color(fn (ContractualRequirement $record): string => $record->type->group()->getColor())
+                                ->color(fn (ContractualRequirement $record): ?string => $record->documentType?->requirementGroup?->color)
+                                ->placeholder('—')
                                 ->columnSpan(1),
                             TextEntry::make('sites')
                                 ->label('القسم / الموقع')
                                 ->badge()
+                                ->formatStateUsing(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->name ?? $state)
+                                ->color(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->color ?? 'gray')
                                 ->placeholder('غير مرتبط بموقع')
                                 ->columnSpan(1),
                             TextEntry::make('title')

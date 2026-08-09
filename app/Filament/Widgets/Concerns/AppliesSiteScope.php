@@ -4,7 +4,7 @@ namespace App\Filament\Widgets\Concerns;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
-use App\Enums\Site;
+use App\Models\Location;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
@@ -29,16 +29,16 @@ trait AppliesSiteScope
      * الموقع المختار في فلتر اللوحة، بعد التحقق من أنه ضمن مواقع المستخدم؛
      * الفلتر محفوظ في الجلسة وقد يحمل موقعاً سُحبت صلاحيته.
      */
-    protected function filteredSite(): ?Site
+    protected function filteredSite(): ?Location
     {
         $value = $this->pageFilters['site'] ?? null;
-        $site = is_string($value) ? Site::tryFrom($value) : null;
+        $location = is_string($value) ? Location::cached()->firstWhere('slug', $value) : null;
 
-        if ($site === null) {
+        if ($location === null) {
             return null;
         }
 
-        return $this->currentUser()?->canAccessSite($site) === true ? $site : null;
+        return $this->currentUser()?->canAccessSite($location) === true ? $location : null;
     }
 
     protected function applySiteScope(Builder $query): Builder
@@ -46,7 +46,7 @@ trait AppliesSiteScope
         $filtered = $this->filteredSite();
 
         if ($filtered !== null) {
-            return $query->whereJsonContains('sites', $filtered->value);
+            return $query->whereJsonContains('sites', $filtered->slug);
         }
 
         $allowed = $this->currentUser()?->allowedSites();
@@ -58,9 +58,9 @@ trait AppliesSiteScope
         return $query->where(function (Builder $q) use ($allowed): void {
             $q->whereNull('sites')->orWhereJsonLength('sites', 0);
 
-            /** @var Site $site */
-            foreach ($allowed as $site) {
-                $q->orWhereJsonContains('sites', $site->value);
+            /** @var Location $location */
+            foreach ($allowed as $location) {
+                $q->orWhereJsonContains('sites', $location->slug);
             }
         });
     }

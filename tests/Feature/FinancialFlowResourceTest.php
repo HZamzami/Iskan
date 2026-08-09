@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\FinancialFlowType;
-use App\Enums\Site;
 use App\Filament\Resources\FinancialFlows\Pages\CreateFinancialFlow;
 use App\Filament\Resources\FinancialFlows\Pages\ListFinancialFlows;
 use App\Models\FinancialFlow;
@@ -37,14 +35,14 @@ class FinancialFlowResourceTest extends TestCase
     public function test_type_tab_filters_records(): void
     {
         $consultant = FinancialFlow::factory()
-            ->ofType(FinancialFlowType::Consultant)
+            ->ofType('consultant')
             ->create();
         $operation = FinancialFlow::factory()
-            ->ofType(FinancialFlowType::Operation, Site::SiteA)
+            ->ofType('operation', 'site_a')
             ->create();
 
         Livewire::test(ListFinancialFlows::class)
-            ->set('activeTab', FinancialFlowType::Consultant->value)
+            ->set('activeTab', 'consultant')
             ->assertCanSeeTableRecords([$consultant])
             ->assertCanNotSeeTableRecords([$operation]);
     }
@@ -52,14 +50,14 @@ class FinancialFlowResourceTest extends TestCase
     public function test_site_filter_narrows_records(): void
     {
         $siteA = FinancialFlow::factory()
-            ->ofType(FinancialFlowType::Operation, Site::SiteA)
+            ->ofType('operation', 'site_a')
             ->create();
         $abraj = FinancialFlow::factory()
-            ->ofType(FinancialFlowType::Operation, Site::AbrajKudanah)
+            ->ofType('operation', 'abraj_kudanah')
             ->create();
 
         Livewire::test(ListFinancialFlows::class)
-            ->filterTable('sites', Site::SiteA->value)
+            ->filterTable('sites', 'site_a')
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -68,7 +66,7 @@ class FinancialFlowResourceTest extends TestCase
     {
         Livewire::test(CreateFinancialFlow::class)
             ->fillForm([
-                'type' => FinancialFlowType::Operation->value,
+                'type' => 'operation',
                 'sites' => null,
                 'title' => 'تدفق مالي لعقد الصيانة والتشغيل',
                 'period_month' => '2026-07-01',
@@ -83,7 +81,7 @@ class FinancialFlowResourceTest extends TestCase
     {
         Livewire::test(CreateFinancialFlow::class)
             ->fillForm([
-                'type' => FinancialFlowType::Consultant->value,
+                'type' => 'consultant',
                 'title' => 'تدفق مالي لعقد الإستشاري',
                 'period_month' => '2026-07-01',
                 'amount' => 150000,
@@ -97,7 +95,7 @@ class FinancialFlowResourceTest extends TestCase
 
         $this->assertDatabaseHas(FinancialFlow::class, [
             'title' => 'تدفق مالي لعقد الإستشاري',
-            'type' => FinancialFlowType::Consultant->value,
+            'type' => 'consultant',
             'sites' => null,
             'amount' => 150000,
         ]);

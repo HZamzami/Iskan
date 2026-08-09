@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Minutes\Pages;
 
-use App\Enums\MinuteType;
 use App\Filament\Resources\Minutes\MinuteResource;
 use App\Models\Minute;
+use App\Models\MinuteType;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -28,11 +28,11 @@ class ListMinutes extends ListRecords
                 ->badge(fn (): int => Minute::count()),
         ];
 
-        foreach (MinuteType::cases() as $type) {
-            $tabs[$type->value] = Tab::make($type->getLabel())
-                ->badge(fn (): int => Minute::where('type', $type)->count())
-                ->badgeColor($type->getColor())
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', $type));
+        foreach (MinuteType::active()->ordered()->get() as $type) {
+            $tabs[$type->slug] = Tab::make($type->name)
+                ->badge(fn (): int => Minute::where('type', $type->slug)->count())
+                ->badgeColor($type->color)
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', $type->slug));
         }
 
         return $tabs;

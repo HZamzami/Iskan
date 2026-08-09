@@ -9,7 +9,7 @@
                         <div class="flex items-center gap-2">
                             <x-filament::icon :icon="$card['site']->getIcon()" class="h-5 w-5 text-gray-500 dark:text-gray-400" />
                             <h3 class="text-sm font-semibold text-gray-950 dark:text-white">
-                                {{ $card['site']->getLabel() }}
+                                {{ $card['site']->name }}
                             </h3>
                         </div>
 
@@ -19,14 +19,24 @@
                     </div>
 
                     <dl class="space-y-1 rounded-lg bg-gray-50 p-2.5 text-xs text-gray-500 dark:bg-white/5 dark:text-gray-400">
-                        <div class="flex justify-between gap-2">
-                            <dt>المقاول</dt>
-                            <dd class="font-medium text-gray-700 dark:text-gray-200">{{ $card['site']->contractor() }}</dd>
-                        </div>
-                        <div class="flex justify-between gap-2">
-                            <dt>مدير الأصل</dt>
-                            <dd class="font-medium text-gray-700 dark:text-gray-200">{{ $card['site']->assetManager() }}</dd>
-                        </div>
+                        @if ($card['site']->contractor)
+                            <div class="flex justify-between gap-2">
+                                <dt>المقاول</dt>
+                                <dd class="font-medium text-gray-700 dark:text-gray-200">{{ $card['site']->contractor }}</dd>
+                            </div>
+                        @endif
+                        @if ($card['site']->consultant)
+                            <div class="flex justify-between gap-2">
+                                <dt>الاستشاري</dt>
+                                <dd class="font-medium text-gray-700 dark:text-gray-200">{{ $card['site']->consultant }}</dd>
+                            </div>
+                        @endif
+                        @if ($card['site']->asset_manager)
+                            <div class="flex justify-between gap-2">
+                                <dt>مدير الأصل</dt>
+                                <dd class="font-medium text-gray-700 dark:text-gray-200">{{ $card['site']->asset_manager }}</dd>
+                            </div>
+                        @endif
                     </dl>
 
                     @if (count($card['modules']))

@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\FinancialFlows\Tables;
 
-use App\Enums\Site;
 use App\Models\FinancialFlow;
+use App\Models\FinancialFlowType;
+use App\Models\Location;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -36,12 +37,15 @@ class FinancialFlowsTable
                     ->searchable()
                     ->limit(40)
                     ->tooltip(fn (FinancialFlow $record): string => $record->title),
-                TextColumn::make('type')
+                TextColumn::make('documentType.name')
                     ->label('نوع التدفق')
-                    ->badge(),
+                    ->badge()
+                    ->color(fn (FinancialFlow $record): string => $record->documentType?->color ?? 'gray'),
                 TextColumn::make('sites')
                     ->label('القسم / الموقع')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->name ?? $state)
+                    ->color(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->color ?? 'gray')
                     ->placeholder('—'),
                 TextColumn::make('period_month')
                     ->label('الشهر المالي')
@@ -65,9 +69,13 @@ class FinancialFlowsTable
             ])
             ->defaultSort('document_date', 'desc')
             ->filters([
+                SelectFilter::make('type')
+                    ->label('نوع التدفق')
+                    ->options(fn (): array => FinancialFlowType::active()->ordered()->pluck('name', 'slug')->all())
+                    ->searchable(),
                 SelectFilter::make('sites')
                     ->label('القسم / الموقع')
-                    ->options(Site::class)
+                    ->options(fn (): array => Location::active()->ordered()->pluck('name', 'slug')->all())
                     ->multiple()
                     ->query(function (Builder $query, array $data): Builder {
                         $values = $data['values'] ?? [];

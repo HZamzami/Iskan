@@ -10,12 +10,18 @@ use App\Filament\Resources\GeoDocuments\GeoDocumentResource;
 use App\Filament\Resources\Minutes\MinuteResource;
 use App\Filament\Resources\PeriodicReports\PeriodicReportResource;
 use App\Models\ContractDocument;
+use App\Models\ContractDocumentType;
 use App\Models\ContractualRequirement;
+use App\Models\ContractualRequirementType;
 use App\Models\Correspondence;
 use App\Models\FinancialFlow;
+use App\Models\FinancialFlowType;
 use App\Models\GeoDocument;
+use App\Models\GeoDocumentType;
 use App\Models\Minute;
+use App\Models\MinuteType;
 use App\Models\PeriodicReport;
+use App\Models\PeriodicReportType;
 use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
@@ -62,6 +68,22 @@ enum Module: string implements HasLabel
     public function isSiteScoped(): bool
     {
         return $this !== self::Correspondences;
+    }
+
+    /**
+     * @return class-string<Model>|null
+     */
+    public function typeModelClass(): ?string
+    {
+        return match ($this) {
+            self::Correspondences => null,
+            self::ContractDocuments => ContractDocumentType::class,
+            self::Minutes => MinuteType::class,
+            self::FinancialFlows => FinancialFlowType::class,
+            self::ContractualRequirements => ContractualRequirementType::class,
+            self::PeriodicReports => PeriodicReportType::class,
+            self::GeoDocuments => GeoDocumentType::class,
+        };
     }
 
     /**

@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\MinuteType;
-use App\Enums\Site;
 use App\Filament\Resources\Minutes\Pages\CreateMinute;
 use App\Filament\Resources\Minutes\Pages\ListMinutes;
 use App\Models\Minute;
@@ -37,14 +35,14 @@ class MinuteResourceTest extends TestCase
     public function test_type_tab_filters_records(): void
     {
         $weeklyMeeting = Minute::factory()
-            ->ofType(MinuteType::WeeklyMeeting, Site::SiteA)
+            ->ofType('weekly_meeting', 'site_a')
             ->create();
         $projectHandover = Minute::factory()
-            ->ofType(MinuteType::ProjectHandover)
+            ->ofType('project_handover')
             ->create();
 
         Livewire::test(ListMinutes::class)
-            ->set('activeTab', MinuteType::WeeklyMeeting->value)
+            ->set('activeTab', 'weekly_meeting')
             ->assertCanSeeTableRecords([$weeklyMeeting])
             ->assertCanNotSeeTableRecords([$projectHandover]);
     }
@@ -52,14 +50,14 @@ class MinuteResourceTest extends TestCase
     public function test_site_filter_narrows_records(): void
     {
         $siteA = Minute::factory()
-            ->ofType(MinuteType::WeeklyMeeting, Site::SiteA)
+            ->ofType('weekly_meeting', 'site_a')
             ->create();
         $abraj = Minute::factory()
-            ->ofType(MinuteType::WeeklyMeeting, Site::AbrajKudanah)
+            ->ofType('weekly_meeting', 'abraj_kudanah')
             ->create();
 
         Livewire::test(ListMinutes::class)
-            ->filterTable('sites', Site::SiteA->value)
+            ->filterTable('sites', 'site_a')
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -68,7 +66,7 @@ class MinuteResourceTest extends TestCase
     {
         Livewire::test(CreateMinute::class)
             ->fillForm([
-                'type' => MinuteType::AssetTagging->value,
+                'type' => 'asset_tagging',
                 'sites' => null,
                 'title' => 'محضر تسليم علامات ترميز',
                 'document_date' => '2026-07-20',
@@ -82,8 +80,8 @@ class MinuteResourceTest extends TestCase
     {
         Livewire::test(CreateMinute::class)
             ->fillForm([
-                'type' => MinuteType::AssetTagging->value,
-                'sites' => [Site::AbrajKudanah->value],
+                'type' => 'asset_tagging',
+                'sites' => ['abraj_kudanah'],
                 'title' => 'محضر تسليم علامات ترميز',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('minute.pdf', 100, 'application/pdf'),
@@ -96,7 +94,7 @@ class MinuteResourceTest extends TestCase
     {
         Livewire::test(CreateMinute::class)
             ->fillForm([
-                'type' => MinuteType::ProjectHandover->value,
+                'type' => 'project_handover',
                 'title' => 'محضر تسليم مشروع',
                 'parties' => 'شركة الراجحي',
                 'document_date' => '2026-07-20',
@@ -109,7 +107,7 @@ class MinuteResourceTest extends TestCase
 
         $this->assertDatabaseHas(Minute::class, [
             'title' => 'محضر تسليم مشروع',
-            'type' => MinuteType::ProjectHandover->value,
+            'type' => 'project_handover',
             'sites' => null,
         ]);
 

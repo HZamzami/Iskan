@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\ContractDocumentType;
-use App\Enums\Site;
 use App\Filament\Resources\ContractDocuments\Pages\CreateContractDocument;
 use App\Filament\Resources\ContractDocuments\Pages\ListContractDocuments;
 use App\Models\ContractDocument;
@@ -37,14 +35,14 @@ class ContractDocumentResourceTest extends TestCase
     public function test_type_tab_filters_records(): void
     {
         $consultant = ContractDocument::factory()
-            ->ofType(ContractDocumentType::ConsultantContract)
+            ->ofType('consultant_contract')
             ->create();
         $operation = ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::SiteA)
+            ->ofType('operation_contract', 'site_a')
             ->create();
 
         Livewire::test(ListContractDocuments::class)
-            ->set('activeTab', ContractDocumentType::ConsultantContract->value)
+            ->set('activeTab', 'consultant_contract')
             ->assertCanSeeTableRecords([$consultant])
             ->assertCanNotSeeTableRecords([$operation]);
     }
@@ -52,14 +50,14 @@ class ContractDocumentResourceTest extends TestCase
     public function test_site_filter_narrows_records(): void
     {
         $siteA = ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::SiteA)
+            ->ofType('operation_contract', 'site_a')
             ->create();
         $abraj = ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::AbrajKudanah)
+            ->ofType('operation_contract', 'abraj_kudanah')
             ->create();
 
         Livewire::test(ListContractDocuments::class)
-            ->filterTable('sites', Site::SiteA->value)
+            ->filterTable('sites', 'site_a')
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -68,7 +66,7 @@ class ContractDocumentResourceTest extends TestCase
     {
         Livewire::test(CreateContractDocument::class)
             ->fillForm([
-                'type' => ContractDocumentType::OperationContract->value,
+                'type' => 'operation_contract',
                 'sites' => null,
                 'title' => 'عقد صيانة وتشغيل',
                 'document_date' => '2026-07-20',
@@ -82,7 +80,7 @@ class ContractDocumentResourceTest extends TestCase
     {
         Livewire::test(CreateContractDocument::class)
             ->fillForm([
-                'type' => ContractDocumentType::ConsultantContract->value,
+                'type' => 'consultant_contract',
                 'title' => 'عقد الإستشاري',
                 'contracting_party' => 'إيهاف',
                 'document_date' => '2026-07-20',
@@ -95,7 +93,7 @@ class ContractDocumentResourceTest extends TestCase
 
         $this->assertDatabaseHas(ContractDocument::class, [
             'title' => 'عقد الإستشاري',
-            'type' => ContractDocumentType::ConsultantContract->value,
+            'type' => 'consultant_contract',
             'sites' => null,
         ]);
 
@@ -109,8 +107,8 @@ class ContractDocumentResourceTest extends TestCase
     {
         Livewire::test(CreateContractDocument::class)
             ->fillForm([
-                'type' => ContractDocumentType::OperationContract->value,
-                'sites' => [Site::AbrajKudanah->value],
+                'type' => 'operation_contract',
+                'sites' => ['abraj_kudanah'],
                 'title' => 'عقد صيانة أبراج كدانة',
                 'contracting_party' => 'شركة الراجحي',
                 'document_date' => '2026-07-20',
@@ -126,7 +124,7 @@ class ContractDocumentResourceTest extends TestCase
 
         $document = ContractDocument::query()->where('title', 'عقد صيانة أبراج كدانة')->firstOrFail();
 
-        $this->assertSame([Site::AbrajKudanah], $document->sites->all());
+        $this->assertSame(['abraj_kudanah'], $document->sites);
     }
 
     public function test_create_validates_required_fields(): void

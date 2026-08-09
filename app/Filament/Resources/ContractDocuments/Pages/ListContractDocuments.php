@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\ContractDocuments\Pages;
 
-use App\Enums\ContractDocumentType;
 use App\Filament\Resources\ContractDocuments\ContractDocumentResource;
 use App\Models\ContractDocument;
+use App\Models\ContractDocumentType;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -28,11 +28,11 @@ class ListContractDocuments extends ListRecords
                 ->badge(fn (): int => ContractDocument::count()),
         ];
 
-        foreach (ContractDocumentType::cases() as $type) {
-            $tabs[$type->value] = Tab::make($type->getLabel())
-                ->badge(fn (): int => ContractDocument::where('type', $type)->count())
-                ->badgeColor($type->getColor())
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', $type));
+        foreach (ContractDocumentType::active()->ordered()->get() as $type) {
+            $tabs[$type->slug] = Tab::make($type->name)
+                ->badge(fn (): int => ContractDocument::where('type', $type->slug)->count())
+                ->badgeColor($type->color)
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', $type->slug));
         }
 
         return $tabs;

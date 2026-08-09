@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\ContractualRequirements\Tables;
 
-use App\Enums\ContractualRequirementType;
-use App\Enums\Site;
 use App\Models\ContractualRequirement;
+use App\Models\ContractualRequirementType;
+use App\Models\Location;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -37,12 +37,15 @@ class ContractualRequirementsTable
                     ->searchable()
                     ->limit(40)
                     ->tooltip(fn (ContractualRequirement $record): string => $record->title),
-                TextColumn::make('type')
+                TextColumn::make('documentType.name')
                     ->label('نوع المتطلب')
-                    ->badge(),
+                    ->badge()
+                    ->color(fn (ContractualRequirement $record): string => $record->documentType?->color ?? 'gray'),
                 TextColumn::make('sites')
                     ->label('القسم / الموقع')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->name ?? $state)
+                    ->color(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->color ?? 'gray')
                     ->placeholder('—'),
                 TextColumn::make('period')
                     ->label('الفترة')
@@ -63,11 +66,11 @@ class ContractualRequirementsTable
             ->filters([
                 SelectFilter::make('type')
                     ->label('نوع المتطلب')
-                    ->options(ContractualRequirementType::class)
+                    ->options(fn (): array => ContractualRequirementType::active()->ordered()->pluck('name', 'slug')->all())
                     ->searchable(),
                 SelectFilter::make('sites')
                     ->label('القسم / الموقع')
-                    ->options(Site::class)
+                    ->options(fn (): array => Location::active()->ordered()->pluck('name', 'slug')->all())
                     ->multiple()
                     ->query(function (Builder $query, array $data): Builder {
                         $values = $data['values'] ?? [];

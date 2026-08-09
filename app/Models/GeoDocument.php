@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\GeoDocumentType;
-use App\Enums\Site;
+use App\Models\Concerns\BelongsToDocumentType;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\GeoDocumentFactory;
-use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class GeoDocument extends Model
 {
+    use BelongsToDocumentType;
+
     /** @use HasFactory<GeoDocumentFactory> */
     use HasFactory;
 
@@ -41,9 +41,13 @@ class GeoDocument extends Model
     protected function casts(): array
     {
         return [
-            'type' => GeoDocumentType::class,
-            'sites' => AsEnumCollection::of(Site::class),
+            'sites' => 'array',
             'document_date' => 'date',
         ];
+    }
+
+    public static function documentTypeClass(): string
+    {
+        return GeoDocumentType::class;
     }
 }

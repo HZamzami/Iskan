@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Users;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
-use App\Enums\Site;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -12,6 +11,7 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Models\Location;
 use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -91,7 +91,6 @@ class UserResource extends Resource
             }
 
             foreach ($data['sites'] ?? [] as $site) {
-                $site = $site instanceof Site ? $site->value : $site;
                 $permissions[] = "site.{$site}";
             }
         }
@@ -121,10 +120,11 @@ class UserResource extends Resource
             }
         }
 
-        $sites = array_values(array_filter(
-            array_map(fn (Site $site): string => $site->value, Site::cases()),
-            fn (string $site): bool => $user->permissions->contains('name', "site.{$site}"),
-        ));
+        $sites = Location::cached()
+            ->map(fn (Location $location): string => $location->slug)
+            ->filter(fn (string $slug): bool => $user->permissions->contains('name', "site.{$slug}"))
+            ->values()
+            ->all();
 
         return [
             'is_admin' => $user->isAdmin(),

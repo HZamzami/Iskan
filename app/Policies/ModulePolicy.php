@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
-use App\Enums\Site;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -50,6 +49,6 @@ abstract class ModulePolicy
             return true;
         }
 
-        return collect($record->sites)->contains(fn (Site $site): bool => $user->canAccessSite($site));
+        return collect($record->sites)->contains(fn (string $slug): bool => $user->canAccessSite($slug));
     }
 }

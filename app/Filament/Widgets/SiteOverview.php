@@ -3,8 +3,9 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\Module;
-use App\Enums\Site;
+use App\Enums\PaletteColor;
 use App\Filament\Widgets\Concerns\AppliesSiteScope;
+use App\Models\Location;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\Widget;
@@ -36,7 +37,7 @@ class SiteOverview extends Widget
     protected function getViewData(): array
     {
         $user = $this->currentUser();
-        $sites = $user?->allowedSites() ?? Site::cases();
+        $sites = $user?->allowedSites() ?? Location::active()->ordered()->get()->all();
         $modules = array_values(array_filter(
             $this->accessibleModules(),
             fn (Module $module): bool => $module->isSiteScoped(),
@@ -45,31 +46,24 @@ class SiteOverview extends Widget
 
         foreach ($modules as $module) {
             $counts[$module->value] = collect($sites)->mapWithKeys(
-                fn (Site $site): array => [
-                    $site->value => $module->modelClass()::query()
-                        ->whereJsonContains('sites', $site->value)
+                fn (Location $location): array => [
+                    $location->slug => $module->modelClass()::query()
+                        ->whereJsonContains('sites', $location->slug)
                         ->count(),
                 ],
             )->all();
         }
 
-        $accents = [
-            'info' => '#3b82f6',
-            'success' => '#22c55e',
-            'warning' => '#f59e0b',
-            'danger' => '#ef4444',
-        ];
-
-        $cards = collect($sites)->map(fn (Site $site): array => [
-            'site' => $site,
-            'accent' => $accents[$site->getColor()] ?? '#f59e0b',
+        $cards = collect($sites)->map(fn (Location $location): array => [
+            'site' => $location,
+            'accent' => (PaletteColor::tryFrom($location->color) ?? PaletteColor::Primary)->hex(),
             'modules' => collect($modules)->map(fn (Module $module): array => [
                 'module' => $module,
-                'count' => (int) ($counts[$module->value][$site->value] ?? 0),
+                'count' => (int) ($counts[$module->value][$location->slug] ?? 0),
                 'url' => $module->resourceClass()::getUrl('index'),
             ]),
             'total' => collect($modules)->sum(
-                fn (Module $module): int => (int) ($counts[$module->value][$site->value] ?? 0),
+                fn (Module $module): int => (int) ($counts[$module->value][$location->slug] ?? 0),
             ),
         ])->all();
 

@@ -3,9 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\AccessLevel;
-use App\Enums\ContractDocumentType;
 use App\Enums\Module;
-use App\Enums\Site;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\ArchiveOverviewStats;
 use App\Filament\Widgets\ExpiringContracts;
@@ -64,14 +62,14 @@ class DashboardTest extends TestCase
     {
         $this->actingAs($this->makeUserWithAccess(
             [Module::ContractDocuments->value => AccessLevel::Read],
-            [Site::SiteA],
+            ['site_a'],
         ));
 
         ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::SiteA)
+            ->ofType('operation_contract', 'site_a')
             ->create(['start_date' => today()->subMonth(), 'end_date' => today()->addDays(30)]);
         ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::SiteB)
+            ->ofType('operation_contract', 'site_b')
             ->create(['start_date' => today()->subMonth(), 'end_date' => today()->addDays(30)]);
 
         Livewire::test(ArchiveOverviewStats::class)
@@ -102,7 +100,7 @@ class DashboardTest extends TestCase
     {
         $this->actingAs($this->makeUserWithAccess(
             [Module::Minutes->value => AccessLevel::Read],
-            [Site::SiteA],
+            ['site_a'],
         ));
 
         $this->assertTrue(SiteOverview::canView());
@@ -159,7 +157,7 @@ class DashboardTest extends TestCase
     {
         $this->actingAs($this->makeUserWithAccess(
             [Module::Minutes->value => AccessLevel::Read],
-            [Site::SiteA],
+            ['site_a'],
         ));
 
         Livewire::test(Dashboard::class)
@@ -181,24 +179,24 @@ class DashboardTest extends TestCase
     {
         $this->actingAs($this->makeUserWithAccess(
             [Module::ContractDocuments->value => AccessLevel::Read],
-            [Site::SiteA],
+            ['site_a'],
         ));
 
         $siteA = ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::SiteA)
+            ->ofType('operation_contract', 'site_a')
             ->create(['title' => 'عقد موقع أ', 'end_date' => today()->addDays(30)]);
         $siteB = ContractDocument::factory()
-            ->ofType(ContractDocumentType::OperationContract, Site::SiteB)
+            ->ofType('operation_contract', 'site_b')
             ->create(['title' => 'عقد موقع ب', 'end_date' => today()->addDays(30)]);
         $general = ContractDocument::factory()
-            ->ofType(ContractDocumentType::ConsultantContract)
+            ->ofType('consultant_contract')
             ->create(['title' => 'عقد استشاري عام', 'end_date' => today()->addDays(30)]);
 
-        Livewire::test(ExpiringContracts::class, ['pageFilters' => ['site' => Site::SiteA->value]])
+        Livewire::test(ExpiringContracts::class, ['pageFilters' => ['site' => 'site_a']])
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$siteB, $general]);
 
-        Livewire::test(ExpiringContracts::class, ['pageFilters' => ['site' => Site::SiteB->value]])
+        Livewire::test(ExpiringContracts::class, ['pageFilters' => ['site' => 'site_b']])
             ->assertCanSeeTableRecords([$siteA, $general])
             ->assertCanNotSeeTableRecords([$siteB]);
     }
@@ -223,7 +221,7 @@ class DashboardTest extends TestCase
                 Module::Minutes->value => AccessLevel::Read,
                 Module::GeoDocuments->value => AccessLevel::Read,
             ],
-            Site::cases(),
+            ['site_a', 'site_b', 'site_c', 'abraj_kudanah'],
         ));
 
         Minute::factory()->create(['title' => 'محضر للاختبار']);

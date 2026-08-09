@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\FinancialFlowType;
-use App\Enums\Site;
+use App\Models\Concerns\BelongsToDocumentType;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\FinancialFlowFactory;
-use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FinancialFlow extends Model
 {
+    use BelongsToDocumentType;
+
     /** @use HasFactory<FinancialFlowFactory> */
     use HasFactory;
 
@@ -42,11 +42,15 @@ class FinancialFlow extends Model
     protected function casts(): array
     {
         return [
-            'type' => FinancialFlowType::class,
-            'sites' => AsEnumCollection::of(Site::class),
+            'sites' => 'array',
             'period_month' => 'date',
             'document_date' => 'date',
             'amount' => 'decimal:2',
         ];
+    }
+
+    public static function documentTypeClass(): string
+    {
+        return FinancialFlowType::class;
     }
 }

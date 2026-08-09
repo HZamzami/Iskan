@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\ContractDocuments\Tables;
 
-use App\Enums\Site;
 use App\Models\ContractDocument;
+use App\Models\ContractDocumentType;
+use App\Models\Location;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -36,12 +37,15 @@ class ContractDocumentsTable
                     ->searchable()
                     ->limit(40)
                     ->tooltip(fn (ContractDocument $record): string => $record->title),
-                TextColumn::make('type')
+                TextColumn::make('documentType.name')
                     ->label('نوع العقد')
-                    ->badge(),
+                    ->badge()
+                    ->color(fn (ContractDocument $record): string => $record->documentType?->color ?? 'gray'),
                 TextColumn::make('sites')
                     ->label('القسم / الموقع')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->name ?? $state)
+                    ->color(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->color ?? 'gray')
                     ->placeholder('—'),
                 TextColumn::make('contracting_party')
                     ->label('الطرف المتعاقد')
@@ -64,9 +68,13 @@ class ContractDocumentsTable
             ])
             ->defaultSort('document_date', 'desc')
             ->filters([
+                SelectFilter::make('type')
+                    ->label('نوع العقد')
+                    ->options(fn (): array => ContractDocumentType::active()->ordered()->pluck('name', 'slug')->all())
+                    ->searchable(),
                 SelectFilter::make('sites')
                     ->label('القسم / الموقع')
-                    ->options(Site::class)
+                    ->options(fn (): array => Location::active()->ordered()->pluck('name', 'slug')->all())
                     ->multiple()
                     ->query(function (Builder $query, array $data): Builder {
                         $values = $data['values'] ?? [];

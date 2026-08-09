@@ -5,7 +5,6 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\AccessLevel;
 use App\Enums\Module;
-use App\Enums\Site;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -63,9 +62,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     /**
      * المواقع المسموح بها للمستخدم، أو null لمدير النظام (غير مقيّد).
-     * المصفوفة الفارغة تعني الاطلاع على السجلات العامة فقط.
+     * المصفوفة الفارغة تعني الاطلاع على السجلات العامة فقط. الاعتماد على
+     * Location::cached() (محفوظة على مستوى الطلب) يكفي لتفادي استعلامات
+     * متكررة دون خطر تخزين نتيجة قديمة إذا تغيّرت صلاحيات المستخدم.
      *
-     * @return array<int, Site>|null
+     * @return array<int, Location>|null
      */
     public function allowedSites(): ?array
     {
@@ -73,17 +74,28 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             return null;
         }
 
-        return array_values(array_filter(
-            Site::cases(),
-            fn (Site $site): bool => $this->permissions->contains('name', "site.{$site->value}"),
-        ));
+        return Location::cached()
+            ->filter(fn (Location $location): bool => $this->permissions->contains('name', $location->permissionName()))
+            ->values()
+            ->all();
     }
 
-    public function canAccessSite(Site $site): bool
+    /**
+     * @return array<int, string>|null
+     */
+    public function allowedSiteSlugs(): ?array
     {
         $allowed = $this->allowedSites();
 
-        return $allowed === null || in_array($site, $allowed, true);
+        return $allowed === null ? null : array_map(fn (Location $location): string => $location->slug, $allowed);
+    }
+
+    public function canAccessSite(Location|string $site): bool
+    {
+        $slug = $site instanceof Location ? $site->slug : $site;
+        $allowed = $this->allowedSiteSlugs();
+
+        return $allowed === null || in_array($slug, $allowed, true);
     }
 
     public function entity(): BelongsTo

@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\PeriodicReports\Tables;
 
-use App\Enums\Site;
+use App\Models\Location;
 use App\Models\PeriodicReport;
+use App\Models\PeriodicReportType;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -36,12 +37,15 @@ class PeriodicReportsTable
                     ->searchable()
                     ->limit(40)
                     ->tooltip(fn (PeriodicReport $record): string => $record->title),
-                TextColumn::make('type')
+                TextColumn::make('documentType.name')
                     ->label('نوع التقرير')
-                    ->badge(),
+                    ->badge()
+                    ->color(fn (PeriodicReport $record): string => $record->documentType?->color ?? 'gray'),
                 TextColumn::make('sites')
                     ->label('القسم / الموقع')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->name ?? $state)
+                    ->color(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->color ?? 'gray')
                     ->placeholder('—'),
                 TextColumn::make('period')
                     ->label('فترة التقرير')
@@ -59,9 +63,13 @@ class PeriodicReportsTable
             ])
             ->defaultSort('document_date', 'desc')
             ->filters([
+                SelectFilter::make('type')
+                    ->label('نوع التقرير')
+                    ->options(fn (): array => PeriodicReportType::active()->ordered()->pluck('name', 'slug')->all())
+                    ->searchable(),
                 SelectFilter::make('sites')
                     ->label('القسم / الموقع')
-                    ->options(Site::class)
+                    ->options(fn (): array => Location::active()->ordered()->pluck('name', 'slug')->all())
                     ->multiple()
                     ->query(function (Builder $query, array $data): Builder {
                         $values = $data['values'] ?? [];

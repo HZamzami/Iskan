@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\ContractDocuments\Schemas;
 
-use App\Enums\ContractDocumentType;
-use App\Enums\Site;
+use App\Models\ContractDocumentType;
+use App\Models\Location;
+use App\Support\FileTypes;
 use Closure;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
@@ -31,7 +32,8 @@ class ContractDocumentForm
                         Grid::make(2)->schema([
                             Select::make('type')
                                 ->label('نوع العقد')
-                                ->options(ContractDocumentType::class)
+                                ->options(fn (Get $get): array => ContractDocumentType::selectOptions($get('type')))
+                                ->helperText(fn (Get $get): ?string => self::selectedType($get)?->description)
                                 ->live()
                                 ->required()
                                 ->columnSpan(1),
@@ -98,11 +100,13 @@ class ContractDocumentForm
                     ->columnSpanFull()
                     ->schema([
                         FileUpload::make('file_path')
-                            ->label('ملف المستند (PDF)')
+                            ->label('ملف المستند')
                             ->disk('local')
                             ->directory('contract-documents')
-                            ->acceptedFileTypes(['application/pdf'])
-                            ->maxSize(20480)
+                            ->acceptedFileTypes(fn (Get $get): array => FileTypes::mimeTypesFor(self::acceptedExtensions($get)))
+                            ->rule(fn (Get $get): string => 'extensions:'.implode(',', self::acceptedExtensions($get)))
+                            ->maxSize(fn (Get $get): int => self::selectedType($get)?->maxFileSizeKb() ?? 20480)
+                            ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get)))
                             ->downloadable()
                             ->required()
                             ->columnSpanFull(),
@@ -116,7 +120,7 @@ class ContractDocumentForm
 
     private static function isSiteScoped(Get $get): bool
     {
-        return self::selectedType($get)?->sites() !== null;
+        return self::selectedType($get)?->isSiteScoped() ?? false;
     }
 
     /**
@@ -124,20 +128,24 @@ class ContractDocumentForm
      */
     private static function siteOptions(Get $get): array
     {
-        return collect(self::selectedType($get)?->sites() ?? [])
-            ->filter(fn (Site $site): bool => Filament::auth()->user()->canAccessSite($site))
-            ->mapWithKeys(fn (Site $site): array => [$site->value => $site->getLabel()])
+        return collect(self::selectedType($get)?->allowedLocations() ?? [])
+            ->filter(fn (Location $location): bool => Filament::auth()->user()->canAccessSite($location))
+            ->mapWithKeys(fn (Location $location): array => [$location->slug => $location->name])
             ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function acceptedExtensions(Get $get): array
+    {
+        return self::selectedType($get)?->acceptedExtensions() ?? ['pdf'];
     }
 
     private static function selectedType(Get $get): ?ContractDocumentType
     {
         $type = $get('type');
 
-        if ($type instanceof ContractDocumentType) {
-            return $type;
-        }
-
-        return $type ? ContractDocumentType::tryFrom($type) : null;
+        return filled($type) ? ContractDocumentType::cached()->firstWhere('slug', $type) : null;
     }
 }

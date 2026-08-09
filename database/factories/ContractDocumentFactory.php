@@ -2,8 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\ContractDocumentType;
-use App\Enums\Site;
 use App\Models\ContractDocument;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,7 +18,7 @@ class ContractDocumentFactory extends Factory
     public function definition(): array
     {
         return [
-            'type' => ContractDocumentType::ConsultantContract,
+            'type' => 'consultant_contract',
             'sites' => null,
             'title' => fake()->sentence(4),
             'contracting_party' => fake()->company(),
@@ -29,11 +27,11 @@ class ContractDocumentFactory extends Factory
         ];
     }
 
-    public function ofType(ContractDocumentType $type, ?Site $site = null): static
+    public function ofType(string $typeSlug, ?string $siteSlug = null): static
     {
         return $this->state([
-            'type' => $type,
-            'sites' => $site !== null ? [$site] : null,
+            'type' => $typeSlug,
+            'sites' => $siteSlug !== null ? [$siteSlug] : null,
         ]);
     }
 }

@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\GeoDocumentType;
-use App\Enums\Site;
 use App\Filament\Resources\GeoDocuments\Pages\CreateGeoDocument;
 use App\Filament\Resources\GeoDocuments\Pages\ListGeoDocuments;
 use App\Models\GeoDocument;
@@ -37,14 +35,14 @@ class GeoDocumentResourceTest extends TestCase
     public function test_type_tab_filters_records(): void
     {
         $gis = GeoDocument::factory()
-            ->ofType(GeoDocumentType::Gis, Site::SiteA)
+            ->ofType('gis', 'site_a')
             ->create();
         $asBuilt = GeoDocument::factory()
-            ->ofType(GeoDocumentType::AsBuiltDrawing, Site::SiteB)
+            ->ofType('as_built_drawing', 'site_b')
             ->create();
 
         Livewire::test(ListGeoDocuments::class)
-            ->set('activeTab', GeoDocumentType::Gis->value)
+            ->set('activeTab', 'gis')
             ->assertCanSeeTableRecords([$gis])
             ->assertCanNotSeeTableRecords([$asBuilt]);
     }
@@ -52,14 +50,14 @@ class GeoDocumentResourceTest extends TestCase
     public function test_site_filter_narrows_records(): void
     {
         $siteA = GeoDocument::factory()
-            ->ofType(GeoDocumentType::Gis, Site::SiteA)
+            ->ofType('gis', 'site_a')
             ->create();
         $abraj = GeoDocument::factory()
-            ->ofType(GeoDocumentType::Gis, Site::AbrajKudanah)
+            ->ofType('gis', 'abraj_kudanah')
             ->create();
 
         Livewire::test(ListGeoDocuments::class)
-            ->filterTable('sites', Site::SiteA->value)
+            ->filterTable('sites', 'site_a')
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -68,7 +66,7 @@ class GeoDocumentResourceTest extends TestCase
     {
         Livewire::test(CreateGeoDocument::class)
             ->fillForm([
-                'type' => GeoDocumentType::Gis->value,
+                'type' => 'gis',
                 'sites' => null,
                 'title' => 'خريطة GIS للموقع',
                 'document_date' => '2026-07-20',
@@ -82,8 +80,8 @@ class GeoDocumentResourceTest extends TestCase
     {
         Livewire::test(CreateGeoDocument::class)
             ->fillForm([
-                'type' => GeoDocumentType::AsBuiltDrawing->value,
-                'sites' => [Site::SiteC->value],
+                'type' => 'as_built_drawing',
+                'sites' => ['site_c'],
                 'title' => 'مخطط كما نُفذ للموقع (ج)',
                 'drawing_number' => 'DWG-1234',
                 'document_date' => '2026-07-20',
@@ -96,13 +94,13 @@ class GeoDocumentResourceTest extends TestCase
 
         $this->assertDatabaseHas(GeoDocument::class, [
             'title' => 'مخطط كما نُفذ للموقع (ج)',
-            'type' => GeoDocumentType::AsBuiltDrawing->value,
+            'type' => 'as_built_drawing',
             'drawing_number' => 'DWG-1234',
         ]);
 
         $document = GeoDocument::query()->firstOrFail();
 
-        $this->assertSame([Site::SiteC], $document->sites->all());
+        $this->assertSame(['site_c'], $document->sites);
         Storage::disk('local')->assertExists($document->file_path);
         $this->assertMatchesRegularExpression('/^خريطة-\d{4}-\d{4}$/', $document->reference_number);
     }
@@ -111,8 +109,8 @@ class GeoDocumentResourceTest extends TestCase
     {
         Livewire::test(CreateGeoDocument::class)
             ->fillForm([
-                'type' => GeoDocumentType::Gis->value,
-                'sites' => [Site::SiteA->value],
+                'type' => 'gis',
+                'sites' => ['site_a'],
                 'title' => 'خريطة GIS للموقع',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('map.pdf', 100, 'application/pdf'),
@@ -125,8 +123,8 @@ class GeoDocumentResourceTest extends TestCase
     {
         Livewire::test(CreateGeoDocument::class)
             ->fillForm([
-                'type' => GeoDocumentType::Gis->value,
-                'sites' => [Site::SiteA->value],
+                'type' => 'gis',
+                'sites' => ['site_a'],
                 'title' => 'خريطة GIS للموقع',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('map.gpkg', 100),
@@ -145,8 +143,8 @@ class GeoDocumentResourceTest extends TestCase
     {
         Livewire::test(CreateGeoDocument::class)
             ->fillForm([
-                'type' => GeoDocumentType::KmlKmz->value,
-                'sites' => [Site::SiteA->value],
+                'type' => 'kml_kmz',
+                'sites' => ['site_a'],
                 'title' => 'خريطة KML للموقع',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('map.dwg', 100),

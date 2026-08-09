@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\PeriodicReportType;
-use App\Enums\Site;
 use App\Filament\Resources\PeriodicReports\Pages\CreatePeriodicReport;
 use App\Filament\Resources\PeriodicReports\Pages\ListPeriodicReports;
 use App\Models\PeriodicReport;
@@ -37,14 +35,14 @@ class PeriodicReportResourceTest extends TestCase
     public function test_type_tab_filters_records(): void
     {
         $monthly = PeriodicReport::factory()
-            ->ofType(PeriodicReportType::MonthlyReport, Site::SiteA)
+            ->ofType('monthly_report', 'site_a')
             ->create();
         $weekly = PeriodicReport::factory()
-            ->ofType(PeriodicReportType::WeeklyProgress, Site::SiteB)
+            ->ofType('weekly_progress', 'site_b')
             ->create();
 
         Livewire::test(ListPeriodicReports::class)
-            ->set('activeTab', PeriodicReportType::MonthlyReport->value)
+            ->set('activeTab', 'monthly_report')
             ->assertCanSeeTableRecords([$monthly])
             ->assertCanNotSeeTableRecords([$weekly]);
     }
@@ -52,14 +50,14 @@ class PeriodicReportResourceTest extends TestCase
     public function test_site_filter_narrows_records(): void
     {
         $siteA = PeriodicReport::factory()
-            ->ofType(PeriodicReportType::WeeklyProgress, Site::SiteA)
+            ->ofType('weekly_progress', 'site_a')
             ->create();
         $abraj = PeriodicReport::factory()
-            ->ofType(PeriodicReportType::WeeklyProgress, Site::AbrajKudanah)
+            ->ofType('weekly_progress', 'abraj_kudanah')
             ->create();
 
         Livewire::test(ListPeriodicReports::class)
-            ->filterTable('sites', Site::SiteA->value)
+            ->filterTable('sites', 'site_a')
             ->assertCanSeeTableRecords([$siteA])
             ->assertCanNotSeeTableRecords([$abraj]);
     }
@@ -68,7 +66,7 @@ class PeriodicReportResourceTest extends TestCase
     {
         Livewire::test(CreatePeriodicReport::class)
             ->fillForm([
-                'type' => PeriodicReportType::MonthlyReport->value,
+                'type' => 'monthly_report',
                 'sites' => null,
                 'title' => 'التقرير الشهري',
                 'period' => '2026-07-01',
@@ -83,8 +81,8 @@ class PeriodicReportResourceTest extends TestCase
     {
         Livewire::test(CreatePeriodicReport::class)
             ->fillForm([
-                'type' => PeriodicReportType::WeeklyProgress->value,
-                'sites' => [Site::AbrajKudanah->value],
+                'type' => 'weekly_progress',
+                'sites' => ['abraj_kudanah'],
                 'title' => 'تقرير إنجاز الأعمال الأسبوعي',
                 'period' => '2026-07-15',
                 'document_date' => '2026-07-20',
@@ -97,12 +95,12 @@ class PeriodicReportResourceTest extends TestCase
 
         $this->assertDatabaseHas(PeriodicReport::class, [
             'title' => 'تقرير إنجاز الأعمال الأسبوعي',
-            'type' => PeriodicReportType::WeeklyProgress->value,
+            'type' => 'weekly_progress',
         ]);
 
         $report = PeriodicReport::query()->firstOrFail();
 
-        $this->assertSame([Site::AbrajKudanah], $report->sites->all());
+        $this->assertSame(['abraj_kudanah'], $report->sites);
         Storage::disk('local')->assertExists($report->file_path);
         $this->assertMatchesRegularExpression('/^تقرير-\d{4}-\d{4}$/', $report->reference_number);
     }

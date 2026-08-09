@@ -2,9 +2,10 @@
 
 namespace App\Filament\Widgets;
 
-use App\Enums\FinancialFlowType;
+use App\Enums\PaletteColor;
 use App\Filament\Widgets\Concerns\AppliesSiteScope;
 use App\Models\FinancialFlow;
+use App\Models\FinancialFlowType;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
@@ -53,33 +54,21 @@ class FinancialFlowsChart extends ChartWidget
 
         foreach ($rows as $row) {
             $month = (int) $row->period_month->format('n');
-            $byTypeMonth[$row->type->value][$month] = ($byTypeMonth[$row->type->value][$month] ?? 0) + (float) $row->amount;
+            $byTypeMonth[$row->type][$month] = ($byTypeMonth[$row->type][$month] ?? 0) + (float) $row->amount;
         }
 
         $labels = collect(range(1, 12))
             ->map(fn (int $month): string => Carbon::create($year, $month, 1)->translatedFormat('F'))
             ->all();
 
-        $palette = [
-            'info' => '#3b82f6',
-            'warning' => '#f59e0b',
-            'gray' => '#6b7280',
-        ];
-
-        $shortLabels = [
-            FinancialFlowType::Consultant->value => 'عقد الإستشاري',
-            FinancialFlowType::Operation->value => 'الصيانة والتشغيل',
-            FinancialFlowType::InternalProjects->value => 'المشاريع الداخلية',
-        ];
-
         return [
             'labels' => $labels,
-            'datasets' => collect(FinancialFlowType::cases())->map(fn (FinancialFlowType $type): array => [
-                'label' => $shortLabels[$type->value] ?? $type->getLabel(),
+            'datasets' => FinancialFlowType::active()->ordered()->get()->map(fn (FinancialFlowType $type): array => [
+                'label' => $type->short_label ?? $type->name,
                 'data' => collect(range(1, 12))
-                    ->map(fn (int $month): float => $byTypeMonth[$type->value][$month] ?? 0.0)
+                    ->map(fn (int $month): float => $byTypeMonth[$type->slug][$month] ?? 0.0)
                     ->all(),
-                'backgroundColor' => $palette[$type->getColor()] ?? '#f59e0b',
+                'backgroundColor' => (PaletteColor::tryFrom($type->color) ?? PaletteColor::Primary)->hex(),
             ])->all(),
         ];
     }

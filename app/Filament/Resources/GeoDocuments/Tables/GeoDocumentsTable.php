@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\GeoDocuments\Tables;
 
-use App\Enums\Site;
 use App\Models\GeoDocument;
+use App\Models\GeoDocumentType;
+use App\Models\Location;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -36,12 +37,15 @@ class GeoDocumentsTable
                     ->searchable()
                     ->limit(40)
                     ->tooltip(fn (GeoDocument $record): string => $record->title),
-                TextColumn::make('type')
+                TextColumn::make('documentType.name')
                     ->label('نوع الخريطة / الرسم')
-                    ->badge(),
+                    ->badge()
+                    ->color(fn (GeoDocument $record): string => $record->documentType?->color ?? 'gray'),
                 TextColumn::make('sites')
                     ->label('القسم / الموقع')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->name ?? $state)
+                    ->color(fn (string $state): string => Location::cached()->firstWhere('slug', $state)?->color ?? 'gray')
                     ->placeholder('—'),
                 TextColumn::make('drawing_number')
                     ->label('رقم المخطط')
@@ -59,9 +63,13 @@ class GeoDocumentsTable
             ])
             ->defaultSort('document_date', 'desc')
             ->filters([
+                SelectFilter::make('type')
+                    ->label('نوع الخريطة / الرسم')
+                    ->options(fn (): array => GeoDocumentType::active()->ordered()->pluck('name', 'slug')->all())
+                    ->searchable(),
                 SelectFilter::make('sites')
                     ->label('القسم / الموقع')
-                    ->options(Site::class)
+                    ->options(fn (): array => Location::active()->ordered()->pluck('name', 'slug')->all())
                     ->multiple()
                     ->query(function (Builder $query, array $data): Builder {
                         $values = $data['values'] ?? [];

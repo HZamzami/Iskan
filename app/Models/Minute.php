@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\MinuteType;
-use App\Enums\Site;
+use App\Models\Concerns\BelongsToDocumentType;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\MinuteFactory;
-use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Minute extends Model
 {
+    use BelongsToDocumentType;
+
     /** @use HasFactory<MinuteFactory> */
     use HasFactory;
 
@@ -41,9 +41,13 @@ class Minute extends Model
     protected function casts(): array
     {
         return [
-            'type' => MinuteType::class,
-            'sites' => AsEnumCollection::of(Site::class),
+            'sites' => 'array',
             'document_date' => 'date',
         ];
+    }
+
+    public static function documentTypeClass(): string
+    {
+        return MinuteType::class;
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\Module;
-use App\Enums\Site;
+use App\Models\Location;
 use App\Models\User;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
@@ -84,8 +84,8 @@ class UserInfolist
                                 ->label('المواقع المسموح بها')
                                 ->badge()
                                 ->state(fn (User $record): array => array_map(
-                                    fn (Site $site): string => $site->getLabel(),
-                                    $record->allowedSites() ?? Site::cases(),
+                                    fn (Location $location): string => $location->name,
+                                    $record->allowedSites() ?? Location::active()->ordered()->get()->all(),
                                 ))
                                 ->placeholder('السجلات العامة فقط')
                                 ->columnSpanFull(),
