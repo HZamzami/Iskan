@@ -6,6 +6,7 @@ use App\Filament\Resources\ContractualRequirements\ContractualRequirementResourc
 use App\Models\ContractualRequirement;
 use App\Models\RequirementGroup;
 use Filament\Actions\CreateAction;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +27,10 @@ class ListContractualRequirements extends ListRecords
         $tabs = [
             'all' => Tab::make('الكل')
                 ->badge(fn (): int => ContractualRequirement::count()),
+            'mine' => Tab::make('بانتظار إجرائي')
+                ->badge(fn (): int => ContractualRequirement::where('assigned_to', Filament::auth()->id())->count())
+                ->badgeColor('warning')
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('assigned_to', Filament::auth()->id())),
         ];
 
         foreach (RequirementGroup::active()->ordered()->with('types')->get() as $group) {

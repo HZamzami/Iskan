@@ -125,6 +125,25 @@ class ArchiveOverviewStats extends StatsOverviewWidget
             ->descriptionIcon(Heroicon::DocumentPlus)
             ->color('info');
 
+        $user = $this->currentUser();
+
+        if ($user !== null) {
+            $pending = 0;
+
+            foreach ($modules as $module) {
+                if ($module === Module::Correspondences) {
+                    continue;
+                }
+
+                $pending += $module->modelClass()::query()->where('assigned_to', $user->id)->count();
+            }
+
+            $stats[] = Stat::make('بانتظار إجرائي', $pending)
+                ->description($pending > 0 ? 'سجلات تنتظر ترحيلك أو اعتمادك' : 'لا سجلات بانتظارك حالياً')
+                ->descriptionIcon(Heroicon::Clock)
+                ->color($pending > 0 ? 'warning' : 'success');
+        }
+
         return $stats;
     }
 }

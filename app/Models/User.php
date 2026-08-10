@@ -11,6 +11,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -101,6 +102,20 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function entity(): BelongsTo
     {
         return $this->belongsTo(Entity::class);
+    }
+
+    /**
+     * الجهة (مقاول/استشاري/مالك) التي ينتمي إليها المستخدم عبر جهته، أو null
+     * إن لم تُحدَّد جهته أو لم تُصنَّف جهته بعد.
+     */
+    public function category(): ?string
+    {
+        return $this->entity?->entityType?->slug;
+    }
+
+    public function scopeOfCategory(Builder $query, string $slug): Builder
+    {
+        return $query->whereHas('entity.entityType', fn (Builder $q): Builder => $q->where('slug', $slug));
     }
 
     public function getFilamentAvatarUrl(): ?string

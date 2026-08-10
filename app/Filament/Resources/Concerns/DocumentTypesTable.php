@@ -7,6 +7,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -39,6 +40,10 @@ class DocumentTypesTable
                     ->label('عدد السجلات')
                     ->counts('documents')
                     ->sortable(),
+                IconColumn::make('requires_workflow')
+                    ->label('سير اعتماد')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ToggleColumn::make('is_active')
                     ->label('نشط'),
             ])

@@ -12,14 +12,14 @@ class EntityTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        $names = [
-            'مقاول',
-            'استشاري',
-            'مالك',
+        $rows = [
+            ['slug' => 'contractor', 'name' => 'مقاول'],
+            ['slug' => 'consultant', 'name' => 'استشاري'],
+            ['slug' => 'owner', 'name' => 'مالك'],
         ];
 
-        foreach ($names as $name) {
-            EntityType::query()->firstOrCreate(['name' => $name]);
+        foreach ($rows as $row) {
+            EntityType::query()->firstOrCreate(['slug' => $row['slug']], $row);
         }
     }
 }

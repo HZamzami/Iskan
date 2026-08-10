@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\FinancialFlows\Schemas;
 
+use App\Filament\Support\WorkflowInfolist;
 use App\Models\FinancialFlow;
 use App\Models\Location;
 use Filament\Infolists\Components\TextEntry;
@@ -74,6 +75,8 @@ class FinancialFlowInfolist
                             ->placeholder('لا توجد ملاحظات')
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowInfolist::timelineSection(),
             ]);
     }
 }

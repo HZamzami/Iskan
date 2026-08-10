@@ -181,7 +181,7 @@ class UserResourceTest extends TestCase
     {
         $this->actingAs($this->makeAdminUser());
 
-        $contractorType = EntityType::factory()->create(['name' => 'مقاول']);
+        $contractorType = EntityType::query()->where('slug', 'contractor')->firstOrFail();
         $entity = Entity::factory()->create([
             'name' => 'شركة الراجحي',
             'entity_type_id' => $contractorType->id,

@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\WorkflowStatus;
 use App\Models\Concerns\BelongsToDocumentType;
 use App\Models\Concerns\HasReferenceNumber;
+use App\Models\Concerns\HasWorkflow;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\GeoDocumentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +19,7 @@ class GeoDocument extends Model
     use HasFactory;
 
     use HasReferenceNumber;
+    use HasWorkflow;
     use LogsArchiveActivity;
 
     protected $fillable = [
@@ -28,6 +31,11 @@ class GeoDocument extends Model
         'document_date',
         'file_path',
         'notes',
+        'created_by',
+        'workflow_status',
+        'assigned_to',
+        'assigned_entity_type_id',
+        'completed_at',
     ];
 
     public static function referencePrefix(): string
@@ -43,6 +51,8 @@ class GeoDocument extends Model
         return [
             'sites' => 'array',
             'document_date' => 'date',
+            'workflow_status' => WorkflowStatus::class,
+            'completed_at' => 'datetime',
         ];
     }
 

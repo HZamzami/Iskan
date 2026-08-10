@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             LookupSeeder::class,
             RolesAndPermissionsSeeder::class,
-            EntityTypeSeeder::class,
             EntitySeeder::class,
             CorrespondenceSeeder::class,
         ]);

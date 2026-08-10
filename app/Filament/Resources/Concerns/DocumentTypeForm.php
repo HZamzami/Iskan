@@ -89,6 +89,12 @@ class DocumentTypeForm
                                 ->helperText('الأنواع غير النشطة تختفي من نموذج الإنشاء لكنها تبقى ظاهرة في السجلات القديمة.')
                                 ->inline(false)
                                 ->columnSpan(1),
+                            Toggle::make('requires_workflow')
+                                ->label('يتطلب سير اعتماد')
+                                ->default(false)
+                                ->helperText('عند التفعيل، يمر أي سجل من هذا النوع بسلسلة ترحيل بين الجهات (مقاول/استشاري/مالك...) قبل اعتباره معتمداً نهائياً، بدلاً من اعتباره نهائياً فور الرفع.')
+                                ->inline(false)
+                                ->columnSpan(1),
                         ]),
                     ]),
 

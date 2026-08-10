@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\GeoDocuments\Schemas;
 
+use App\Filament\Support\WorkflowInfolist;
 use App\Models\GeoDocument;
 use App\Models\Location;
 use Filament\Infolists\Components\TextEntry;
@@ -60,6 +61,8 @@ class GeoDocumentInfolist
                             ->placeholder('لا توجد ملاحظات')
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowInfolist::timelineSection(),
             ]);
     }
 }

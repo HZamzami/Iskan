@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\FinancialFlows\Schemas;
 
+use App\Filament\Support\WorkflowFormFields;
 use App\Models\FinancialFlowType;
 use App\Models\Location;
 use App\Support\FileTypes;
@@ -111,6 +112,10 @@ class FinancialFlowForm
                             ->rows(3)
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowFormFields::submissionSection(
+                    fn (string $operation, Get $get): bool => $operation === 'create' && (self::selectedType($get)?->requiresWorkflow() ?? false),
+                ),
             ]);
     }
 

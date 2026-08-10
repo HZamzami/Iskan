@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ContractDocuments\Pages;
 
 use App\Filament\Resources\ContractDocuments\ContractDocumentResource;
+use App\Filament\Support\WorkflowActions;
 use App\Models\ContractDocument;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -32,6 +33,7 @@ class ViewContractDocument extends ViewRecord
                 ->color('gray')
                 ->action(fn (ContractDocument $record) => Storage::disk('local')
                     ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
+            ...WorkflowActions::forRecord(),
             EditAction::make(),
         ];
     }

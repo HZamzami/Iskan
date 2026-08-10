@@ -32,6 +32,11 @@ trait IsDocumentType
         return $this->site_scope !== SiteScope::None;
     }
 
+    public function requiresWorkflow(): bool
+    {
+        return (bool) $this->requires_workflow;
+    }
+
     /**
      * @return Collection<int, Location>|null
      */

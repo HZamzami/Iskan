@@ -27,4 +27,9 @@ class Entity extends Model
     {
         return $this->belongsTo(EntityType::class);
     }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 }

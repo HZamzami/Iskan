@@ -6,6 +6,7 @@ use App\Filament\Resources\GeoDocuments\GeoDocumentResource;
 use App\Models\GeoDocument;
 use App\Models\GeoDocumentType;
 use Filament\Actions\CreateAction;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +27,10 @@ class ListGeoDocuments extends ListRecords
         $tabs = [
             'all' => Tab::make('الكل')
                 ->badge(fn (): int => GeoDocument::count()),
+            'mine' => Tab::make('بانتظار إجرائي')
+                ->badge(fn (): int => GeoDocument::where('assigned_to', Filament::auth()->id())->count())
+                ->badgeColor('warning')
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('assigned_to', Filament::auth()->id())),
         ];
 
         foreach (GeoDocumentType::active()->ordered()->get() as $type) {

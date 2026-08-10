@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ContractualRequirements\Schemas;
 
+use App\Filament\Support\WorkflowInfolist;
 use App\Models\ContractualRequirement;
 use App\Models\Location;
 use Filament\Infolists\Components\TextEntry;
@@ -67,6 +68,8 @@ class ContractualRequirementInfolist
                             ->placeholder('لا توجد ملاحظات')
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowInfolist::timelineSection(),
             ]);
     }
 }

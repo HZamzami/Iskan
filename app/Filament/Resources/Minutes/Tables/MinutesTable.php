@@ -2,20 +2,25 @@
 
 namespace App\Filament\Resources\Minutes\Tables;
 
+use App\Enums\WorkflowStatus;
+use App\Filament\Support\WorkflowActions;
 use App\Models\Location;
 use App\Models\Minute;
 use App\Models\MinuteType;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -49,12 +54,25 @@ class MinutesTable
                     ->placeholder('—'),
                 TextColumn::make('parties')
                     ->label('الأطراف المشاركة')
-                    ->searchable()
+                    ->state(fn (Minute $record): string => $record->participants->isNotEmpty()
+                        ? $record->participants->pluck('name')->join('، ')
+                        : ($record->parties ?? '—'))
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query
+                        ->where('parties', 'like', "%{$search}%")
+                        ->orWhereHas('participants', fn (Builder $q) => $q->where('name', 'like', "%{$search}%")))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('document_date')
                     ->label('تاريخ الملف')
                     ->date('Y/m/d')
                     ->sortable(),
+                TextColumn::make('workflow_status')
+                    ->label('حالة الاعتماد')
+                    ->badge()
+                    ->placeholder('—'),
+                TextColumn::make('assignee.name')
+                    ->label('بانتظار')
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label('تاريخ الرفع')
                     ->date('Y/m/d')
@@ -67,6 +85,18 @@ class MinutesTable
                     ->label('نوع المحضر')
                     ->options(fn (): array => MinuteType::active()->ordered()->pluck('name', 'slug')->all())
                     ->searchable(),
+                SelectFilter::make('workflow_status')
+                    ->label('حالة الاعتماد')
+                    ->options(WorkflowStatus::class),
+                TernaryFilter::make('assigned_to_me')
+                    ->label('بانتظار إجرائي')
+                    ->placeholder('الجميع')
+                    ->trueLabel('بانتظار إجرائي فقط')
+                    ->falseLabel('غير ذلك')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->where('assigned_to', Filament::auth()->id()),
+                        false: fn (Builder $query): Builder => $query->where(fn (Builder $q) => $q->whereNull('assigned_to')->orWhere('assigned_to', '!=', Filament::auth()->id())),
+                    ),
                 SelectFilter::make('sites')
                     ->label('القسم / الموقع')
                     ->options(fn (): array => Location::active()->ordered()->pluck('name', 'slug')->all())
@@ -112,6 +142,11 @@ class MinutesTable
                         ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
                 ViewAction::make(),
                 EditAction::make(),
+                ActionGroup::make(WorkflowActions::forRecord())
+                    ->label('إجراء الاعتماد')
+                    ->icon(Heroicon::CheckCircle)
+                    ->color('warning')
+                    ->visible(fn (Minute $record): bool => $record->workflow_status === WorkflowStatus::Pending),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

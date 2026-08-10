@@ -6,6 +6,7 @@ use App\Filament\Resources\PeriodicReports\PeriodicReportResource;
 use App\Models\PeriodicReport;
 use App\Models\PeriodicReportType;
 use Filament\Actions\CreateAction;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +27,10 @@ class ListPeriodicReports extends ListRecords
         $tabs = [
             'all' => Tab::make('الكل')
                 ->badge(fn (): int => PeriodicReport::count()),
+            'mine' => Tab::make('بانتظار إجرائي')
+                ->badge(fn (): int => PeriodicReport::where('assigned_to', Filament::auth()->id())->count())
+                ->badgeColor('warning')
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('assigned_to', Filament::auth()->id())),
         ];
 
         foreach (PeriodicReportType::active()->ordered()->get() as $type) {

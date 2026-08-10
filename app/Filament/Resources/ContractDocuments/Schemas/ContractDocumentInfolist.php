@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ContractDocuments\Schemas;
 
+use App\Filament\Support\WorkflowInfolist;
 use App\Models\ContractDocument;
 use App\Models\Location;
 use Filament\Infolists\Components\TextEntry;
@@ -82,6 +83,8 @@ class ContractDocumentInfolist
                             ->placeholder('لا توجد ملاحظات')
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowInfolist::timelineSection(),
             ]);
     }
 }

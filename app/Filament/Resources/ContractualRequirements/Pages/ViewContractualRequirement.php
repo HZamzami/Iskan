@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ContractualRequirements\Pages;
 
 use App\Filament\Resources\ContractualRequirements\ContractualRequirementResource;
+use App\Filament\Support\WorkflowActions;
 use App\Models\ContractualRequirement;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -32,6 +33,7 @@ class ViewContractualRequirement extends ViewRecord
                 ->color('gray')
                 ->action(fn (ContractualRequirement $record) => Storage::disk('local')
                     ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
+            ...WorkflowActions::forRecord(),
             EditAction::make(),
         ];
     }

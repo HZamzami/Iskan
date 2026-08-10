@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Enums\WorkflowStatus;
 use App\Models\Concerns\BelongsToDocumentType;
 use App\Models\Concerns\HasReferenceNumber;
+use App\Models\Concerns\HasWorkflow;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\MinuteFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Minute extends Model
 {
@@ -17,6 +20,7 @@ class Minute extends Model
     use HasFactory;
 
     use HasReferenceNumber;
+    use HasWorkflow;
     use LogsArchiveActivity;
 
     protected $fillable = [
@@ -28,6 +32,11 @@ class Minute extends Model
         'document_date',
         'file_path',
         'notes',
+        'created_by',
+        'workflow_status',
+        'assigned_to',
+        'assigned_entity_type_id',
+        'completed_at',
     ];
 
     public static function referencePrefix(): string
@@ -43,11 +52,18 @@ class Minute extends Model
         return [
             'sites' => 'array',
             'document_date' => 'date',
+            'workflow_status' => WorkflowStatus::class,
+            'completed_at' => 'datetime',
         ];
     }
 
     public static function documentTypeClass(): string
     {
         return MinuteType::class;
+    }
+
+    public function participants(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'minute_participants')->withTimestamps();
     }
 }

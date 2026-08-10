@@ -6,6 +6,7 @@ use App\Filament\Resources\Minutes\MinuteResource;
 use App\Models\Minute;
 use App\Models\MinuteType;
 use Filament\Actions\CreateAction;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +27,10 @@ class ListMinutes extends ListRecords
         $tabs = [
             'all' => Tab::make('الكل')
                 ->badge(fn (): int => Minute::count()),
+            'mine' => Tab::make('بانتظار إجرائي')
+                ->badge(fn (): int => Minute::where('assigned_to', Filament::auth()->id())->count())
+                ->badgeColor('warning')
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('assigned_to', Filament::auth()->id())),
         ];
 
         foreach (MinuteType::active()->ordered()->get() as $type) {

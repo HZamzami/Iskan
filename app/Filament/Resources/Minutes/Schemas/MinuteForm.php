@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Minutes\Schemas;
 
+use App\Filament\Support\WorkflowFormFields;
 use App\Models\Location;
+use App\Models\Minute;
 use App\Models\MinuteType;
 use App\Support\FileTypes;
 use Closure;
@@ -76,9 +78,19 @@ class MinuteForm
                     ->icon(Heroicon::UserGroup)
                     ->columnSpanFull()
                     ->schema([
-                        TextInput::make('parties')
+                        Select::make('participants')
                             ->label('الأطراف المشاركة')
-                            ->maxLength(255)
+                            ->relationship('participants', 'name')
+                            ->multiple()
+                            ->searchable()
+                            ->preload()
+                            ->columnSpanFull(),
+                        TextInput::make('parties')
+                            ->label('الأطراف المشاركة (سجل قديم)')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->visible(fn (?Minute $record): bool => filled($record?->parties))
+                            ->helperText('حقل نصي قديم للقراءة فقط من سجل سابق، تم استبداله بحقل الأطراف أعلاه.')
                             ->columnSpanFull(),
                     ]),
 
@@ -102,6 +114,10 @@ class MinuteForm
                             ->rows(3)
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowFormFields::submissionSection(
+                    fn (string $operation, Get $get): bool => $operation === 'create' && (self::selectedType($get)?->requiresWorkflow() ?? false),
+                ),
             ]);
     }
 

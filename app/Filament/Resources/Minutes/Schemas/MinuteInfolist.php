@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Minutes\Schemas;
 
+use App\Filament\Support\WorkflowInfolist;
 use App\Models\Location;
 use App\Models\Minute;
 use Filament\Infolists\Components\TextEntry;
@@ -51,9 +52,16 @@ class MinuteInfolist
                     ->icon(Heroicon::UserGroup)
                     ->columnSpanFull()
                     ->schema([
-                        TextEntry::make('parties')
+                        TextEntry::make('participants.name')
                             ->label('الأطراف المشاركة')
+                            ->listWithLineBreaks()
+                            ->bulleted()
                             ->placeholder('—')
+                            ->columnSpanFull(),
+                        TextEntry::make('parties')
+                            ->label('الأطراف المشاركة (سجل قديم)')
+                            ->placeholder('—')
+                            ->visible(fn (Minute $record): bool => filled($record->parties))
                             ->columnSpanFull(),
                     ]),
 
@@ -66,6 +74,8 @@ class MinuteInfolist
                             ->placeholder('لا توجد ملاحظات')
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowInfolist::timelineSection(),
             ]);
     }
 }

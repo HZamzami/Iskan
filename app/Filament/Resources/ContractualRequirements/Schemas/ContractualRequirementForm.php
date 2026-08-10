@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ContractualRequirements\Schemas;
 
+use App\Filament\Support\WorkflowFormFields;
 use App\Models\ContractualRequirementType;
 use App\Models\Location;
 use App\Models\RequirementGroup;
@@ -97,6 +98,10 @@ class ContractualRequirementForm
                             ->rows(3)
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowFormFields::submissionSection(
+                    fn (string $operation, Get $get): bool => $operation === 'create' && (self::selectedType($get)?->requiresWorkflow() ?? false),
+                ),
             ]);
     }
 

@@ -27,6 +27,7 @@ class GeoDocumentType extends Model implements HasColor, HasLabel
         'max_file_size',
         'is_active',
         'sort_order',
+        'requires_workflow',
     ];
 
     /**
@@ -39,6 +40,7 @@ class GeoDocumentType extends Model implements HasColor, HasLabel
             'sites' => 'array',
             'accepted_extensions' => 'array',
             'is_active' => 'boolean',
+            'requires_workflow' => 'boolean',
         ];
     }
 

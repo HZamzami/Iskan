@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PeriodicReports\Schemas;
 
+use App\Filament\Support\WorkflowFormFields;
 use App\Models\Location;
 use App\Models\PeriodicReportType;
 use App\Support\FileTypes;
@@ -97,6 +98,10 @@ class PeriodicReportForm
                             ->rows(3)
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowFormFields::submissionSection(
+                    fn (string $operation, Get $get): bool => $operation === 'create' && (self::selectedType($get)?->requiresWorkflow() ?? false),
+                ),
             ]);
     }
 

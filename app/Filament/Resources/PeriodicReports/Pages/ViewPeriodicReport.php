@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PeriodicReports\Pages;
 
 use App\Filament\Resources\PeriodicReports\PeriodicReportResource;
+use App\Filament\Support\WorkflowActions;
 use App\Models\PeriodicReport;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -32,6 +33,7 @@ class ViewPeriodicReport extends ViewRecord
                 ->color('gray')
                 ->action(fn (PeriodicReport $record) => Storage::disk('local')
                     ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
+            ...WorkflowActions::forRecord(),
             EditAction::make(),
         ];
     }

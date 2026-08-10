@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\FinancialFlows\Pages;
 
 use App\Filament\Resources\FinancialFlows\FinancialFlowResource;
+use App\Filament\Support\WorkflowActions;
 use App\Models\FinancialFlow;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -32,6 +33,7 @@ class ViewFinancialFlow extends ViewRecord
                 ->color('gray')
                 ->action(fn (FinancialFlow $record) => Storage::disk('local')
                     ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
+            ...WorkflowActions::forRecord(),
             EditAction::make(),
         ];
     }

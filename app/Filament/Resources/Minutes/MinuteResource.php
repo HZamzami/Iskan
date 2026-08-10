@@ -16,11 +16,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class MinuteResource extends Resource
 {
-    use HasSiteRestrictedQuery;
+    use HasSiteRestrictedQuery {
+        HasSiteRestrictedQuery::getEloquentQuery as getSiteRestrictedQuery;
+    }
 
     protected static ?string $model = Minute::class;
 
@@ -35,6 +38,11 @@ class MinuteResource extends Resource
     protected static ?string $pluralModelLabel = 'المحاضر';
 
     protected static ?string $recordTitleAttribute = 'title';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return static::getSiteRestrictedQuery()->with('participants');
+    }
 
     public static function form(Schema $schema): Schema
     {

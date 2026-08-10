@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\GeoDocuments\Schemas;
 
+use App\Filament\Support\WorkflowFormFields;
 use App\Models\GeoDocumentType;
 use App\Models\Location;
 use App\Support\FileTypes;
@@ -96,6 +97,10 @@ class GeoDocumentForm
                             ->rows(3)
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowFormFields::submissionSection(
+                    fn (string $operation, Get $get): bool => $operation === 'create' && (self::selectedType($get)?->requiresWorkflow() ?? false),
+                ),
             ]);
     }
 

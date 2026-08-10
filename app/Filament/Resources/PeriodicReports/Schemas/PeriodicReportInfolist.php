@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PeriodicReports\Schemas;
 
+use App\Filament\Support\WorkflowInfolist;
 use App\Models\Location;
 use App\Models\PeriodicReport;
 use Filament\Infolists\Components\TextEntry;
@@ -60,6 +61,8 @@ class PeriodicReportInfolist
                             ->placeholder('لا توجد ملاحظات')
                             ->columnSpanFull(),
                     ]),
+
+                WorkflowInfolist::timelineSection(),
             ]);
     }
 }

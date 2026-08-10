@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Resources\Minutes\Pages\CreateMinute;
 use App\Filament\Resources\Minutes\Pages\ListMinutes;
 use App\Models\Minute;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -92,11 +93,13 @@ class MinuteResourceTest extends TestCase
 
     public function test_can_create_project_handover_without_site(): void
     {
+        $participant = User::factory()->create();
+
         Livewire::test(CreateMinute::class)
             ->fillForm([
                 'type' => 'project_handover',
                 'title' => 'محضر تسليم مشروع',
-                'parties' => 'شركة الراجحي',
+                'participants' => [$participant->id],
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('minute.pdf', 100, 'application/pdf'),
             ])
@@ -115,6 +118,7 @@ class MinuteResourceTest extends TestCase
 
         Storage::disk('local')->assertExists($minute->file_path);
         $this->assertMatchesRegularExpression('/^محضر-\d{4}-\d{4}$/', $minute->reference_number);
+        $this->assertTrue($minute->participants->contains($participant));
     }
 
     public function test_create_validates_required_fields(): void

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Minutes\Pages;
 
 use App\Filament\Resources\Minutes\MinuteResource;
+use App\Filament\Support\WorkflowActions;
 use App\Models\Minute;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -32,6 +33,7 @@ class ViewMinute extends ViewRecord
                 ->color('gray')
                 ->action(fn (Minute $record) => Storage::disk('local')
                     ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
+            ...WorkflowActions::forRecord(),
             EditAction::make(),
         ];
     }

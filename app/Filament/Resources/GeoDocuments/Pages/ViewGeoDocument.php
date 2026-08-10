@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\GeoDocuments\Pages;
 
 use App\Filament\Resources\GeoDocuments\GeoDocumentResource;
+use App\Filament\Support\WorkflowActions;
 use App\Models\GeoDocument;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -32,6 +33,7 @@ class ViewGeoDocument extends ViewRecord
                 ->color('gray')
                 ->action(fn (GeoDocument $record) => Storage::disk('local')
                     ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
+            ...WorkflowActions::forRecord(),
             EditAction::make(),
         ];
     }
