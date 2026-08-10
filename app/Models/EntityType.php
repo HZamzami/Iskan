@@ -35,4 +35,14 @@ class EntityType extends Model implements HasLabel
     {
         return $this->hasMany(Entity::class);
     }
+
+    public function usageCount(): int
+    {
+        return $this->entities()->count();
+    }
+
+    public function isInUse(): bool
+    {
+        return $this->usageCount() > 0;
+    }
 }

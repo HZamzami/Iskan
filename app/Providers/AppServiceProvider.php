@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\ContractDocumentType;
 use App\Models\ContractualRequirementType;
+use App\Models\Entity;
+use App\Models\EntityType;
 use App\Models\FinancialFlowType;
 use App\Models\GeoDocumentType;
 use App\Models\Location;
@@ -55,6 +57,8 @@ class AppServiceProvider extends ServiceProvider
             FinancialFlowType::class,
             PeriodicReportType::class,
             ContractualRequirementType::class,
+            EntityType::class,
+            Entity::class,
         ] as $lookupModel) {
             Gate::policy($lookupModel, AdminOnlyPolicy::class);
         }

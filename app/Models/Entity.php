@@ -32,4 +32,14 @@ class Entity extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function usageCount(): int
+    {
+        return $this->correspondences()->count() + $this->users()->count();
+    }
+
+    public function isInUse(): bool
+    {
+        return $this->usageCount() > 0;
+    }
 }
