@@ -21,6 +21,8 @@ class PeriodicReportTypeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
 
+    protected static ?int $navigationSort = 6;
+
     protected static ?string $modelLabel = 'نوع تقرير دوري';
 
     protected static ?string $pluralModelLabel = 'أنواع التقارير الدورية';

@@ -21,6 +21,8 @@ class GeoDocumentTypeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMap;
 
+    protected static ?int $navigationSort = 7;
+
     protected static ?string $modelLabel = 'نوع خريطة / رسم جيومكاني';
 
     protected static ?string $pluralModelLabel = 'أنواع الخرائط والرسومات الجيومكانية';

@@ -21,6 +21,8 @@ class ContractualRequirementTypeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
+    protected static ?int $navigationSort = 4;
+
     protected static ?string $modelLabel = 'نوع متطلب تعاقدي';
 
     protected static ?string $pluralModelLabel = 'أنواع المتطلبات التعاقدية';

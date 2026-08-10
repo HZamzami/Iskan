@@ -21,6 +21,8 @@ class ContractDocumentTypeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $modelLabel = 'نوع مستند تعاقدي';
 
     protected static ?string $pluralModelLabel = 'أنواع المستندات التعاقدية';

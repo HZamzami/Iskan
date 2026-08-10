@@ -21,6 +21,8 @@ class RequirementGroupResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleGroup;
 
+    protected static ?int $navigationSort = 5;
+
     protected static ?string $modelLabel = 'مجموعة متطلبات';
 
     protected static ?string $pluralModelLabel = 'مجموعات المتطلبات';

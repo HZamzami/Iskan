@@ -21,6 +21,8 @@ class FinancialFlowTypeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
+    protected static ?int $navigationSort = 3;
+
     protected static ?string $modelLabel = 'نوع تدفق مالي';
 
     protected static ?string $pluralModelLabel = 'أنواع التدفقات المالية';
