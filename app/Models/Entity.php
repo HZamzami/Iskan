@@ -5,7 +5,6 @@ namespace App\Models;
 use Database\Factories\EntityFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Entity extends Model
@@ -15,7 +14,6 @@ class Entity extends Model
 
     protected $fillable = [
         'name',
-        'entity_type_id',
     ];
 
     public function correspondences(): HasMany
@@ -23,19 +21,9 @@ class Entity extends Model
         return $this->hasMany(Correspondence::class);
     }
 
-    public function entityType(): BelongsTo
-    {
-        return $this->belongsTo(EntityType::class);
-    }
-
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class);
-    }
-
     public function usageCount(): int
     {
-        return $this->correspondences()->count() + $this->users()->count();
+        return $this->correspondences()->count();
     }
 
     public function isInUse(): bool

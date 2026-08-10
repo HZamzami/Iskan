@@ -8,9 +8,9 @@ use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * نوع الانتقال المسجَّل في WorkflowTransition. لا يوجد إجراء منفصل لكل جهة
- * (مثل "ترحيل للمالك")، لأن السلسلة مرنة وغير محدودة الطول — الجهة المستهدفة
- * تُسجَّل بشكل منفصل عبر entity_type_id في نفس السجل.
+ * نوع الانتقال المسجَّل في WorkflowTransition. لا يوجد إجراء منفصل لكل دور
+ * (مثل "ترحيل للمالك")، لأن السلسلة مرنة وغير محدودة الطول — الدور المستهدف
+ * يُسجَّل بشكل منفصل عبر role_id في نفس السجل.
  */
 enum WorkflowAction: string implements HasColor, HasIcon, HasLabel
 {

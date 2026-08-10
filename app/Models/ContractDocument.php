@@ -37,7 +37,7 @@ class ContractDocument extends Model
         'created_by',
         'workflow_status',
         'assigned_to',
-        'assigned_entity_type_id',
+        'assigned_role_id',
         'completed_at',
     ];
 

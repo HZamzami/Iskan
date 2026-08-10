@@ -8,7 +8,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class EntitiesTable
@@ -22,25 +21,11 @@ class EntitiesTable
                     ->label('اسم الجهة')
                     ->searchable()
                     ->weight('medium'),
-                TextColumn::make('entityType.name')
-                    ->label('نوع الجهة')
-                    ->badge()
-                    ->color('gray')
-                    ->placeholder('—'),
-                TextColumn::make('users_count')
-                    ->label('عدد المستخدمين')
-                    ->counts('users')
-                    ->sortable(),
                 TextColumn::make('correspondences_count')
                     ->label('عدد المعاملات')
                     ->counts('correspondences')
                     ->sortable()
                     ->toggleable(),
-            ])
-            ->filters([
-                SelectFilter::make('entity_type_id')
-                    ->label('نوع الجهة')
-                    ->relationship('entityType', 'name'),
             ])
             ->recordActions([
                 EditAction::make(),
