@@ -21,7 +21,7 @@ class RoleCategoryTest extends TestCase
     public function test_the_three_seeded_roles_have_stable_slugs(): void
     {
         $this->assertSame(
-            ['contractor', 'consultant', 'owner'],
+            ['contractor', 'consultant', 'asset_manager'],
             Role::cached()->pluck('slug')->all(),
         );
     }
@@ -37,10 +37,10 @@ class RoleCategoryTest extends TestCase
 
     public function test_user_category_resolves_through_role(): void
     {
-        $role = Role::query()->where('slug', 'owner')->firstOrFail();
+        $role = Role::query()->where('slug', 'asset_manager')->firstOrFail();
         $user = User::factory()->create(['role_id' => $role->id]);
 
-        $this->assertSame('owner', $user->category());
+        $this->assertSame('asset_manager', $user->category());
         $this->assertTrue($user->fresh()->is($role->fresh()->users->firstOrFail()));
     }
 
@@ -54,10 +54,10 @@ class RoleCategoryTest extends TestCase
     public function test_of_category_scope_filters_users_by_role_slug(): void
     {
         $consultantRole = Role::query()->where('slug', 'consultant')->firstOrFail();
-        $ownerRole = Role::query()->where('slug', 'owner')->firstOrFail();
+        $assetManagerRole = Role::query()->where('slug', 'asset_manager')->firstOrFail();
 
         $consultant = User::factory()->create(['role_id' => $consultantRole->id]);
-        User::factory()->create(['role_id' => $ownerRole->id]);
+        User::factory()->create(['role_id' => $assetManagerRole->id]);
         User::factory()->create(['role_id' => null]);
 
         $result = User::query()->ofCategory('consultant')->get();

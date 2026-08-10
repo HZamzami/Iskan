@@ -50,9 +50,9 @@ class WorkflowResourceTest extends TestCase
     {
         $contractor = $this->editUser(['site_a']);
         $consultant = $this->editUser(['site_a']);
-        $owner = $this->editUser(['site_a']);
+        $assetManager = $this->editUser(['site_a']);
         $consultant->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);
-        $owner->update(['role_id' => Role::where('slug', 'owner')->first()->id]);
+        $assetManager->update(['role_id' => Role::where('slug', 'asset_manager')->first()->id]);
 
         $type = $this->workflowType();
 
@@ -80,14 +80,14 @@ class WorkflowResourceTest extends TestCase
 
         Livewire::test(ListFinancialFlows::class)
             ->callAction(TestAction::make('workflowForward')->table($flow), data: [
-                'role_id' => Role::where('slug', 'owner')->first()->id,
-                'assigned_to' => $owner->id,
+                'role_id' => Role::where('slug', 'asset_manager')->first()->id,
+                'assigned_to' => $assetManager->id,
             ])
             ->assertNotified();
 
-        $this->assertSame($owner->id, $flow->fresh()->assigned_to);
+        $this->assertSame($assetManager->id, $flow->fresh()->assigned_to);
 
-        $this->actingAs($owner);
+        $this->actingAs($assetManager);
 
         Livewire::test(ListFinancialFlows::class)
             ->callAction(TestAction::make('workflowApprove')->table($flow))
@@ -161,7 +161,7 @@ class WorkflowResourceTest extends TestCase
             ->assertActionVisible(TestAction::make('workflowForward')->table($flow));
     }
 
-    public function test_approve_action_only_visible_to_owner_category_assignee(): void
+    public function test_approve_action_only_visible_to_asset_manager_category_assignee(): void
     {
         $consultant = $this->editUser();
         $consultant->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);

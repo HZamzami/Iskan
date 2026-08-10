@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * سلوك مشترك لسير الاعتماد (مقاول ← استشاري ← مالك) عبر وحدات المستندات
+ * سلوك مشترك لسير الاعتماد (مقاول ← استشاري ← مدير الأصل) عبر وحدات المستندات
  * الستة. لا يُفعَّل فعلياً إلا للسجلات التي نوعها يتطلب ذلك
  * (requiresWorkflow())؛ باقي السجلات تبقى workflow_status = null دون أي
  * تأثير. القرارات الفعلية (هل الانتقال مسموح؟) تُتخذ في WorkflowService، لا
@@ -64,7 +64,7 @@ trait HasWorkflow
 
     public function canApprove(User $user): bool
     {
-        return $user->isAdmin() || ($this->assigned_to === $user->id && $user->category() === 'owner');
+        return $user->isAdmin() || ($this->assigned_to === $user->id && $user->category() === 'asset_manager');
     }
 
     public function scopeAssignedTo(Builder $query, User $user): Builder

@@ -66,8 +66,22 @@ class RoleResourceTest extends TestCase
     {
         $this->actingAs($this->makeAdminUser());
 
-        $role = Role::query()->where('slug', 'consultant')->firstOrFail();
+        $role = Role::factory()->create();
         User::factory()->create(['role_id' => $role->id]);
+
+        Livewire::test(ManageRoles::class)
+            ->callAction(TestAction::make('delete')->table($role))
+            ->assertNotified();
+
+        $this->assertDatabaseHas('roles_lookup', ['id' => $role->id]);
+    }
+
+    public function test_deleting_a_core_role_is_blocked_even_without_usage(): void
+    {
+        $this->actingAs($this->makeAdminUser());
+
+        $role = Role::query()->where('slug', 'asset_manager')->firstOrFail();
+        $this->assertSame(0, $role->usageCount());
 
         Livewire::test(ManageRoles::class)
             ->callAction(TestAction::make('delete')->table($role))

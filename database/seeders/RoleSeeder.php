@@ -15,7 +15,7 @@ class RoleSeeder extends Seeder
         $rows = [
             ['slug' => 'contractor', 'name' => 'مقاول'],
             ['slug' => 'consultant', 'name' => 'استشاري'],
-            ['slug' => 'owner', 'name' => 'مالك'],
+            ['slug' => 'asset_manager', 'name' => 'مدير الأصل'],
         ];
 
         foreach ($rows as $row) {

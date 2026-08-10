@@ -100,23 +100,23 @@ class WorkflowServiceTest extends TestCase
         $this->actingAs($contractor);
         $consultantA = $this->makeCategorizedUser('consultant');
         $consultantB = $this->makeCategorizedUser('consultant');
-        $owner = $this->makeCategorizedUser('owner');
+        $assetManager = $this->makeCategorizedUser('asset_manager');
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        // contractor -> consultantA -> consultantB -> contractor -> owner
+        // contractor -> consultantA -> consultantB -> contractor -> asset manager
         $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultantA);
         $this->service->forward($minute->fresh(), $consultantA, Role::where('slug', 'consultant')->firstOrFail(), $consultantB);
         $this->service->forward($minute->fresh(), $consultantB, Role::where('slug', 'contractor')->firstOrFail(), $contractor);
-        $this->service->forward($minute->fresh(), $contractor, Role::where('slug', 'owner')->firstOrFail(), $owner);
+        $this->service->forward($minute->fresh(), $contractor, Role::where('slug', 'asset_manager')->firstOrFail(), $assetManager);
 
         $minute->refresh();
 
-        $this->assertSame($owner->id, $minute->assigned_to);
+        $this->assertSame($assetManager->id, $minute->assigned_to);
         $this->assertSame(WorkflowStatus::Pending, $minute->workflow_status);
         $this->assertSame(4, $minute->transitions()->count());
 
-        $this->service->approve($minute->fresh(), $owner);
+        $this->service->approve($minute->fresh(), $assetManager);
 
         $this->assertSame(WorkflowStatus::Approved, $minute->fresh()->workflow_status);
     }
@@ -141,13 +141,13 @@ class WorkflowServiceTest extends TestCase
         $contractor = $this->makeCategorizedUser('contractor');
         $this->actingAs($contractor);
         $consultant = $this->makeCategorizedUser('consultant');
-        $owner = $this->makeCategorizedUser('owner');
+        $assetManager = $this->makeCategorizedUser('asset_manager');
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
         $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
-        $this->service->forward($minute->fresh(), $consultant, Role::where('slug', 'owner')->firstOrFail(), $owner);
-        $this->service->returnToPrevious($minute->fresh(), $owner, 'يحتاج تعديل');
+        $this->service->forward($minute->fresh(), $consultant, Role::where('slug', 'asset_manager')->firstOrFail(), $assetManager);
+        $this->service->returnToPrevious($minute->fresh(), $assetManager, 'يحتاج تعديل');
 
         $minute->refresh();
 
@@ -175,7 +175,7 @@ class WorkflowServiceTest extends TestCase
         $this->service->returnToPrevious($minute, $contractor);
     }
 
-    public function test_only_owner_category_can_approve(): void
+    public function test_only_asset_manager_category_can_approve(): void
     {
         $contractor = $this->makeCategorizedUser('contractor');
         $this->actingAs($contractor);
@@ -189,16 +189,16 @@ class WorkflowServiceTest extends TestCase
         $this->service->approve($minute->fresh(), $consultant);
     }
 
-    public function test_approve_by_the_assigned_owner_completes_the_record(): void
+    public function test_approve_by_the_assigned_asset_manager_completes_the_record(): void
     {
         $contractor = $this->makeCategorizedUser('contractor');
         $this->actingAs($contractor);
-        $owner = $this->makeCategorizedUser('owner');
+        $assetManager = $this->makeCategorizedUser('asset_manager');
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, Role::where('slug', 'owner')->firstOrFail(), $owner);
-        $this->service->approve($minute->fresh(), $owner, 'معتمد');
+        $this->service->submit($minute, $contractor, Role::where('slug', 'asset_manager')->firstOrFail(), $assetManager);
+        $this->service->approve($minute->fresh(), $assetManager, 'معتمد');
 
         $minute->refresh();
 
@@ -216,15 +216,15 @@ class WorkflowServiceTest extends TestCase
     {
         $contractor = $this->makeCategorizedUser('contractor');
         $this->actingAs($contractor);
-        $owner = $this->makeCategorizedUser('owner');
+        $assetManager = $this->makeCategorizedUser('asset_manager');
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, Role::where('slug', 'owner')->firstOrFail(), $owner);
-        $this->service->approve($minute->fresh(), $owner);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'asset_manager')->firstOrFail(), $assetManager);
+        $this->service->approve($minute->fresh(), $assetManager);
 
         $this->expectException(LogicException::class);
-        $this->service->forward($minute->fresh(), $owner, Role::where('slug', 'contractor')->firstOrFail(), $contractor);
+        $this->service->forward($minute->fresh(), $assetManager, Role::where('slug', 'contractor')->firstOrFail(), $contractor);
     }
 
     public function test_each_transition_notifies_the_new_holder(): void
@@ -249,33 +249,33 @@ class WorkflowServiceTest extends TestCase
         $contractor = $this->makeCategorizedUser('contractor');
         $this->actingAs($contractor);
         $consultant = $this->makeCategorizedUser('consultant');
-        $owner = $this->makeCategorizedUser('owner');
+        $assetManager = $this->makeCategorizedUser('asset_manager');
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
         $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
-        $this->service->forward($minute->fresh(), $consultant, Role::where('slug', 'owner')->firstOrFail(), $owner);
+        $this->service->forward($minute->fresh(), $consultant, Role::where('slug', 'asset_manager')->firstOrFail(), $assetManager);
 
-        $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $owner->id)->count());
+        $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $assetManager->id)->count());
         $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $consultant->id)->count());
 
-        $this->service->returnToPrevious($minute->fresh(), $owner);
+        $this->service->returnToPrevious($minute->fresh(), $assetManager);
 
-        // consultant gets a 2nd notification (the return); owner gets no additional one.
+        // consultant gets a 2nd notification (the return); asset manager gets no additional one.
         $this->assertSame(2, DatabaseNotification::query()->where('notifiable_id', $consultant->id)->count());
-        $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $owner->id)->count());
+        $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $assetManager->id)->count());
     }
 
     public function test_approve_notifies_the_original_creator(): void
     {
         $contractor = $this->makeCategorizedUser('contractor');
         $this->actingAs($contractor);
-        $owner = $this->makeCategorizedUser('owner');
+        $assetManager = $this->makeCategorizedUser('asset_manager');
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, Role::where('slug', 'owner')->firstOrFail(), $owner);
-        $this->service->approve($minute->fresh(), $owner);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'asset_manager')->firstOrFail(), $assetManager);
+        $this->service->approve($minute->fresh(), $assetManager);
 
         $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $contractor->id)->count());
     }

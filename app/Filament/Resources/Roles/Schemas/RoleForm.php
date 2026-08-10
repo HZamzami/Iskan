@@ -25,7 +25,7 @@ class RoleForm
                         ->disabled()
                         ->dehydrated(false)
                         ->visible(fn (string $operation): bool => $operation === 'edit')
-                        ->helperText('يُنشأ تلقائياً من الاسم عند الإنشاء، ولا يمكن تغييره لاحقاً. يُستخدم لتحديد "المالك" في سير الاعتماد.')
+                        ->helperText('يُنشأ تلقائياً من الاسم عند الإنشاء، ولا يمكن تغييره لاحقاً. يُستخدم لتحديد "مدير الأصل" في سير الاعتماد.')
                         ->columnSpan(1),
                     Toggle::make('is_active')
                         ->label('نشط')
