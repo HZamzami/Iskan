@@ -13,7 +13,7 @@ class LookupSeeder extends Seeder
     {
         $this->call([
             LocationSeeder::class,
-            EntityTypeSeeder::class,
+            RoleSeeder::class,
             RequirementGroupSeeder::class,
             MinuteTypeSeeder::class,
             GeoDocumentTypeSeeder::class,

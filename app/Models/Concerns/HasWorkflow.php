@@ -3,7 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Enums\WorkflowStatus;
-use App\Models\EntityType;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\WorkflowTransition;
 use Illuminate\Database\Eloquent\Builder;
@@ -39,9 +39,9 @@ trait HasWorkflow
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    public function assignedEntityType(): BelongsTo
+    public function assignedRole(): BelongsTo
     {
-        return $this->belongsTo(EntityType::class, 'assigned_entity_type_id');
+        return $this->belongsTo(Role::class, 'assigned_role_id');
     }
 
     public function transitions(): MorphMany

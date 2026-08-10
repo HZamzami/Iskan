@@ -2,7 +2,7 @@
 
 namespace App\Filament\Support;
 
-use App\Models\EntityType;
+use App\Models\Role;
 use App\Models\User;
 use Closure;
 use Filament\Forms\Components\Select;
@@ -12,18 +12,19 @@ use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * حقول اختيار "الجهة ثم الشخص" المشتركة عبر كل خطوة في سير الاعتماد (الإرسال
+ * حقول اختيار "الدور ثم الشخص" المشتركة عبر كل خطوة في سير الاعتماد (الإرسال
  * الأول عند الإنشاء، وكل ترحيل لاحق) — تُستخدم في نموذج الإنشاء (بأسماء
  * حقول افتراضية غير محفوظة مباشرة) وفي نافذة إجراء الترحيل (بأسماء الأعمدة
- * الحقيقية) على حد سواء.
+ * الحقيقية) على حد سواء. يعتمد على نموذج Role المستقل تماماً عن
+ * Entity/EntityType (الخاصتين حصراً بجهات المراسلات).
  */
 class WorkflowFormFields
 {
-    public static function categorySelect(string $name, string $label = 'الجهة'): Select
+    public static function categorySelect(string $name, string $label = 'الدور'): Select
     {
         return Select::make($name)
             ->label($label)
-            ->options(fn (): array => EntityType::active()->ordered()->pluck('name', 'id')->all())
+            ->options(fn (): array => Role::active()->ordered()->pluck('name', 'id')->all())
             ->live()
             ->searchable()
             ->native(false);
@@ -51,7 +52,7 @@ class WorkflowFormFields
             return [];
         }
 
-        $category = EntityType::find($categoryId);
+        $category = Role::find($categoryId);
 
         if ($category === null) {
             return [];
@@ -74,14 +75,14 @@ class WorkflowFormFields
     public static function submissionSection(Closure $isVisible): Section
     {
         return Section::make('سير الاعتماد')
-            ->description('هذا النوع يتطلب مراجعة واعتماداً قبل اعتبار السجل نهائياً. اختر الجهة ثم الشخص الذي سيُرسَل إليه السجل أولاً.')
+            ->description('هذا النوع يتطلب مراجعة واعتماداً قبل اعتبار السجل نهائياً. اختر الدور ثم الشخص الذي سيُرسَل إليه السجل أولاً.')
             ->visible($isVisible)
             ->columnSpanFull()
             ->schema([
-                self::categorySelect('workflow_entity_type_id')
+                self::categorySelect('workflow_role_id')
                     ->required($isVisible)
                     ->dehydrated(false),
-                self::userSelect('workflow_assigned_to', 'workflow_entity_type_id')
+                self::userSelect('workflow_assigned_to', 'workflow_role_id')
                     ->required($isVisible)
                     ->dehydrated(false),
                 Textarea::make('workflow_note')

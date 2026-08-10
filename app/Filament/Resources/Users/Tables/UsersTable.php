@@ -15,6 +15,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UsersTable
 {
@@ -41,16 +42,14 @@ class UsersTable
                     ->searchable()
                     ->placeholder('—')
                     ->toggleable(),
-                TextColumn::make('entity.name')
-                    ->label('الجهة')
-                    ->formatStateUsing(fn (User $record): ?string => $record->entity === null ? null : trim(
-                        $record->entity->name.($record->entity->entityType ? " ({$record->entity->entityType->name})" : ''),
-                    ))
-                    ->searchable()
+                TextColumn::make('role.name')
+                    ->label('الدور')
+                    ->badge()
+                    ->color('gray')
                     ->placeholder('—')
                     ->toggleable(),
-                TextColumn::make('role')
-                    ->label('الدور')
+                TextColumn::make('account_type')
+                    ->label('نوع الحساب')
                     ->badge()
                     ->state(fn (User $record): string => $record->isAdmin() ? 'مدير النظام' : 'مستخدم')
                     ->color(fn (string $state): string => $state === 'مدير النظام' ? 'danger' : 'gray'),
@@ -93,7 +92,9 @@ class UsersTable
             return false;
         }
 
-        return User::role('admin')->where('is_active', true)->count() === 1;
+        return User::whereHas('roles', fn (Builder $query) => $query->where('name', 'admin'))
+            ->where('is_active', true)
+            ->count() === 1;
     }
 
     public static function notifyLastAdmin(): void

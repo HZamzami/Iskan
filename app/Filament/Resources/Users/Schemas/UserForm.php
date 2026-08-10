@@ -46,30 +46,19 @@ class UserForm
                                 ->tel()
                                 ->maxLength(255)
                                 ->columnSpan(1),
-                            Select::make('entity_id')
-                                ->label('الجهة')
-                                ->relationship('entity', 'name')
+                            Select::make('role_id')
+                                ->label('الدور')
+                                ->relationship('role', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->createOptionForm([
                                     TextInput::make('name')
-                                        ->label('اسم الجهة')
+                                        ->label('اسم الدور')
                                         ->required()
                                         ->maxLength(255)
-                                        ->unique('entities', 'name'),
-                                    Select::make('entity_type_id')
-                                        ->label('نوع الجهة')
-                                        ->relationship('entityType', 'name')
-                                        ->searchable()
-                                        ->preload()
-                                        ->createOptionForm([
-                                            TextInput::make('name')
-                                                ->label('اسم النوع')
-                                                ->required()
-                                                ->maxLength(255)
-                                                ->unique('entity_types', 'name'),
-                                        ]),
+                                        ->unique('roles_lookup', 'name'),
                                 ])
+                                ->helperText('يُستخدم لتحديد دور المستخدم في سير اعتماد المستندات (مقاول/استشاري/مالك)، ولا علاقة له بجهات المراسلات.')
                                 ->columnSpan(1),
                             TextInput::make('password')
                                 ->label('كلمة المرور')

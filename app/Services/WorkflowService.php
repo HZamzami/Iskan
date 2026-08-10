@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Enums\WorkflowAction;
 use App\Enums\WorkflowStatus;
-use App\Models\EntityType;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\WorkflowTransition;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +20,7 @@ use LogicException;
  */
 class WorkflowService
 {
-    public function submit(Model $document, User $actor, EntityType $category, User $target, ?string $note = null): void
+    public function submit(Model $document, User $actor, Role $category, User $target, ?string $note = null): void
     {
         if ($document->workflow_status !== null) {
             throw new LogicException('لا يمكن إرسال سجل بدأ سير اعتماده بالفعل.');
@@ -30,7 +30,7 @@ class WorkflowService
             $document->forceFill([
                 'workflow_status' => WorkflowStatus::Pending,
                 'assigned_to' => $target->id,
-                'assigned_entity_type_id' => $category->id,
+                'assigned_role_id' => $category->id,
             ])->save();
 
             $this->recordTransition(
@@ -48,14 +48,14 @@ class WorkflowService
         app(WorkflowNotifier::class)->notify($document, $target, WorkflowAction::Submit);
     }
 
-    public function forward(Model $document, User $actor, EntityType $category, User $target, ?string $note = null): void
+    public function forward(Model $document, User $actor, Role $category, User $target, ?string $note = null): void
     {
         $this->assertCanAct($document, $actor);
 
         DB::transaction(function () use ($document, $actor, $category, $target, $note): void {
             $document->forceFill([
                 'assigned_to' => $target->id,
-                'assigned_entity_type_id' => $category->id,
+                'assigned_role_id' => $category->id,
             ])->save();
 
             $this->recordTransition(
@@ -86,13 +86,13 @@ class WorkflowService
 
         $previousHolder = $lastTransition->actor;
         $category = $previousHolder->category() !== null
-            ? EntityType::query()->where('slug', $previousHolder->category())->first()
+            ? Role::query()->where('slug', $previousHolder->category())->first()
             : null;
 
         DB::transaction(function () use ($document, $actor, $category, $previousHolder, $note): void {
             $document->forceFill([
                 'assigned_to' => $previousHolder->id,
-                'assigned_entity_type_id' => $category?->id,
+                'assigned_role_id' => $category?->id,
             ])->save();
 
             $this->recordTransition(
@@ -124,7 +124,7 @@ class WorkflowService
             $document->forceFill([
                 'workflow_status' => WorkflowStatus::Approved,
                 'assigned_to' => null,
-                'assigned_entity_type_id' => null,
+                'assigned_role_id' => null,
                 'completed_at' => now(),
             ])->save();
 
@@ -162,7 +162,7 @@ class WorkflowService
         WorkflowStatus $toStatus,
         WorkflowAction $action,
         User $actor,
-        ?EntityType $category,
+        ?Role $category,
         ?User $assignedTo,
         ?string $note,
     ): void {
@@ -171,7 +171,7 @@ class WorkflowService
             'to_status' => $toStatus,
             'action' => $action,
             'actor_id' => $actor->id,
-            'entity_type_id' => $category?->id,
+            'role_id' => $category?->id,
             'assigned_to_id' => $assignedTo?->id,
             'note' => $note,
         ]);

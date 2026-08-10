@@ -7,8 +7,7 @@ use App\Enums\Module;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Models\Entity;
-use App\Models\EntityType;
+use App\Models\Role;
 use App\Models\User;
 use Filament\Auth\Pages\Login;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -138,18 +137,18 @@ class UserResourceTest extends TestCase
         $this->assertSame($originalHash, $user->password);
     }
 
-    public function test_admin_can_set_phone_and_entity_on_create_and_edit(): void
+    public function test_admin_can_set_phone_and_role_on_create_and_edit(): void
     {
         $this->actingAs($this->makeAdminUser());
 
-        $entity = Entity::factory()->create();
+        $role = Role::factory()->create();
 
         Livewire::test(CreateUser::class)
             ->fillForm([
                 'name' => 'منى العتيبي',
                 'email' => 'mona@iskan.test',
                 'phone' => '0501234567',
-                'entity_id' => $entity->id,
+                'role_id' => $role->id,
                 'password' => 'password123',
                 'is_admin' => false,
             ])
@@ -159,14 +158,14 @@ class UserResourceTest extends TestCase
         $user = User::query()->where('email', 'mona@iskan.test')->firstOrFail();
 
         $this->assertSame('0501234567', $user->phone);
-        $this->assertTrue($user->entity->is($entity));
+        $this->assertTrue($user->role->is($role));
 
-        $otherEntity = Entity::factory()->create();
+        $otherRole = Role::factory()->create();
 
         Livewire::test(EditUser::class, ['record' => $user->id])
             ->fillForm([
                 'phone' => '0559876543',
-                'entity_id' => $otherEntity->id,
+                'role_id' => $otherRole->id,
             ])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -174,24 +173,20 @@ class UserResourceTest extends TestCase
         $user->refresh();
 
         $this->assertSame('0559876543', $user->phone);
-        $this->assertTrue($user->entity->is($otherEntity));
+        $this->assertTrue($user->role->is($otherRole));
     }
 
-    public function test_entity_with_type_is_linked_to_user(): void
+    public function test_seeded_role_is_linked_to_user(): void
     {
         $this->actingAs($this->makeAdminUser());
 
-        $contractorType = EntityType::query()->where('slug', 'contractor')->firstOrFail();
-        $entity = Entity::factory()->create([
-            'name' => 'شركة الراجحي',
-            'entity_type_id' => $contractorType->id,
-        ]);
+        $contractorRole = Role::query()->where('slug', 'contractor')->firstOrFail();
 
         Livewire::test(CreateUser::class)
             ->fillForm([
                 'name' => 'خالد المطيري',
                 'email' => 'khalid@iskan.test',
-                'entity_id' => $entity->id,
+                'role_id' => $contractorRole->id,
                 'password' => 'password123',
                 'is_admin' => false,
             ])
@@ -200,9 +195,9 @@ class UserResourceTest extends TestCase
 
         $user = User::query()->where('email', 'khalid@iskan.test')->firstOrFail();
 
-        $this->assertTrue($user->entity->is($entity));
-        $this->assertTrue($user->entity->entityType->is($contractorType));
-        $this->assertSame('مقاول', $user->entity->entityType->name);
+        $this->assertTrue($user->role->is($contractorRole));
+        $this->assertSame('مقاول', $user->role->name);
+        $this->assertSame('contractor', $user->category());
     }
 
     public function test_admin_can_deactivate_a_regular_user(): void

@@ -12,6 +12,7 @@ use App\Models\Location;
 use App\Models\MinuteType;
 use App\Models\PeriodicReportType;
 use App\Models\RequirementGroup;
+use App\Models\Role;
 use App\Models\User;
 use App\Observers\LocationObserver;
 use App\Policies\ActivityPolicy;
@@ -59,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
             ContractualRequirementType::class,
             EntityType::class,
             Entity::class,
+            Role::class,
         ] as $lookupModel) {
             Gate::policy($lookupModel, AdminOnlyPolicy::class);
         }

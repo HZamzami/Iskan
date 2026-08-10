@@ -33,15 +33,14 @@ class UserInfolist
                                 ->label('رقم الهاتف')
                                 ->placeholder('—')
                                 ->columnSpan(1),
-                            TextEntry::make('entity.name')
-                                ->label('الجهة')
-                                ->formatStateUsing(fn (User $record): ?string => $record->entity === null ? null : trim(
-                                    $record->entity->name.($record->entity->entityType ? " ({$record->entity->entityType->name})" : ''),
-                                ))
+                            TextEntry::make('role.name')
+                                ->label('الدور')
+                                ->badge()
+                                ->color('gray')
                                 ->placeholder('—')
                                 ->columnSpan(1),
-                            TextEntry::make('role')
-                                ->label('الدور')
+                            TextEntry::make('account_type')
+                                ->label('نوع الحساب')
                                 ->badge()
                                 ->state(fn (User $record): string => $record->isAdmin() ? 'مدير النظام' : 'مستخدم')
                                 ->color(fn (string $state): string => $state === 'مدير النظام' ? 'danger' : 'gray')

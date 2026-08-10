@@ -4,7 +4,7 @@ namespace App\Filament\Support;
 
 use App\Enums\WorkflowAction as WorkflowActionEnum;
 use App\Enums\WorkflowStatus;
-use App\Models\EntityType;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\WorkflowService;
 use Filament\Actions\Action;
@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * الإجراءات الثلاثة المشتركة لسير الاعتماد (ترحيل/إعادة/اعتماد نهائي)،
  * تُستخدَم بنفس الشكل في جدول كل وحدة (recordActions) وفي رأس صفحة العرض
- * (getHeaderActions) على حد سواء. لا يوجد إجراء منفصل لكل جهة — الجهة
- * المستهدفة تُختار داخل نافذة "ترحيل" نفسها في كل مرة.
+ * (getHeaderActions) على حد سواء. لا يوجد إجراء منفصل لكل دور — الدور
+ * المستهدف يُختار داخل نافذة "ترحيل" نفسها في كل مرة.
  */
 class WorkflowActions
 {
@@ -42,8 +42,8 @@ class WorkflowActions
             ->color($enum->getColor())
             ->visible(fn (Model $record): bool => self::isPending($record) && $record->canBeActedOnBy(Filament::auth()->user()))
             ->schema([
-                WorkflowFormFields::categorySelect('entity_type_id')->required(),
-                WorkflowFormFields::userSelect('assigned_to', 'entity_type_id')->required(),
+                WorkflowFormFields::categorySelect('role_id')->required(),
+                WorkflowFormFields::userSelect('assigned_to', 'role_id')->required(),
                 Textarea::make('note')
                     ->label('ملاحظة (اختياري)')
                     ->rows(2),
@@ -52,7 +52,7 @@ class WorkflowActions
                 app(WorkflowService::class)->forward(
                     $record,
                     Filament::auth()->user(),
-                    EntityType::findOrFail($data['entity_type_id']),
+                    Role::findOrFail($data['role_id']),
                     User::findOrFail($data['assigned_to']),
                     $data['note'] ?? null,
                 );

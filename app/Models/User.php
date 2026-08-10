@@ -21,7 +21,7 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'phone', 'entity_id', 'avatar_path', 'is_active', 'password'])]
+#[Fillable(['name', 'email', 'phone', 'role_id', 'avatar_path', 'is_active', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
@@ -99,23 +99,24 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $allowed === null || in_array($slug, $allowed, true);
     }
 
-    public function entity(): BelongsTo
+    public function role(): BelongsTo
     {
-        return $this->belongsTo(Entity::class);
+        return $this->belongsTo(Role::class);
     }
 
     /**
-     * الجهة (مقاول/استشاري/مالك) التي ينتمي إليها المستخدم عبر جهته، أو null
-     * إن لم تُحدَّد جهته أو لم تُصنَّف جهته بعد.
+     * الدور (مقاول/استشاري/مالك) الذي يشغله المستخدم في سير الاعتماد، أو null
+     * إن لم يُحدَّد دوره بعد. مستقل تماماً عن Entity (جهات المراسلات) —
+     * اتصال مباشر بلا طبقة وسيطة.
      */
     public function category(): ?string
     {
-        return $this->entity?->entityType?->slug;
+        return $this->role?->slug;
     }
 
     public function scopeOfCategory(Builder $query, string $slug): Builder
     {
-        return $query->whereHas('entity.entityType', fn (Builder $q): Builder => $q->where('slug', $slug));
+        return $query->whereHas('role', fn (Builder $q): Builder => $q->where('slug', $slug));
     }
 
     public function getFilamentAvatarUrl(): ?string
@@ -126,7 +127,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email', 'phone', 'entity_id', 'is_active'])
+            ->logOnly(['name', 'email', 'phone', 'role_id', 'is_active'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
     }

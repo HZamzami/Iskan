@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\EntityType;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 
-class EntityTypeSeeder extends Seeder
+class RoleSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -19,7 +19,7 @@ class EntityTypeSeeder extends Seeder
         ];
 
         foreach ($rows as $row) {
-            EntityType::query()->firstOrCreate(['slug' => $row['slug']], $row);
+            Role::query()->firstOrCreate(['slug' => $row['slug']], $row);
         }
     }
 }

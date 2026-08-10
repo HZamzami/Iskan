@@ -22,7 +22,7 @@ class WorkflowTransition extends Model
         'to_status',
         'action',
         'actor_id',
-        'entity_type_id',
+        'role_id',
         'assigned_to_id',
         'note',
     ];
@@ -49,9 +49,9 @@ class WorkflowTransition extends Model
         return $this->belongsTo(User::class, 'actor_id');
     }
 
-    public function entityType(): BelongsTo
+    public function role(): BelongsTo
     {
-        return $this->belongsTo(EntityType::class);
+        return $this->belongsTo(Role::class);
     }
 
     public function assignedTo(): BelongsTo

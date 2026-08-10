@@ -6,10 +6,9 @@ use App\Enums\AccessLevel;
 use App\Enums\Module;
 use App\Enums\WorkflowAction;
 use App\Enums\WorkflowStatus;
-use App\Models\Entity;
-use App\Models\EntityType;
 use App\Models\Minute;
 use App\Models\MinuteType;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\WorkflowService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,9 +35,7 @@ class WorkflowServiceTest extends TestCase
     {
         $user = $this->makeUserWithAccess([Module::Minutes->value => AccessLevel::Edit], ['site_a']);
         $user->update([
-            'entity_id' => Entity::factory()->create([
-                'entity_type_id' => EntityType::query()->where('slug', $categorySlug)->firstOrFail()->id,
-            ])->id,
+            'role_id' => Role::query()->where('slug', $categorySlug)->firstOrFail()->id,
         ]);
 
         return $user->fresh();
@@ -64,7 +61,7 @@ class WorkflowServiceTest extends TestCase
         $this->service->submit(
             $minute,
             $contractor,
-            EntityType::where('slug', 'consultant')->firstOrFail(),
+            Role::where('slug', 'consultant')->firstOrFail(),
             $consultant,
             'الرجاء المراجعة',
         );
@@ -91,10 +88,10 @@ class WorkflowServiceTest extends TestCase
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'consultant')->firstOrFail(), $consultant);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
 
         $this->expectException(LogicException::class);
-        $this->service->submit($minute->fresh(), $contractor, EntityType::where('slug', 'consultant')->firstOrFail(), $consultant);
+        $this->service->submit($minute->fresh(), $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
     }
 
     public function test_chain_can_revisit_the_same_category_any_number_of_times(): void
@@ -108,10 +105,10 @@ class WorkflowServiceTest extends TestCase
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
         // contractor -> consultantA -> consultantB -> contractor -> owner
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'consultant')->firstOrFail(), $consultantA);
-        $this->service->forward($minute->fresh(), $consultantA, EntityType::where('slug', 'consultant')->firstOrFail(), $consultantB);
-        $this->service->forward($minute->fresh(), $consultantB, EntityType::where('slug', 'contractor')->firstOrFail(), $contractor);
-        $this->service->forward($minute->fresh(), $contractor, EntityType::where('slug', 'owner')->firstOrFail(), $owner);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultantA);
+        $this->service->forward($minute->fresh(), $consultantA, Role::where('slug', 'consultant')->firstOrFail(), $consultantB);
+        $this->service->forward($minute->fresh(), $consultantB, Role::where('slug', 'contractor')->firstOrFail(), $contractor);
+        $this->service->forward($minute->fresh(), $contractor, Role::where('slug', 'owner')->firstOrFail(), $owner);
 
         $minute->refresh();
 
@@ -133,10 +130,10 @@ class WorkflowServiceTest extends TestCase
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'consultant')->firstOrFail(), $consultant);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
 
         $this->expectException(LogicException::class);
-        $this->service->forward($minute->fresh(), $stranger, EntityType::where('slug', 'consultant')->firstOrFail(), $consultant);
+        $this->service->forward($minute->fresh(), $stranger, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
     }
 
     public function test_return_targets_whoever_sent_it_to_the_current_holder(): void
@@ -148,8 +145,8 @@ class WorkflowServiceTest extends TestCase
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'consultant')->firstOrFail(), $consultant);
-        $this->service->forward($minute->fresh(), $consultant, EntityType::where('slug', 'owner')->firstOrFail(), $owner);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
+        $this->service->forward($minute->fresh(), $consultant, Role::where('slug', 'owner')->firstOrFail(), $owner);
         $this->service->returnToPrevious($minute->fresh(), $owner, 'يحتاج تعديل');
 
         $minute->refresh();
@@ -186,7 +183,7 @@ class WorkflowServiceTest extends TestCase
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'consultant')->firstOrFail(), $consultant);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
 
         $this->expectException(LogicException::class);
         $this->service->approve($minute->fresh(), $consultant);
@@ -200,14 +197,14 @@ class WorkflowServiceTest extends TestCase
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'owner')->firstOrFail(), $owner);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'owner')->firstOrFail(), $owner);
         $this->service->approve($minute->fresh(), $owner, 'معتمد');
 
         $minute->refresh();
 
         $this->assertSame(WorkflowStatus::Approved, $minute->workflow_status);
         $this->assertNull($minute->assigned_to);
-        $this->assertNull($minute->assigned_entity_type_id);
+        $this->assertNull($minute->assigned_role_id);
         $this->assertNotNull($minute->completed_at);
 
         $lastTransition = $minute->transitions()->firstOrFail();
@@ -223,11 +220,11 @@ class WorkflowServiceTest extends TestCase
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'owner')->firstOrFail(), $owner);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'owner')->firstOrFail(), $owner);
         $this->service->approve($minute->fresh(), $owner);
 
         $this->expectException(LogicException::class);
-        $this->service->forward($minute->fresh(), $owner, EntityType::where('slug', 'contractor')->firstOrFail(), $contractor);
+        $this->service->forward($minute->fresh(), $owner, Role::where('slug', 'contractor')->firstOrFail(), $contractor);
     }
 
     public function test_each_transition_notifies_the_new_holder(): void
@@ -238,7 +235,7 @@ class WorkflowServiceTest extends TestCase
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'consultant')->firstOrFail(), $consultant);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
 
         $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $consultant->id)->count());
 
@@ -256,8 +253,8 @@ class WorkflowServiceTest extends TestCase
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'consultant')->firstOrFail(), $consultant);
-        $this->service->forward($minute->fresh(), $consultant, EntityType::where('slug', 'owner')->firstOrFail(), $owner);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
+        $this->service->forward($minute->fresh(), $consultant, Role::where('slug', 'owner')->firstOrFail(), $owner);
 
         $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $owner->id)->count());
         $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $consultant->id)->count());
@@ -277,7 +274,7 @@ class WorkflowServiceTest extends TestCase
         $type = $this->workflowMinuteType();
         $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
 
-        $this->service->submit($minute, $contractor, EntityType::where('slug', 'owner')->firstOrFail(), $owner);
+        $this->service->submit($minute, $contractor, Role::where('slug', 'owner')->firstOrFail(), $owner);
         $this->service->approve($minute->fresh(), $owner);
 
         $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $contractor->id)->count());

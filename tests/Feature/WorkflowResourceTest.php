@@ -8,10 +8,9 @@ use App\Enums\WorkflowStatus;
 use App\Filament\Resources\FinancialFlows\Pages\CreateFinancialFlow;
 use App\Filament\Resources\FinancialFlows\Pages\ListFinancialFlows;
 use App\Filament\Support\WorkflowFormFields;
-use App\Models\Entity;
-use App\Models\EntityType;
 use App\Models\FinancialFlow;
 use App\Models\FinancialFlowType;
+use App\Models\Role;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -52,8 +51,8 @@ class WorkflowResourceTest extends TestCase
         $contractor = $this->editUser(['site_a']);
         $consultant = $this->editUser(['site_a']);
         $owner = $this->editUser(['site_a']);
-        $consultant->update(['entity_id' => Entity::factory()->create(['entity_type_id' => EntityType::where('slug', 'consultant')->first()->id])->id]);
-        $owner->update(['entity_id' => Entity::factory()->create(['entity_type_id' => EntityType::where('slug', 'owner')->first()->id])->id]);
+        $consultant->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);
+        $owner->update(['role_id' => Role::where('slug', 'owner')->first()->id]);
 
         $type = $this->workflowType();
 
@@ -67,7 +66,7 @@ class WorkflowResourceTest extends TestCase
                 'period_month' => '2026-07-01',
                 'document_date' => '2026-07-20',
                 'file_path' => UploadedFile::fake()->create('flow.pdf', 100, 'application/pdf'),
-                'workflow_entity_type_id' => EntityType::where('slug', 'consultant')->first()->id,
+                'workflow_role_id' => Role::where('slug', 'consultant')->first()->id,
                 'workflow_assigned_to' => $consultant->id,
             ])
             ->call('create')
@@ -81,7 +80,7 @@ class WorkflowResourceTest extends TestCase
 
         Livewire::test(ListFinancialFlows::class)
             ->callAction(TestAction::make('workflowForward')->table($flow), data: [
-                'entity_type_id' => EntityType::where('slug', 'owner')->first()->id,
+                'role_id' => Role::where('slug', 'owner')->first()->id,
                 'assigned_to' => $owner->id,
             ])
             ->assertNotified();
@@ -102,15 +101,15 @@ class WorkflowResourceTest extends TestCase
         $contractor = $this->editUser();
         $consultant = $this->editUser();
         $nonConsultant = $this->editUser();
-        $consultant->update(['entity_id' => Entity::factory()->create(['entity_type_id' => EntityType::where('slug', 'consultant')->first()->id])->id]);
-        // $nonConsultant is deliberately left without an entity/category.
+        $consultant->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);
+        // $nonConsultant is deliberately left without a role/category.
 
         $type = $this->workflowType();
 
         $this->actingAs($contractor);
 
         $eligible = WorkflowFormFields::eligibleUsers(
-            EntityType::where('slug', 'consultant')->first()->id,
+            Role::where('slug', 'consultant')->first()->id,
             ['site_a'],
         );
 
@@ -123,11 +122,11 @@ class WorkflowResourceTest extends TestCase
     {
         $consultantWithAccess = $this->editUser(['site_a']);
         $consultantWithoutAccess = $this->editUser(['site_b']);
-        $consultantWithAccess->update(['entity_id' => Entity::factory()->create(['entity_type_id' => EntityType::where('slug', 'consultant')->first()->id])->id]);
-        $consultantWithoutAccess->update(['entity_id' => Entity::factory()->create(['entity_type_id' => EntityType::where('slug', 'consultant')->first()->id])->id]);
+        $consultantWithAccess->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);
+        $consultantWithoutAccess->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);
 
         $eligible = WorkflowFormFields::eligibleUsers(
-            EntityType::where('slug', 'consultant')->first()->id,
+            Role::where('slug', 'consultant')->first()->id,
             ['site_a'],
         );
 
@@ -140,7 +139,7 @@ class WorkflowResourceTest extends TestCase
         $contractor = $this->editUser();
         $consultant = $this->editUser();
         $bystander = $this->editUser();
-        $consultant->update(['entity_id' => Entity::factory()->create(['entity_type_id' => EntityType::where('slug', 'consultant')->first()->id])->id]);
+        $consultant->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);
 
         $type = $this->workflowType();
         $flow = FinancialFlow::factory()->create([
@@ -165,7 +164,7 @@ class WorkflowResourceTest extends TestCase
     public function test_approve_action_only_visible_to_owner_category_assignee(): void
     {
         $consultant = $this->editUser();
-        $consultant->update(['entity_id' => Entity::factory()->create(['entity_type_id' => EntityType::where('slug', 'consultant')->first()->id])->id]);
+        $consultant->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);
 
         $type = $this->workflowType();
         $flow = FinancialFlow::factory()->create([
@@ -185,7 +184,7 @@ class WorkflowResourceTest extends TestCase
     public function test_return_action_hidden_when_no_prior_transition_exists(): void
     {
         $consultant = $this->editUser();
-        $consultant->update(['entity_id' => Entity::factory()->create(['entity_type_id' => EntityType::where('slug', 'consultant')->first()->id])->id]);
+        $consultant->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);
 
         $type = $this->workflowType();
         $flow = FinancialFlow::factory()->create([

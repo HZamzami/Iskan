@@ -56,7 +56,7 @@ class EditUser extends EditRecord
 
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        $record->update(Arr::only($data, ['name', 'email', 'phone', 'entity_id', 'is_active', 'password']));
+        $record->update(Arr::only($data, ['name', 'email', 'phone', 'role_id', 'is_active', 'password']));
 
         UserResource::syncAccess($record, $data);
 
