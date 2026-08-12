@@ -28,13 +28,13 @@ class TaskInfolist
                                 ->state(fn (Task $record): string => $record->requestTypeLabel())
                                 ->columnSpan(1),
                             TextEntry::make('assignee.name')
-                                ->label('الشخص المكلَّف')
+                                ->label('المكلَّف')
                                 ->columnSpan(1),
                             TextEntry::make('requester.name')
                                 ->label('مقدّم الطلب')
                                 ->columnSpan(1),
                             TextEntry::make('due_date')
-                                ->label('تاريخ الإنتهاء')
+                                ->label('تاريخ الانتهاء')
                                 ->date('Y/m/d')
                                 ->columnSpan(1),
                             TextEntry::make('priority')

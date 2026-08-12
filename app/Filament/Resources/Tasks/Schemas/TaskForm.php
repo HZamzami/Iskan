@@ -33,7 +33,7 @@ class TaskForm
                                 ->maxLength(255)
                                 ->columnSpanFull(),
                             Select::make('assigned_to')
-                                ->label('الشخص المكلَّف')
+                                ->label('المكلَّف')
                                 ->options(fn (): array => User::query()
                                     ->ofCategory($lockedRoleSlug ?? '')
                                     ->pluck('name', 'id')
@@ -44,7 +44,7 @@ class TaskForm
                                 ->required()
                                 ->columnSpan(1),
                             DatePicker::make('due_date')
-                                ->label('تاريخ الإنتهاء')
+                                ->label('تاريخ الانتهاء')
                                 ->required()
                                 ->minDate(now())
                                 ->columnSpan(1),
@@ -70,8 +70,8 @@ class TaskForm
                     ->columnSpanFull()
                     ->schema([
                         Toggle::make('notify_by_email')
-                            ->label('إرسال تنبيه عبر البريد الإلكتروني')
-                            ->helperText('عند التعطيل، يصل التنبيه داخل المنصة فقط.')
+                            ->label('إرسال إشعار عبر البريد الإلكتروني')
+                            ->helperText('عند التعطيل، يصل الإشعار داخل المنصة فقط.')
                             ->columnSpanFull(),
                         FileUpload::make('file_path')
                             ->label('المرفق')
@@ -80,7 +80,7 @@ class TaskForm
                             ->downloadable()
                             ->columnSpanFull(),
                         Textarea::make('description')
-                            ->label('ملاحظة أو تفاصيل المهمة')
+                            ->label('ملاحظات')
                             ->rows(3)
                             ->columnSpanFull(),
                     ]),

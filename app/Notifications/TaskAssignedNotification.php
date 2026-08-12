@@ -46,7 +46,7 @@ class TaskAssignedNotification extends Notification
             ->subject('تكليف بمهمة جديدة: '.$this->task->title)
             ->greeting('مرحباً '.$notifiable->name)
             ->line('تم تكليفك بمهمة جديدة: '.$this->task->title)
-            ->when($this->task->due_date, fn (MailMessage $mail) => $mail->line('تاريخ الإنتهاء: '.$this->task->due_date->format('Y/m/d')))
+            ->when($this->task->due_date, fn (MailMessage $mail) => $mail->line('تاريخ الانتهاء: '.$this->task->due_date->format('Y/m/d')))
             ->action('عرض المهمة', TaskResource::getUrl('view', ['record' => $this->task]));
     }
 }

@@ -30,7 +30,7 @@ class TaskExporter extends Exporter
                 ->label('الحالة')
                 ->formatStateUsing(fn (Task $record): string => $record->status->getLabel()),
             ExportColumn::make('due_date')
-                ->label('تاريخ الإنتهاء'),
+                ->label('تاريخ الانتهاء'),
             ExportColumn::make('recurrence')
                 ->label('التكرار')
                 ->formatStateUsing(fn (Task $record): string => $record->recurrence->getLabel()),
@@ -43,10 +43,10 @@ class TaskExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = "اكتمل تصدير المهام، وتم تصدير {$export->successful_rows} صف.";
+        $body = "اكتمل تصدير المهام ({$export->successful_rows} سجل).";
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= " فشل تصدير {$failedRowsCount} صف.";
+            $body .= " تعذّر تصدير {$failedRowsCount} سجل.";
         }
 
         return $body;

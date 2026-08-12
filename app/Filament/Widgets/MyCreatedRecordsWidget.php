@@ -17,12 +17,12 @@ class MyCreatedRecordsWidget extends TableWidget
 
     protected int|string|array $columnSpan = 'full';
 
-    protected static ?string $heading = 'ما رفعته';
+    protected static ?string $heading = 'السجلات التي أضفتها';
 
     public function table(Table $table): Table
     {
         return $table
-            ->heading('ما رفعته')
+            ->heading('السجلات التي أضفتها')
             ->headerActions([
                 ExportAction::make()
                     ->label('تصدير إلى Excel')
@@ -46,6 +46,6 @@ class MyCreatedRecordsWidget extends TableWidget
                     ->label('رقم السجل'),
             ])
             ->recordUrl(fn (Activity $record): ?string => ActivityResource::subjectUrl($record->subject_type, $record->subject_id))
-            ->emptyStateHeading('لم ترفع أي سجل بعد');
+            ->emptyStateHeading('لم تُضِف أي سجل بعد');
     }
 }

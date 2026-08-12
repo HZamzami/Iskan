@@ -52,10 +52,10 @@ class ActivityExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = "اكتمل تصدير سجل النشاط، وتم تصدير {$export->successful_rows} صف.";
+        $body = "اكتمل تصدير سجل النشاط ({$export->successful_rows} سجل).";
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= " فشل تصدير {$failedRowsCount} صف.";
+            $body .= " تعذّر تصدير {$failedRowsCount} سجل.";
         }
 
         return $body;

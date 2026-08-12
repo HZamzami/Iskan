@@ -59,7 +59,7 @@ class TasksTable
                     ->label('الحالة')
                     ->badge(),
                 TextColumn::make('due_date')
-                    ->label('تاريخ الإنتهاء')
+                    ->label('تاريخ الانتهاء')
                     ->date('Y/m/d')
                     ->sortable()
                     ->color(fn (Task $record): ?string => $record->isOverdue() ? 'danger' : null),
@@ -87,18 +87,18 @@ class TasksTable
                     ->label('نوع الطلب')
                     ->options(fn (): array => Role::active()->ordered()->pluck('name', 'id')->all()),
                 TernaryFilter::make('assigned_to_me')
-                    ->label('مكلَّف بها لي')
+                    ->label('المسندة إليّ')
                     ->placeholder('الجميع')
-                    ->trueLabel('مكلَّف بها لي فقط')
+                    ->trueLabel('المسندة إليّ فقط')
                     ->falseLabel('غير ذلك')
                     ->queries(
                         true: fn (Builder $query): Builder => $query->where('assigned_to', Filament::auth()->id()),
                         false: fn (Builder $query): Builder => $query->where('assigned_to', '!=', Filament::auth()->id()),
                     ),
                 TernaryFilter::make('requested_by_me')
-                    ->label('من طلبي')
+                    ->label('طلباتي')
                     ->placeholder('الجميع')
-                    ->trueLabel('من طلبي فقط')
+                    ->trueLabel('طلباتي فقط')
                     ->falseLabel('غير ذلك')
                     ->queries(
                         true: fn (Builder $query): Builder => $query->where('requested_by', Filament::auth()->id()),

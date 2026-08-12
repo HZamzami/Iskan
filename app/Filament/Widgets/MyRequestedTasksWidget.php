@@ -36,7 +36,7 @@ class MyRequestedTasksWidget extends TableWidget
                     ->label('الحالة')
                     ->badge(),
                 TextColumn::make('due_date')
-                    ->label('تاريخ الإنتهاء')
+                    ->label('تاريخ الانتهاء')
                     ->date('Y/m/d'),
             ])
             ->recordUrl(fn (Task $record): string => TaskResource::getUrl('view', ['record' => $record]))

@@ -15,7 +15,7 @@ class GenerateRecurringTasks extends Command
     {
         $count = $generator->run();
 
-        $this->info("تم إنشاء {$count} مهمة من المهام المتكررة.");
+        $this->info("تم إنشاء {$count} مهمة متكررة.");
 
         return self::SUCCESS;
     }
