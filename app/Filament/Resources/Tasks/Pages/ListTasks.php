@@ -15,7 +15,7 @@ class ListTasks extends ListRecords
     {
         return [
             Action::make('create-internal')
-                ->label('طلب مهمة من داخلية')
+                ->label('طلب مهمة داخلية')
                 ->icon(Heroicon::Plus)
                 ->color('gray')
                 ->url(TaskResource::getUrl('create-internal')),

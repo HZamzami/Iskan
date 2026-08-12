@@ -9,7 +9,7 @@ class GenerateRecurringTasks extends Command
 {
     protected $signature = 'tasks:generate-recurring';
 
-    protected $description = 'إنشاء نسخة جديدة من كل مهمة متكررة حان موعد تكرارها التالي';
+    protected $description = 'توليد نسخ جديدة من المهام المتكررة المستحقة';
 
     public function handle(TaskRecurrenceGenerator $generator): int
     {

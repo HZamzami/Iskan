@@ -38,7 +38,7 @@ class TaskInfolist
                                 ->date('Y/m/d')
                                 ->columnSpan(1),
                             TextEntry::make('priority')
-                                ->label('أهمية المهمة')
+                                ->label('الأولوية')
                                 ->badge()
                                 ->columnSpan(1),
                             TextEntry::make('status')
@@ -46,7 +46,7 @@ class TaskInfolist
                                 ->badge()
                                 ->columnSpan(1),
                             TextEntry::make('recurrence')
-                                ->label('تكرار المهمة')
+                                ->label('التكرار')
                                 ->badge()
                                 ->columnSpan(1),
                         ]),

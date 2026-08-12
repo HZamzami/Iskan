@@ -49,14 +49,14 @@ class TaskForm
                                 ->minDate(now())
                                 ->columnSpan(1),
                             Select::make('priority')
-                                ->label('أهمية المهمة')
+                                ->label('الأولوية')
                                 ->options(TaskPriority::class)
                                 ->default(TaskPriority::Normal)
                                 ->required()
                                 ->native(false)
                                 ->columnSpan(1),
                             Select::make('recurrence')
-                                ->label('تكرار المهمة')
+                                ->label('التكرار')
                                 ->options(TaskRecurrence::class)
                                 ->default(TaskRecurrence::Once)
                                 ->required()
@@ -65,7 +65,7 @@ class TaskForm
                         ]),
                     ]),
 
-                Section::make('التنبيهات والمرفقات')
+                Section::make('الإشعارات والمرفقات')
                     ->icon(Heroicon::PaperClip)
                     ->columnSpanFull()
                     ->schema([

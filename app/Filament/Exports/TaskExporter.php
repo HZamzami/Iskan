@@ -24,7 +24,7 @@ class TaskExporter extends Exporter
             ExportColumn::make('requester.name')
                 ->label('مقدّم الطلب'),
             ExportColumn::make('priority')
-                ->label('الأهمية')
+                ->label('الأولوية')
                 ->formatStateUsing(fn (Task $record): string => $record->priority->getLabel()),
             ExportColumn::make('status')
                 ->label('الحالة')

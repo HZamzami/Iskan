@@ -53,7 +53,7 @@ class TasksTable
                     ->placeholder('—')
                     ->toggleable(),
                 TextColumn::make('priority')
-                    ->label('الأهمية')
+                    ->label('الأولوية')
                     ->badge(),
                 TextColumn::make('status')
                     ->label('الحالة')
@@ -75,7 +75,7 @@ class TasksTable
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('priority')
-                    ->label('الأهمية')
+                    ->label('الأولوية')
                     ->options(TaskPriority::class),
                 SelectFilter::make('status')
                     ->label('الحالة')

@@ -30,7 +30,7 @@ class MyAssignedTasksWidget extends TableWidget
                     ->label('عنوان المهمة')
                     ->limit(40),
                 TextColumn::make('priority')
-                    ->label('الأهمية')
+                    ->label('الأولوية')
                     ->badge(),
                 TextColumn::make('status')
                     ->label('الحالة')

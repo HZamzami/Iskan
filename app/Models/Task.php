@@ -78,7 +78,7 @@ class Task extends Model
     public function requestTypeLabel(): string
     {
         return match ($this->assignedRole?->slug) {
-            'asset_manager' => 'طلب مهمة من داخلية',
+            'asset_manager' => 'طلب مهمة داخلية',
             'consultant' => 'طلب مهمة من مدير الأصل للاستشاري',
             'contractor' => 'طلب مهمة من مدير الأصل للمقاول',
             default => '—',
