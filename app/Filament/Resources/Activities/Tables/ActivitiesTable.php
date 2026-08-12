@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Activities\Tables;
 
+use App\Filament\Exports\ActivityExporter;
 use App\Filament\Resources\Activities\ActivityResource;
 use App\Models\User;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Support\Icons\Heroicon;
@@ -12,12 +14,18 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Spatie\Activitylog\Models\Activity;
 
 class ActivitiesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->headerActions([
+                ExportAction::make()
+                    ->label('تصدير إلى Excel')
+                    ->exporter(ActivityExporter::class),
+            ])
             ->columns([
                 TextColumn::make('created_at')
                     ->label('التاريخ والوقت')
@@ -48,6 +56,8 @@ class ActivitiesTable
                     ->formatStateUsing(fn (?string $state): string => ActivityResource::subjectTypeLabel($state)),
                 TextColumn::make('subject_id')
                     ->label('رقم السجل')
+                    ->url(fn (Activity $record): ?string => ActivityResource::subjectUrl($record->subject_type, $record->subject_id))
+                    ->openUrlInNewTab()
                     ->toggleable(),
             ])
             ->defaultSort('created_at', 'desc')

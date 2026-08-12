@@ -61,6 +61,7 @@ class ApplyLocationToTypesAction
 
         return $typeClass::query()
             ->where('site_scope', SiteScope::Custom->value)
+            ->active()
             ->ordered()
             ->pluck('name', 'slug');
     }

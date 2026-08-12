@@ -7,6 +7,9 @@ use App\Filament\Resources\Activities\Pages\ListActivities;
 use App\Filament\Resources\Activities\Pages\ViewActivity;
 use App\Filament\Resources\Activities\Schemas\ActivityInfolist;
 use App\Filament\Resources\Activities\Tables\ActivitiesTable;
+use App\Filament\Resources\Tasks\TaskResource;
+use App\Filament\Resources\Users\UserResource;
+use App\Models\Task;
 use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -61,6 +64,10 @@ class ActivityResource extends Resource
             return 'مستخدم';
         }
 
+        if ($subjectType === Task::class) {
+            return 'مهمة';
+        }
+
         foreach (Module::cases() as $module) {
             if ($module->modelClass() === $subjectType) {
                 return $module->getLabel();
@@ -82,7 +89,44 @@ class ActivityResource extends Resource
         }
 
         $options[User::class] = 'مستخدم';
+        $options[Task::class] = 'مهمة';
 
         return $options;
+    }
+
+    /**
+     * رابط عرض السجل المرتبط بالنشاط، أو null إن كان محذوفاً أو لا يقبل الربط.
+     */
+    public static function subjectUrl(?string $subjectType, ?int $subjectId): ?string
+    {
+        if ($subjectType === null || $subjectId === null) {
+            return null;
+        }
+
+        if ($subjectType === User::class) {
+            return User::query()->whereKey($subjectId)->exists()
+                ? UserResource::getUrl('view', ['record' => $subjectId])
+                : null;
+        }
+
+        if ($subjectType === Task::class) {
+            return Task::query()->whereKey($subjectId)->exists()
+                ? TaskResource::getUrl('view', ['record' => $subjectId])
+                : null;
+        }
+
+        foreach (Module::cases() as $module) {
+            if ($module->modelClass() !== $subjectType) {
+                continue;
+            }
+
+            $modelClass = $module->modelClass();
+
+            return $modelClass::query()->whereKey($subjectId)->exists()
+                ? $module->resourceClass()::getUrl('view', ['record' => $subjectId])
+                : null;
+        }
+
+        return null;
     }
 }

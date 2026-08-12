@@ -12,10 +12,12 @@ use App\Models\MinuteType;
 use App\Models\PeriodicReportType;
 use App\Models\RequirementGroup;
 use App\Models\Role;
+use App\Models\Task;
 use App\Models\User;
 use App\Observers\LocationObserver;
 use App\Policies\ActivityPolicy;
 use App\Policies\AdminOnlyPolicy;
+use App\Policies\TaskPolicy;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Carbon;
@@ -47,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(fn (User $user, string $ability): ?bool => $user->isAdmin() ? true : null);
 
         Gate::policy(Activity::class, ActivityPolicy::class);
+
+        Gate::policy(Task::class, TaskPolicy::class);
 
         foreach ([
             Location::class,

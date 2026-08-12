@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->profile(EditProfile::class)
+            ->databaseNotifications()
             ->brandName(new HtmlString(<<<'HTML'
                 <span class="flex flex-col leading-tight">
                     <span class="font-bold">ميسر</span>
