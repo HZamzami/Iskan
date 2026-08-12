@@ -31,6 +31,8 @@ class TaskExporter extends Exporter
                 ->formatStateUsing(fn (Task $record): string => $record->status->getLabel()),
             ExportColumn::make('due_date')
                 ->label('تاريخ الانتهاء'),
+            ExportColumn::make('due_time')
+                ->label('وقت الانتهاء'),
             ExportColumn::make('recurrence')
                 ->label('التكرار')
                 ->formatStateUsing(fn (Task $record): string => $record->recurrence->getLabel()),

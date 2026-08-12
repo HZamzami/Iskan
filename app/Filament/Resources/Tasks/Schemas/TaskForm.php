@@ -10,6 +10,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -47,6 +48,10 @@ class TaskForm
                                 ->label('تاريخ الانتهاء')
                                 ->required()
                                 ->minDate(now())
+                                ->columnSpan(1),
+                            TimePicker::make('due_time')
+                                ->label('وقت الانتهاء')
+                                ->seconds(false)
                                 ->columnSpan(1),
                             Select::make('priority')
                                 ->label('الأولوية')

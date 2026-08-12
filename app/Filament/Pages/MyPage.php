@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\MyAssignedRecordsWidget;
 use App\Filament\Widgets\MyAssignedTasksWidget;
 use App\Filament\Widgets\MyCreatedRecordsWidget;
 use App\Filament\Widgets\MyRequestedTasksWidget;
@@ -26,6 +27,7 @@ class MyPage extends Page
     {
         return [
             MyCreatedRecordsWidget::class,
+            MyAssignedRecordsWidget::class,
             MyAssignedTasksWidget::class,
             MyRequestedTasksWidget::class,
         ];

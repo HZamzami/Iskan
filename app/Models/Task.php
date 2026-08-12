@@ -26,6 +26,7 @@ class Task extends Model
         'title',
         'description',
         'due_date',
+        'due_time',
         'assigned_to',
         'assigned_role_id',
         'requested_by',
@@ -77,12 +78,30 @@ class Task extends Model
 
     public function requestTypeLabel(): string
     {
-        return match ($this->assignedRole?->slug) {
-            'asset_manager' => 'طلب مهمة داخلية',
-            'consultant' => 'طلب مهمة من مدير الأصل للاستشاري',
-            'contractor' => 'طلب مهمة من مدير الأصل للمقاول',
-            default => '—',
-        };
+        return self::requestTypeLabelFor($this->assignedRole);
+    }
+
+    /**
+     * Derives the request-type label from the target role's own name, so
+     * adding a role in الأدوار automatically gets a matching task-request
+     * label with no code change. مدير الأصل is special-cased as "داخلية"
+     * since it's the requester's own organization, not an external party.
+     */
+    public static function requestTypeLabelFor(?Role $role): string
+    {
+        if ($role === null) {
+            return '—';
+        }
+
+        if ($role->slug === 'asset_manager') {
+            return 'طلب مهمة داخلية';
+        }
+
+        // "لل" already carries the definite article (لـ + ال)، فنزيل "ال" من
+        // اسم الدور أولاً كي لا تتكرر إن كان الاسم مكتوباً بأداة التعريف أصلاً.
+        $name = preg_replace('/^ال/u', '', $role->name);
+
+        return "طلب مهمة من مدير الأصل لل{$name}";
     }
 
     public function canBeCompletedBy(User $user): bool

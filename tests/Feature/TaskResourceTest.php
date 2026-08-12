@@ -2,9 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Resources\Tasks\Pages\CreateInternalTask;
-use App\Filament\Resources\Tasks\Pages\CreateOwnerContractorTask;
-use App\Filament\Resources\Tasks\Pages\CreateOwnerConsultantTask;
+use App\Filament\Resources\Tasks\Pages\CreateTask;
 use App\Filament\Resources\Tasks\Pages\ListTasks;
 use App\Models\Role;
 use App\Models\Task;
@@ -32,7 +30,8 @@ class TaskResourceTest extends TestCase
 
         $assetManager = User::factory()->create(['role_id' => Role::where('slug', 'asset_manager')->value('id')]);
 
-        Livewire::test(CreateInternalTask::class)
+        Livewire::withQueryParams(['role' => 'asset_manager'])
+            ->test(CreateTask::class)
             ->fillForm([
                 'title' => 'مراجعة المستندات',
                 'assigned_to' => $assetManager->id,
@@ -56,7 +55,8 @@ class TaskResourceTest extends TestCase
     {
         $consultant = User::factory()->create(['role_id' => Role::where('slug', 'consultant')->value('id')]);
 
-        Livewire::test(CreateOwnerConsultantTask::class)
+        Livewire::withQueryParams(['role' => 'consultant'])
+            ->test(CreateTask::class)
             ->fillForm([
                 'title' => 'طلب تقرير',
                 'assigned_to' => $consultant->id,
@@ -74,7 +74,8 @@ class TaskResourceTest extends TestCase
     {
         $contractor = User::factory()->create(['role_id' => Role::where('slug', 'contractor')->value('id')]);
 
-        Livewire::test(CreateOwnerContractorTask::class)
+        Livewire::withQueryParams(['role' => 'contractor'])
+            ->test(CreateTask::class)
             ->fillForm([
                 'title' => 'طلب صيانة',
                 'assigned_to' => $contractor->id,
@@ -88,6 +89,13 @@ class TaskResourceTest extends TestCase
         $this->assertSame('contractor', $task->assignedRole->slug);
     }
 
+    public function test_create_task_rejects_unknown_role_slug(): void
+    {
+        Livewire::withQueryParams(['role' => 'not-a-real-role'])
+            ->test(CreateTask::class)
+            ->assertStatus(404);
+    }
+
     public function test_list_page_hides_template_rows(): void
     {
         $instance = Task::factory()->create();
@@ -96,5 +104,20 @@ class TaskResourceTest extends TestCase
         Livewire::test(ListTasks::class)
             ->assertCanSeeTableRecords([$instance])
             ->assertCanNotSeeTableRecords([$template]);
+    }
+
+    public function test_adding_a_role_automatically_adds_a_request_button(): void
+    {
+        Role::create(['name' => 'المورد', 'is_active' => true, 'sort_order' => 10]);
+
+        Livewire::test(ListTasks::class)
+            ->assertSee('طلب مهمة من مدير الأصل للمورد');
+    }
+
+    public function test_request_type_label_strips_redundant_definite_article(): void
+    {
+        $role = Role::create(['name' => 'الموزع', 'is_active' => true]);
+
+        $this->assertSame('طلب مهمة من مدير الأصل للموزع', Task::requestTypeLabelFor($role));
     }
 }

@@ -37,6 +37,11 @@ class TaskInfolist
                                 ->label('تاريخ الانتهاء')
                                 ->date('Y/m/d')
                                 ->columnSpan(1),
+                            TextEntry::make('due_time')
+                                ->label('وقت الانتهاء')
+                                ->time('H:i')
+                                ->placeholder('—')
+                                ->columnSpan(1),
                             TextEntry::make('priority')
                                 ->label('الأولوية')
                                 ->badge()

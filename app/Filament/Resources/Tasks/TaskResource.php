@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\Tasks;
 
-use App\Filament\Resources\Tasks\Pages\CreateInternalTask;
-use App\Filament\Resources\Tasks\Pages\CreateOwnerConsultantTask;
-use App\Filament\Resources\Tasks\Pages\CreateOwnerContractorTask;
+use App\Filament\Resources\Tasks\Pages\CreateTask;
 use App\Filament\Resources\Tasks\Pages\EditTask;
 use App\Filament\Resources\Tasks\Pages\ListTasks;
 use App\Filament\Resources\Tasks\Pages\ViewTask;
@@ -59,9 +57,7 @@ class TaskResource extends Resource
     {
         return [
             'index' => ListTasks::route('/'),
-            'create-internal' => CreateInternalTask::route('/create/internal'),
-            'create-owner-consultant' => CreateOwnerConsultantTask::route('/create/owner-consultant'),
-            'create-owner-contractor' => CreateOwnerContractorTask::route('/create/owner-contractor'),
+            'create' => CreateTask::route('/create'),
             'view' => ViewTask::route('/{record}'),
             'edit' => EditTask::route('/{record}/edit'),
         ];
