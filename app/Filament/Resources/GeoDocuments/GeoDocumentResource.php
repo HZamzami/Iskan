@@ -10,6 +10,7 @@ use App\Filament\Resources\GeoDocuments\Pages\ViewGeoDocument;
 use App\Filament\Resources\GeoDocuments\Schemas\GeoDocumentForm;
 use App\Filament\Resources\GeoDocuments\Schemas\GeoDocumentInfolist;
 use App\Filament\Resources\GeoDocuments\Tables\GeoDocumentsTable;
+use App\Filament\Resources\Tasks\RelationManagers\CommentsRelationManager;
 use App\Models\GeoDocument;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -54,7 +55,7 @@ class GeoDocumentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CommentsRelationManager::class,
         ];
     }
 

@@ -10,6 +10,7 @@ use App\Filament\Resources\ContractualRequirements\Pages\ViewContractualRequirem
 use App\Filament\Resources\ContractualRequirements\Schemas\ContractualRequirementForm;
 use App\Filament\Resources\ContractualRequirements\Schemas\ContractualRequirementInfolist;
 use App\Filament\Resources\ContractualRequirements\Tables\ContractualRequirementsTable;
+use App\Filament\Resources\Tasks\RelationManagers\CommentsRelationManager;
 use App\Models\ContractualRequirement;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -54,7 +55,7 @@ class ContractualRequirementResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CommentsRelationManager::class,
         ];
     }
 

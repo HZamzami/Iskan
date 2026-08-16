@@ -6,6 +6,7 @@ use App\Enums\Module;
 use App\Enums\TaskPriority;
 use App\Enums\TaskRecurrence;
 use App\Enums\TaskStatus;
+use App\Models\Concerns\HasComments;
 use App\Models\Concerns\LogsArchiveActivity;
 use Carbon\Carbon;
 use Database\Factories\TaskFactory;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Auth;
 
 class Task extends Model
 {
+    use HasComments;
+
     /** @use HasFactory<TaskFactory> */
     use HasFactory;
 

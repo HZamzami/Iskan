@@ -9,6 +9,7 @@ use App\Filament\Resources\Correspondences\Pages\ViewCorrespondence;
 use App\Filament\Resources\Correspondences\Schemas\CorrespondenceForm;
 use App\Filament\Resources\Correspondences\Schemas\CorrespondenceInfolist;
 use App\Filament\Resources\Correspondences\Tables\CorrespondencesTable;
+use App\Filament\Resources\Tasks\RelationManagers\CommentsRelationManager;
 use App\Models\Correspondence;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -51,7 +52,7 @@ class CorrespondenceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CommentsRelationManager::class,
         ];
     }
 

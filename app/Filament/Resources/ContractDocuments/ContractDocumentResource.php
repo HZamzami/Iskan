@@ -10,6 +10,7 @@ use App\Filament\Resources\ContractDocuments\Pages\ViewContractDocument;
 use App\Filament\Resources\ContractDocuments\Schemas\ContractDocumentForm;
 use App\Filament\Resources\ContractDocuments\Schemas\ContractDocumentInfolist;
 use App\Filament\Resources\ContractDocuments\Tables\ContractDocumentsTable;
+use App\Filament\Resources\Tasks\RelationManagers\CommentsRelationManager;
 use App\Models\ContractDocument;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -54,7 +55,7 @@ class ContractDocumentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CommentsRelationManager::class,
         ];
     }
 

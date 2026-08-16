@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CorrespondenceDirection;
 use App\Enums\CorrespondenceStatus;
+use App\Models\Concerns\HasComments;
 use App\Models\Concerns\LogsArchiveActivity;
 use Database\Factories\CorrespondenceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Correspondence extends Model
 {
+    use HasComments;
+
     /** @use HasFactory<CorrespondenceFactory> */
     use HasFactory;
 

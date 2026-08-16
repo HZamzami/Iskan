@@ -10,6 +10,7 @@ use App\Filament\Resources\FinancialFlows\Pages\ViewFinancialFlow;
 use App\Filament\Resources\FinancialFlows\Schemas\FinancialFlowForm;
 use App\Filament\Resources\FinancialFlows\Schemas\FinancialFlowInfolist;
 use App\Filament\Resources\FinancialFlows\Tables\FinancialFlowsTable;
+use App\Filament\Resources\Tasks\RelationManagers\CommentsRelationManager;
 use App\Models\FinancialFlow;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -54,7 +55,7 @@ class FinancialFlowResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CommentsRelationManager::class,
         ];
     }
 

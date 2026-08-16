@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\WorkflowStatus;
 use App\Models\Concerns\BelongsToDocumentType;
+use App\Models\Concerns\HasComments;
 use App\Models\Concerns\HasReferenceNumber;
 use App\Models\Concerns\HasWorkflow;
 use App\Models\Concerns\LogsArchiveActivity;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 class ContractDocument extends Model
 {
     use BelongsToDocumentType;
+    use HasComments;
 
     /** @use HasFactory<ContractDocumentFactory> */
     use HasFactory;

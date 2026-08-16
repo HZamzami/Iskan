@@ -10,6 +10,7 @@ use App\Filament\Resources\Minutes\Pages\ViewMinute;
 use App\Filament\Resources\Minutes\Schemas\MinuteForm;
 use App\Filament\Resources\Minutes\Schemas\MinuteInfolist;
 use App\Filament\Resources\Minutes\Tables\MinutesTable;
+use App\Filament\Resources\Tasks\RelationManagers\CommentsRelationManager;
 use App\Models\Minute;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -62,7 +63,7 @@ class MinuteResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CommentsRelationManager::class,
         ];
     }
 

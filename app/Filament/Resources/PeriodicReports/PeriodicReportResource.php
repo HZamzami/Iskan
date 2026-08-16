@@ -10,6 +10,7 @@ use App\Filament\Resources\PeriodicReports\Pages\ViewPeriodicReport;
 use App\Filament\Resources\PeriodicReports\Schemas\PeriodicReportForm;
 use App\Filament\Resources\PeriodicReports\Schemas\PeriodicReportInfolist;
 use App\Filament\Resources\PeriodicReports\Tables\PeriodicReportsTable;
+use App\Filament\Resources\Tasks\RelationManagers\CommentsRelationManager;
 use App\Models\PeriodicReport;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -54,7 +55,7 @@ class PeriodicReportResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CommentsRelationManager::class,
         ];
     }
 
