@@ -65,4 +65,12 @@ class TaskResource extends Resource
             'edit' => EditTask::route('/{record}/edit'),
         ];
     }
+
+    /**
+     * @return array<string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title'];
+    }
 }

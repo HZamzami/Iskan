@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class CorrespondenceResource extends Resource
@@ -64,5 +65,18 @@ class CorrespondenceResource extends Resource
             'view' => ViewCorrespondence::route('/{record}'),
             'edit' => EditCorrespondence::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * @return array<string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['reference_number', 'subject'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return "{$record->reference_number} — {$record->subject}";
     }
 }

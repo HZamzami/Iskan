@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->profile(EditProfile::class, isSimple: false)
             ->databaseNotifications()
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->brandName(new HtmlString(<<<'HTML'
                 <span class="flex flex-col leading-tight">
                     <span class="font-bold">ميسر</span>

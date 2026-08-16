@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class MinuteResource extends Resource
@@ -75,5 +76,18 @@ class MinuteResource extends Resource
             'view' => ViewMinute::route('/{record}'),
             'edit' => EditMinute::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * @return array<string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['reference_number', 'title'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return "{$record->reference_number} — {$record->title}";
     }
 }

@@ -17,6 +17,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class GeoDocumentResource extends Resource
@@ -67,5 +68,18 @@ class GeoDocumentResource extends Resource
             'view' => ViewGeoDocument::route('/{record}'),
             'edit' => EditGeoDocument::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * @return array<string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['reference_number', 'title'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return "{$record->reference_number} — {$record->title}";
     }
 }
