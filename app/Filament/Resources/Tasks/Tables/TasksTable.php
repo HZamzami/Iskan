@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Tasks\Tables;
 
+use App\Enums\Module;
 use App\Enums\TaskPriority;
 use App\Enums\TaskRecurrence;
 use App\Enums\TaskStatus;
@@ -66,6 +67,13 @@ class TasksTable
                 TextColumn::make('recurrence')
                     ->label('التكرار')
                     ->badge(),
+                TextColumn::make('linkable')
+                    ->label('السجل المرتبط')
+                    ->state(fn (Task $record): ?string => $record->linkedRecordLabel())
+                    ->url(fn (Task $record): ?string => $record->linkedRecordUrl())
+                    ->openUrlInNewTab()
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label('تاريخ الطلب')
                     ->date('Y/m/d')
@@ -118,6 +126,12 @@ class TasksTable
                     ->color('success')
                     ->visible(fn (Task $record): bool => $record->status !== TaskStatus::Completed && $record->canBeCompletedBy(Filament::auth()->user()))
                     ->action(fn (Task $record) => $record->update(['status' => TaskStatus::Completed, 'completed_at' => now()])),
+                Action::make('createLinkedRecord')
+                    ->label('إنشاء السجل الآن')
+                    ->icon(Heroicon::DocumentPlus)
+                    ->color('primary')
+                    ->visible(fn (Task $record): bool => $record->requested_module instanceof Module && $record->linkable_id === null)
+                    ->url(fn (Task $record): string => $record->requested_module->resourceClass()::getUrl('create', ['from_task' => $record->id])),
                 Action::make('stopRecurrence')
                     ->label('إيقاف التكرار')
                     ->icon(Heroicon::StopCircle)

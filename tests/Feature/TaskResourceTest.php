@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Module;
 use App\Filament\Resources\Tasks\Pages\CreateTask;
 use App\Filament\Resources\Tasks\Pages\ListTasks;
+use App\Models\Minute;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
@@ -115,5 +117,62 @@ class TaskResourceTest extends TestCase
         $role = Role::create(['name' => 'الموزع', 'is_active' => true]);
 
         $this->assertSame('طلب مهمة من مدير الأصل للموزع', Task::requestTypeLabelFor($role));
+    }
+
+    public function test_can_create_task_linked_to_an_existing_archive_record(): void
+    {
+        $role = Role::where('slug', 'asset_manager')->firstOrFail();
+        $assignee = User::factory()->create(['role_id' => $role->id]);
+        $minute = Minute::factory()->create();
+
+        Livewire::test(CreateTask::class)
+            ->fillForm([
+                'title' => 'متابعة محضر الاجتماع',
+                'assigned_role_id' => $role->id,
+                'assigned_to' => $assignee->id,
+                'due_date' => now()->addDays(3)->format('Y-m-d'),
+                'linkable_type' => Minute::class,
+                'linkable_id' => $minute->id,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $task = Task::query()->where('title', 'متابعة محضر الاجتماع')->firstOrFail();
+
+        $this->assertTrue($task->linkable->is($minute));
+        $this->assertNull($task->requested_module);
+    }
+
+    public function test_can_create_task_requesting_a_new_archive_record(): void
+    {
+        $role = Role::where('slug', 'asset_manager')->firstOrFail();
+        $assignee = User::factory()->create(['role_id' => $role->id]);
+
+        Livewire::test(CreateTask::class)
+            ->fillForm([
+                'title' => 'إنشاء محضر جديد',
+                'assigned_role_id' => $role->id,
+                'assigned_to' => $assignee->id,
+                'due_date' => now()->addDays(3)->format('Y-m-d'),
+                'requested_module' => 'minutes',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $task = Task::query()->where('title', 'إنشاء محضر جديد')->firstOrFail();
+
+        $this->assertSame(Module::Minutes, $task->requested_module);
+        $this->assertNull($task->linkable_id);
+    }
+
+    public function test_fulfilling_a_requested_module_clears_the_request_and_links_the_record(): void
+    {
+        $task = Task::factory()->create(['requested_module' => Module::Minutes]);
+        $minute = Minute::factory()->create();
+
+        $task->fulfillRequestWith($minute);
+
+        $this->assertTrue($task->fresh()->linkable->is($minute));
+        $this->assertNull($task->fresh()->requested_module);
     }
 }

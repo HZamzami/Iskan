@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Tasks\Schemas;
 
+use App\Enums\Module;
 use App\Enums\TaskPriority;
 use App\Enums\TaskRecurrence;
 use App\Models\Role;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -18,6 +20,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Model;
 
 class TaskForm
 {
@@ -78,6 +81,36 @@ class TaskForm
                                 ->native(false)
                                 ->columnSpan(1),
                         ]),
+                    ]),
+
+                Section::make('الربط بالأرشيف')
+                    ->icon(Heroicon::Link)
+                    ->columnSpanFull()
+                    ->schema([
+                        MorphToSelect::make('linkable')
+                            ->label('سجل مرتبط (اختياري)')
+                            ->types(collect(Module::cases())
+                                ->map(fn (Module $module): MorphToSelect\Type => MorphToSelect\Type::make($module->modelClass())
+                                    ->label($module->getLabel())
+                                    ->getOptionLabelFromRecordUsing(fn (Model $record): string => $module === Module::Correspondences
+                                        ? "{$record->reference_number} — {$record->subject}"
+                                        : "{$record->reference_number} — {$record->title}")
+                                    ->searchColumns($module === Module::Correspondences
+                                        ? ['reference_number', 'subject']
+                                        : ['reference_number', 'title']))
+                                ->all())
+                            ->searchable()
+                            ->live()
+                            ->visible(fn (Get $get): bool => blank($get('requested_module')))
+                            ->columnSpanFull(),
+                        Select::make('requested_module')
+                            ->label('أو اطلب إنشاء سجل جديد من نوع')
+                            ->helperText('يظهر للمكلَّف زر "إنشاء السجل الآن" يفتح نموذج الإنشاء المناسب ويربط السجل بالمهمة تلقائياً بعد حفظه.')
+                            ->options(Module::class)
+                            ->live()
+                            ->native(false)
+                            ->visible(fn (Get $get): bool => blank($get('linkable_id')))
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('الإشعارات والمرفقات')

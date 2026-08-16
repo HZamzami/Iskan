@@ -132,4 +132,19 @@ enum Module: string implements HasLabel
     {
         return "{$this->value}.{$level->value}";
     }
+
+    /**
+     * يعيد وحدة الأرشيف المطابقة لصنف نموذج معيّن، أو null إن لم يكن الصنف
+     * أحد نماذج الوحدات السبع (مثلاً User أو Task).
+     */
+    public static function fromModelClass(?string $modelClass): ?self
+    {
+        foreach (self::cases() as $module) {
+            if ($module->modelClass() === $modelClass) {
+                return $module;
+            }
+        }
+
+        return null;
+    }
 }

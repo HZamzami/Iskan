@@ -57,6 +57,19 @@ class TaskInfolist
                         ]),
                     ]),
 
+                Section::make('الربط بالأرشيف')
+                    ->icon(Heroicon::Link)
+                    ->columnSpanFull()
+                    ->visible(fn (Task $record): bool => $record->linkedRecordLabel() !== null)
+                    ->schema([
+                        TextEntry::make('linkable')
+                            ->hiddenLabel()
+                            ->state(fn (Task $record): ?string => $record->linkedRecordLabel())
+                            ->url(fn (Task $record): ?string => $record->linkedRecordUrl())
+                            ->openUrlInNewTab()
+                            ->columnSpanFull(),
+                    ]),
+
                 Section::make('ملاحظات')
                     ->icon(Heroicon::PencilSquare)
                     ->columnSpanFull()

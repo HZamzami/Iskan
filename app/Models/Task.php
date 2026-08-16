@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Module;
 use App\Enums\TaskPriority;
 use App\Enums\TaskRecurrence;
 use App\Enums\TaskStatus;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Auth;
 
 class Task extends Model
@@ -40,6 +42,9 @@ class Task extends Model
         'file_path',
         'notify_by_email',
         'completed_at',
+        'linkable_type',
+        'linkable_id',
+        'requested_module',
     ];
 
     protected static function booted(): void
@@ -74,6 +79,53 @@ class Task extends Model
     public function occurrences(): HasMany
     {
         return $this->hasMany(Task::class, 'parent_task_id');
+    }
+
+    public function linkable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * تربط المهمة بسجل تم إنشاؤه تلبيةً لطلبها (مثلاً محضر طُلب إنشاؤه)،
+     * وتُسقط طلب الإنشاء المعلَّق بما أنه تحقق الآن.
+     */
+    public function fulfillRequestWith(Model $record): void
+    {
+        $this->linkable()->associate($record);
+        $this->requested_module = null;
+        $this->save();
+    }
+
+    /**
+     * التسمية المعروضة للسجل المرتبط، أو لطلب إنشائه إن لم يُنشأ بعد.
+     */
+    public function linkedRecordLabel(): ?string
+    {
+        if ($this->linkable !== null) {
+            $module = Module::fromModelClass($this->linkable_type);
+
+            return $module === Module::Correspondences
+                ? "{$this->linkable->reference_number} — {$this->linkable->subject}"
+                : "{$this->linkable->reference_number} — {$this->linkable->title}";
+        }
+
+        if ($this->requested_module instanceof Module) {
+            return "مطلوب: {$this->requested_module->getLabel()}";
+        }
+
+        return null;
+    }
+
+    public function linkedRecordUrl(): ?string
+    {
+        if ($this->linkable === null) {
+            return null;
+        }
+
+        $module = Module::fromModelClass($this->linkable_type);
+
+        return $module?->resourceClass()::getUrl('view', ['record' => $this->linkable_id]);
     }
 
     public function requestTypeLabel(): string
@@ -146,6 +198,7 @@ class Task extends Model
             'is_active' => 'boolean',
             'notify_by_email' => 'boolean',
             'completed_at' => 'datetime',
+            'requested_module' => Module::class,
         ];
     }
 }
