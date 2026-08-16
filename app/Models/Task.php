@@ -106,7 +106,7 @@ class Task extends Model
 
     public function canBeCompletedBy(User $user): bool
     {
-        return $user->isAdmin() || $this->assigned_to === $user->id;
+        return $user->isAdmin() || $this->assigned_to === $user->id || $this->requested_by === $user->id;
     }
 
     public function isOverdue(): bool

@@ -44,4 +44,21 @@ class TaskPolicyTest extends TestCase
         $this->assertTrue($admin->can('delete', $task));
         $this->assertFalse($bystander->can('delete', $task));
     }
+
+    public function test_requester_can_change_status_of_a_task_assigned_to_someone_else(): void
+    {
+        $requester = User::factory()->create();
+        $assignee = User::factory()->create();
+        $task = Task::factory()->create(['requested_by' => $requester->id, 'assigned_to' => $assignee->id]);
+
+        $this->assertTrue($task->canBeCompletedBy($requester));
+    }
+
+    public function test_unrelated_user_cannot_change_status_of_a_task(): void
+    {
+        $bystander = User::factory()->create();
+        $task = Task::factory()->create();
+
+        $this->assertFalse($task->canBeCompletedBy($bystander));
+    }
 }
