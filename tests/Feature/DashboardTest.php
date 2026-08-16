@@ -32,7 +32,7 @@ class DashboardTest extends TestCase
         $admin = $this->makeAdminUser();
         $this->actingAs($admin);
 
-        $this->get('/admin')
+        $this->get('/')
             ->assertOk()
             ->assertSee('مرحباً،')
             ->assertSee($admin->name);
