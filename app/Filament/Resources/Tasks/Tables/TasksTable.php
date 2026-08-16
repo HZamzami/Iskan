@@ -67,6 +67,13 @@ class TasksTable
                 TextColumn::make('recurrence')
                     ->label('التكرار')
                     ->badge(),
+                TextColumn::make('subtasks_progress')
+                    ->label('فرعية')
+                    ->state(fn (Task $record): ?string => $record->subtasksProgressLabel())
+                    ->placeholder('—')
+                    ->badge()
+                    ->color('gray')
+                    ->toggleable(),
                 TextColumn::make('linkable')
                     ->label('السجل المرتبط')
                     ->state(fn (Task $record): ?string => $record->linkedRecordLabel())

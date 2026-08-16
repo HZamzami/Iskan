@@ -45,6 +45,7 @@ class Task extends Model
         'linkable_type',
         'linkable_id',
         'requested_module',
+        'subtask_of_id',
     ];
 
     protected static function booted(): void
@@ -84,6 +85,32 @@ class Task extends Model
     public function linkable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function subtaskOf(): BelongsTo
+    {
+        return $this->belongsTo(Task::class, 'subtask_of_id');
+    }
+
+    public function subtasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'subtask_of_id');
+    }
+
+    /**
+     * نسبة إنجاز المهام الفرعية كنص "٢ / ٥"، أو null إن لم تكن هناك مهام فرعية.
+     */
+    public function subtasksProgressLabel(): ?string
+    {
+        $total = $this->subtasks()->count();
+
+        if ($total === 0) {
+            return null;
+        }
+
+        $completed = $this->subtasks()->where('status', TaskStatus::Completed)->count();
+
+        return "{$completed} / {$total}";
     }
 
     /**

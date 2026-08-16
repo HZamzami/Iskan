@@ -3,13 +3,18 @@
 namespace Tests\Feature;
 
 use App\Enums\Module;
+use App\Enums\TaskStatus;
 use App\Filament\Resources\Tasks\Pages\CreateTask;
 use App\Filament\Resources\Tasks\Pages\ListTasks;
+use App\Filament\Resources\Tasks\Pages\ViewTask;
+use App\Filament\Resources\Tasks\RelationManagers\SubtasksRelationManager;
 use App\Models\Minute;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
 use App\Notifications\TaskAssignedNotification;
+use Filament\Actions\CreateAction;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -174,5 +179,69 @@ class TaskResourceTest extends TestCase
 
         $this->assertTrue($task->fresh()->linkable->is($minute));
         $this->assertNull($task->fresh()->requested_module);
+    }
+
+    public function test_can_create_a_subtask_of_an_existing_task(): void
+    {
+        $role = Role::where('slug', 'asset_manager')->firstOrFail();
+        $assignee = User::factory()->create(['role_id' => $role->id]);
+        $parent = Task::factory()->create();
+
+        Livewire::test(CreateTask::class)
+            ->fillForm([
+                'title' => 'مهمة فرعية',
+                'subtask_of_id' => $parent->id,
+                'assigned_role_id' => $role->id,
+                'assigned_to' => $assignee->id,
+                'due_date' => now()->addDays(3)->format('Y-m-d'),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $subtask = Task::query()->where('title', 'مهمة فرعية')->firstOrFail();
+
+        $this->assertTrue($subtask->subtaskOf->is($parent));
+        $this->assertTrue($parent->subtasks->contains($subtask));
+    }
+
+    public function test_subtasks_progress_label_counts_completed_subtasks(): void
+    {
+        $parent = Task::factory()->create();
+
+        $this->assertNull($parent->subtasksProgressLabel());
+
+        Task::factory()->create(['subtask_of_id' => $parent->id, 'status' => TaskStatus::Completed]);
+        Task::factory()->create(['subtask_of_id' => $parent->id]);
+
+        $this->assertSame('1 / 2', $parent->fresh()->subtasksProgressLabel());
+    }
+
+    public function test_subtask_select_options_exclude_tasks_that_are_themselves_subtasks(): void
+    {
+        $topLevel = Task::factory()->create(['title' => 'مهمة رئيسية']);
+        $existingSubtask = Task::factory()->create(['title' => 'مهمة فرعية موجودة', 'subtask_of_id' => $topLevel->id]);
+
+        Livewire::test(CreateTask::class)
+            ->assertSee('مهمة رئيسية')
+            ->assertDontSee('مهمة فرعية موجودة');
+    }
+
+    public function test_subtasks_relation_manager_lists_and_creates_subtasks(): void
+    {
+        $role = Role::where('slug', 'asset_manager')->firstOrFail();
+        $assignee = User::factory()->create(['role_id' => $role->id]);
+        $parent = Task::factory()->create();
+        $existingSubtask = Task::factory()->create(['subtask_of_id' => $parent->id, 'title' => 'مهمة فرعية سابقة']);
+
+        Livewire::test(SubtasksRelationManager::class, ['ownerRecord' => $parent, 'pageClass' => ViewTask::class])
+            ->assertCanSeeTableRecords([$existingSubtask])
+            ->callAction(TestAction::make(CreateAction::class)->table(), [
+                'title' => 'مهمة فرعية جديدة',
+                'assigned_to' => $assignee->id,
+                'priority' => 'normal',
+            ])
+            ->assertHasNoActionErrors();
+
+        $this->assertTrue($parent->subtasks()->where('title', 'مهمة فرعية جديدة')->exists());
     }
 }

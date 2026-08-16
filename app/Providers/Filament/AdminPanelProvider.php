@@ -31,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->profile(EditProfile::class, isSimple: false)
             ->databaseNotifications()
+            ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->brandName(new HtmlString(<<<'HTML'
                 <span class="flex flex-col leading-tight">
                     <span class="font-bold">ميسر</span>

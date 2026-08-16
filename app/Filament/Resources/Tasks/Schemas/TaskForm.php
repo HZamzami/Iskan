@@ -6,6 +6,7 @@ use App\Enums\Module;
 use App\Enums\TaskPriority;
 use App\Enums\TaskRecurrence;
 use App\Models\Role;
+use App\Models\Task;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -37,6 +38,19 @@ class TaskForm
                                 ->label('عنوان المهمة')
                                 ->required()
                                 ->maxLength(255)
+                                ->columnSpanFull(),
+                            Select::make('subtask_of_id')
+                                ->label('مهمة رئيسية (اختياري)')
+                                ->helperText('اجعل هذه المهمة تابعة لمهمة رئيسية أخرى.')
+                                ->options(fn (?Task $record): array => Task::query()
+                                    ->instances()
+                                    ->whereNull('subtask_of_id')
+                                    ->when($record, fn ($query) => $query->whereKeyNot($record->id))
+                                    ->pluck('title', 'id')
+                                    ->all())
+                                ->searchable()
+                                ->preload()
+                                ->native(false)
                                 ->columnSpanFull(),
                             Select::make('assigned_role_id')
                                 ->label('جهة الإسناد')
