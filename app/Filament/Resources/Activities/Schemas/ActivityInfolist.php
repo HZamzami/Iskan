@@ -54,6 +54,7 @@ class ActivityInfolist
                                 ->columnSpan(1),
                             TextEntry::make('subject_id')
                                 ->label('رقم السجل')
+                                ->formatStateUsing(fn (Activity $record): string => ActivityResource::subjectLabel($record->subject_type, $record->subject_id))
                                 ->url(fn (Activity $record): ?string => ActivityResource::subjectUrl($record->subject_type, $record->subject_id))
                                 ->openUrlInNewTab()
                                 ->columnSpan(1),

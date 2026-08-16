@@ -56,6 +56,7 @@ class ActivitiesTable
                     ->formatStateUsing(fn (?string $state): string => ActivityResource::subjectTypeLabel($state)),
                 TextColumn::make('subject_id')
                     ->label('رقم السجل')
+                    ->formatStateUsing(fn (Activity $record): string => ActivityResource::subjectLabel($record->subject_type, $record->subject_id))
                     ->url(fn (Activity $record): ?string => ActivityResource::subjectUrl($record->subject_type, $record->subject_id))
                     ->openUrlInNewTab()
                     ->toggleable(),

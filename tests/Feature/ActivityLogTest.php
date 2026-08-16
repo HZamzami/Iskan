@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
+use App\Filament\Resources\Activities\ActivityResource;
 use App\Filament\Resources\Activities\Pages\ListActivities;
 use App\Models\Minute;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -103,5 +105,33 @@ class ActivityLogTest extends TestCase
             ->assertCanSeeTableRecords(
                 Activity::query()->where('subject_type', Minute::class)->get(),
             );
+    }
+
+    public function test_subject_label_shows_reference_number_for_archive_records(): void
+    {
+        $minute = Minute::factory()->create();
+
+        $this->assertSame(
+            $minute->reference_number,
+            ActivityResource::subjectLabel(Minute::class, $minute->id),
+        );
+    }
+
+    public function test_subject_label_shows_name_and_title_for_users_and_tasks(): void
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->create();
+
+        $this->assertSame($user->name, ActivityResource::subjectLabel(User::class, $user->id));
+        $this->assertSame($task->title, ActivityResource::subjectLabel(Task::class, $task->id));
+    }
+
+    public function test_subject_label_falls_back_to_raw_id_when_record_is_gone(): void
+    {
+        $minute = Minute::factory()->create();
+        $minuteId = $minute->id;
+        $minute->delete();
+
+        $this->assertSame("#{$minuteId}", ActivityResource::subjectLabel(Minute::class, $minuteId));
     }
 }

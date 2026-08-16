@@ -95,6 +95,37 @@ class ActivityResource extends Resource
     }
 
     /**
+     * التسمية المعروضة للسجل المرتبط بالنشاط (الرقم المرجعي للأرشيف، اسم
+     * المستخدم، أو عنوان المهمة)، أو رقم السجل الخام إن تعذّر العثور عليه.
+     */
+    public static function subjectLabel(?string $subjectType, ?int $subjectId): string
+    {
+        if ($subjectType === null || $subjectId === null) {
+            return '—';
+        }
+
+        if ($subjectType === User::class) {
+            return User::query()->find($subjectId)?->name ?? "#{$subjectId}";
+        }
+
+        if ($subjectType === Task::class) {
+            return Task::query()->find($subjectId)?->title ?? "#{$subjectId}";
+        }
+
+        foreach (Module::cases() as $module) {
+            if ($module->modelClass() !== $subjectType) {
+                continue;
+            }
+
+            $modelClass = $module->modelClass();
+
+            return $modelClass::query()->find($subjectId)?->reference_number ?? "#{$subjectId}";
+        }
+
+        return "#{$subjectId}";
+    }
+
+    /**
      * رابط عرض السجل المرتبط بالنشاط، أو null إن كان محذوفاً أو لا يقبل الربط.
      */
     public static function subjectUrl(?string $subjectType, ?int $subjectId): ?string
