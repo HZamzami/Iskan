@@ -14,6 +14,16 @@ class EditProfileTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_profile_page_renders_inside_the_full_panel_shell(): void
+    {
+        $this->actingAs($this->makeAdminUser());
+
+        $this->get(route('filament.admin.auth.profile'))
+            ->assertOk()
+            ->assertSee('ميسر')
+            ->assertSee('لوحة المعلومات');
+    }
+
     public function test_user_can_update_name_and_phone(): void
     {
         $user = $this->makeAdminUser();

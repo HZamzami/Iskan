@@ -29,7 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
-            ->profile(EditProfile::class)
+            ->profile(EditProfile::class, isSimple: false)
             ->databaseNotifications()
             ->brandName(new HtmlString(<<<'HTML'
                 <span class="flex flex-col leading-tight">
