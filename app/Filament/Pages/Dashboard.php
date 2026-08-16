@@ -7,9 +7,11 @@ use App\Filament\Widgets\CorrespondenceTrendChart;
 use App\Filament\Widgets\ExpiringContracts;
 use App\Filament\Widgets\FinancialFlowsChart;
 use App\Filament\Widgets\LatestDocuments;
+use App\Filament\Widgets\MyAssignedTasksWidget;
 use App\Filament\Widgets\QuickActions;
 use App\Filament\Widgets\RecentActivity;
 use App\Filament\Widgets\SiteOverview;
+use App\Filament\Widgets\TasksOverviewStats;
 use App\Models\Location;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -75,10 +77,12 @@ class Dashboard extends BaseDashboard
         return [
             QuickActions::class,
             ArchiveOverviewStats::class,
+            TasksOverviewStats::class,
             SiteOverview::class,
             FinancialFlowsChart::class,
             CorrespondenceTrendChart::class,
             ExpiringContracts::class,
+            MyAssignedTasksWidget::class,
             LatestDocuments::class,
             RecentActivity::class,
         ];

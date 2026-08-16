@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
+use App\Enums\TaskStatus;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\ArchiveOverviewStats;
 use App\Filament\Widgets\ExpiringContracts;
@@ -12,10 +13,12 @@ use App\Filament\Widgets\LatestDocuments;
 use App\Filament\Widgets\QuickActions;
 use App\Filament\Widgets\RecentActivity;
 use App\Filament\Widgets\SiteOverview;
+use App\Filament\Widgets\TasksOverviewStats;
 use App\Models\ContractDocument;
 use App\Models\FinancialFlow;
 use App\Models\GeoDocument;
 use App\Models\Minute;
+use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -232,6 +235,22 @@ class DashboardTest extends TestCase
             ->assertSee('محضر للاختبار')
             ->assertSee('خريطة للاختبار')
             ->assertDontSee('عقد لا يظهر');
+    }
+
+    public function test_dashboard_shows_tasks_overview_stats(): void
+    {
+        $admin = $this->makeAdminUser();
+        $this->actingAs($admin);
+
+        Task::factory()->create(['assigned_to' => $admin->id, 'status' => TaskStatus::Pending, 'due_date' => today()->subDay()]);
+        Task::factory()->create(['assigned_to' => $admin->id, 'status' => TaskStatus::Completed, 'completed_at' => now()]);
+
+        Livewire::test(TasksOverviewStats::class)
+            ->assertSee('مهامي المعلقة')
+            ->assertSee('مهام متأخرة')
+            ->assertSee('أُنجزت هذا الأسبوع');
+
+        $this->assertContains(TasksOverviewStats::class, (new Dashboard)->getWidgets());
     }
 
     public function test_financial_chart_renders_and_switches_year(): void
