@@ -17,7 +17,7 @@ class EditTask extends EditRecord
 
     public function form(Schema $schema): Schema
     {
-        return TaskForm::configure($schema, $this->record->assignedRole?->slug);
+        return TaskForm::configure($schema);
     }
 
     protected function getHeaderActions(): array

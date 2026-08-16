@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Tasks\Schemas;
 
 use App\Enums\TaskPriority;
 use App\Enums\TaskRecurrence;
+use App\Models\Role;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -14,12 +15,13 @@ use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
 class TaskForm
 {
-    public static function configure(Schema $schema, ?string $lockedRoleSlug = null): Schema
+    public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
@@ -33,12 +35,20 @@ class TaskForm
                                 ->required()
                                 ->maxLength(255)
                                 ->columnSpanFull(),
+                            Select::make('assigned_role_id')
+                                ->label('جهة الإسناد')
+                                ->options(fn (): array => Role::active()->ordered()->pluck('name', 'id')->all())
+                                ->required()
+                                ->live()
+                                ->native(false)
+                                ->columnSpan(1),
                             Select::make('assigned_to')
                                 ->label('المكلَّف')
-                                ->options(fn (): array => User::query()
-                                    ->ofCategory($lockedRoleSlug ?? '')
+                                ->options(fn (Get $get): array => User::query()
+                                    ->whereHas('role', fn ($query) => $query->whereKey($get('assigned_role_id')))
                                     ->pluck('name', 'id')
                                     ->all())
+                                ->disabled(fn (Get $get): bool => blank($get('assigned_role_id')))
                                 ->searchable()
                                 ->preload()
                                 ->native(false)
