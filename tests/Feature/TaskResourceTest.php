@@ -16,7 +16,9 @@ use App\Notifications\TaskAssignedNotification;
 use Filament\Actions\CreateAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -27,6 +29,8 @@ class TaskResourceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Storage::fake('local');
 
         $this->actingAs($this->makeAdminUser());
     }
@@ -57,6 +61,23 @@ class TaskResourceTest extends TestCase
         $this->assertNotNull($task->requested_by);
 
         Notification::assertSentTo($assetManager, TaskAssignedNotification::class);
+    }
+
+    public function test_create_rejects_a_disallowed_attachment_extension(): void
+    {
+        $role = Role::where('slug', 'asset_manager')->firstOrFail();
+        $assignee = User::factory()->create(['role_id' => $role->id]);
+
+        Livewire::test(CreateTask::class)
+            ->fillForm([
+                'title' => 'مهمة بمرفق غير مسموح',
+                'assigned_role_id' => $role->id,
+                'assigned_to' => $assignee->id,
+                'due_date' => now()->addDays(3)->format('Y-m-d'),
+                'file_path' => UploadedFile::fake()->create('malware.exe', 100),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['file_path']);
     }
 
     public function test_can_create_task_targeting_consultant(): void

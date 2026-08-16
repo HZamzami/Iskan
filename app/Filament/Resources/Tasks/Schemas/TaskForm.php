@@ -8,6 +8,7 @@ use App\Enums\TaskRecurrence;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\FileTypes;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\MorphToSelect;
@@ -139,6 +140,10 @@ class TaskForm
                             ->label('المرفق')
                             ->disk('local')
                             ->directory('tasks')
+                            ->acceptedFileTypes(FileTypes::mimeTypesFor(FileTypes::suggestions()))
+                            ->rule('extensions:'.implode(',', FileTypes::suggestions()))
+                            ->maxSize(20480)
+                            ->helperText('الامتدادات المسموحة: '.implode('، ', FileTypes::suggestions()))
                             ->downloadable()
                             ->columnSpanFull(),
                         Textarea::make('description')

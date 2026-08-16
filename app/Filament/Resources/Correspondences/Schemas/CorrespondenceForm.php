@@ -96,6 +96,7 @@ class CorrespondenceForm
                             ->disk('local')
                             ->directory('correspondence-files')
                             ->acceptedFileTypes(['application/pdf'])
+                            ->rule('extensions:pdf')
                             ->maxSize(10240)
                             ->downloadable()
                             ->required()

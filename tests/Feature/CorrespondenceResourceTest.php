@@ -92,6 +92,25 @@ class CorrespondenceResourceTest extends TestCase
         Storage::disk('local')->assertExists($correspondence->file_path);
     }
 
+    public function test_create_rejects_a_non_pdf_attachment(): void
+    {
+        $entity = Entity::factory()->create();
+
+        Livewire::test(CreateCorrespondence::class)
+            ->fillForm([
+                'direction' => CorrespondenceDirection::Incoming->value,
+                'subject' => 'خطاب بشأن تخصيص أرض',
+                'status' => CorrespondenceStatus::New->value,
+                'sender' => 'وزارة الإسكان',
+                'recipient' => 'إدارة المشاريع',
+                'entity_id' => $entity->id,
+                'document_date' => '2026-07-01',
+                'file_path' => UploadedFile::fake()->create('malware.exe', 100),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['file_path']);
+    }
+
     public function test_reference_number_is_auto_generated(): void
     {
         $correspondence = Correspondence::factory()->incoming()->create();
