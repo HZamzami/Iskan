@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\GenerateContractFollowUpTasks;
 use App\Console\Commands\GenerateRecurringTasks;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command(GenerateRecurringTasks::class)->dailyAt('06:00');
+        $schedule->command(GenerateContractFollowUpTasks::class)->dailyAt('06:30');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
