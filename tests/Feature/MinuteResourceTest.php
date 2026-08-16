@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Module;
 use App\Filament\Resources\Minutes\Pages\CreateMinute;
 use App\Filament\Resources\Minutes\Pages\ListMinutes;
 use App\Models\Minute;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -119,6 +121,28 @@ class MinuteResourceTest extends TestCase
         Storage::disk('local')->assertExists($minute->file_path);
         $this->assertMatchesRegularExpression('/^محضر-\d{4}-\d{4}$/', $minute->reference_number);
         $this->assertTrue($minute->participants->contains($participant));
+    }
+
+    public function test_creating_from_a_task_request_links_the_new_minute_back_to_it(): void
+    {
+        $task = Task::factory()->create(['requested_module' => Module::Minutes]);
+
+        Livewire::withQueryParams(['from_task' => $task->id])
+            ->test(CreateMinute::class)
+            ->fillForm([
+                'type' => 'project_handover',
+                'title' => 'محضر تسليم مشروع',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('minute.pdf', 100, 'application/pdf'),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $minute = Minute::query()->firstOrFail();
+        $task->refresh();
+
+        $this->assertTrue($task->linkable->is($minute));
+        $this->assertNull($task->requested_module);
     }
 
     public function test_create_validates_required_fields(): void
