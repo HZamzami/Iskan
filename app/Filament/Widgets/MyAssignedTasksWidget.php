@@ -17,6 +17,14 @@ class MyAssignedTasksWidget extends TableWidget
 
     protected static ?string $heading = 'المهام المسندة إليّ';
 
+    public static function canView(): bool
+    {
+        return Task::query()
+            ->instances()
+            ->where('assigned_to', Filament::auth()->id())
+            ->exists();
+    }
+
     public function table(Table $table): Table
     {
         return $table

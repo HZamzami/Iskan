@@ -6,6 +6,7 @@ use App\Filament\Resources\ContractDocuments\ContractDocumentResource;
 use App\Filament\Widgets\Concerns\AppliesSiteScope;
 use App\Models\ContractDocument;
 use App\Models\Location;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -22,7 +23,18 @@ class ExpiringContracts extends TableWidget
 
     public static function canView(): bool
     {
-        return Filament::auth()->user()?->can('viewAny', ContractDocument::class) ?? false;
+        $user = Filament::auth()->user();
+
+        if (! $user instanceof User || ! $user->can('viewAny', ContractDocument::class)) {
+            return false;
+        }
+
+        return static::anyExistsForAllowedSites(
+            ContractDocument::query()
+                ->whereDate('end_date', '>=', today())
+                ->whereDate('end_date', '<=', today()->addDays(120)),
+            $user,
+        );
     }
 
     public function table(Table $table): Table

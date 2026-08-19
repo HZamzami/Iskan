@@ -41,6 +41,29 @@ trait AppliesSiteScope
         return $this->currentUser()?->canAccessSite($location) === true ? $location : null;
     }
 
+    /**
+     * نسخة ثابتة (static) من نطاق المواقع، لاستخدامها داخل canView() التي
+     * تُستدعى قبل تركيب الودجة (قبل توفر فلتر الموقع اللحظي في الصفحة)؛
+     * تقتصر على مواقع المستخدم المسموح بها فقط.
+     */
+    protected static function anyExistsForAllowedSites(Builder $query, ?User $user): bool
+    {
+        $allowed = $user?->allowedSites();
+
+        if ($allowed === null) {
+            return $query->exists();
+        }
+
+        return $query->where(function (Builder $q) use ($allowed): void {
+            $q->whereNull('sites')->orWhereJsonLength('sites', 0);
+
+            /** @var Location $location */
+            foreach ($allowed as $location) {
+                $q->orWhereJsonContains('sites', $location->slug);
+            }
+        })->exists();
+    }
+
     protected function applySiteScope(Builder $query): Builder
     {
         $filtered = $this->filteredSite();

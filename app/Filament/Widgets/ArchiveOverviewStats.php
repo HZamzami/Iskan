@@ -44,22 +44,12 @@ class ArchiveOverviewStats extends StatsOverviewWidget
         $siteFilterActive = $this->filteredSite() !== null;
 
         if (in_array(Module::Correspondences, $modules, true)) {
-            $daily = Correspondence::query()
-                ->where('created_at', '>=', now()->subDays(6)->startOfDay())
-                ->get(['created_at'])
-                ->countBy(fn (Correspondence $record): string => $record->created_at->toDateString());
-
-            $sparkline = collect(range(6, 0))
-                ->map(fn (int $daysAgo): float => (float) ($daily[now()->subDays($daysAgo)->toDateString()] ?? 0))
-                ->all();
-
             $stats[] = Stat::make('معاملات قيد المعالجة', Correspondence::query()->where('status', CorrespondenceStatus::InProgress)->count())
                 ->description($siteFilterActive
                     ? 'تنتظر الإنجاز (المعاملات غير مرتبطة بالمواقع)'
                     : 'معاملات تنتظر الإنجاز')
                 ->descriptionIcon(Heroicon::Clock)
                 ->color('warning')
-                ->chart($sparkline)
                 ->url(Module::Correspondences->resourceClass()::getUrl('index'));
         }
 
@@ -86,21 +76,10 @@ class ArchiveOverviewStats extends StatsOverviewWidget
                 ->whereDate('document_date', '>=', today()->subDays(30))
                 ->sum('amount');
 
-            $monthly = $this->applySiteScope(FinancialFlow::query())
-                ->whereDate('period_month', '>=', now()->subMonths(5)->startOfMonth())
-                ->get(['period_month', 'amount'])
-                ->groupBy(fn (FinancialFlow $record): string => $record->period_month->format('Y-m'))
-                ->map(fn ($records): float => (float) $records->sum('amount'));
-
-            $sparkline = collect(range(5, 0))
-                ->map(fn (int $monthsAgo): float => $monthly[now()->subMonths($monthsAgo)->format('Y-m')] ?? 0.0)
-                ->all();
-
             $stats[] = Stat::make('مستخلصات آخر 30 يوماً', number_format($recentSum).' ريال')
                 ->description('مجموع التدفقات المالية المسجلة')
                 ->descriptionIcon(Heroicon::Banknotes)
                 ->color('primary')
-                ->chart($sparkline)
                 ->url(Module::FinancialFlows->resourceClass()::getUrl('index'));
         }
 

@@ -10,6 +10,7 @@ use App\Filament\Widgets\ArchiveOverviewStats;
 use App\Filament\Widgets\ExpiringContracts;
 use App\Filament\Widgets\FinancialFlowsChart;
 use App\Filament\Widgets\LatestDocuments;
+use App\Filament\Widgets\MyAssignedTasksWidget;
 use App\Filament\Widgets\QuickActions;
 use App\Filament\Widgets\RecentActivity;
 use App\Filament\Widgets\SiteOverview;
@@ -216,6 +217,29 @@ class DashboardTest extends TestCase
         Livewire::test(ExpiringContracts::class)
             ->assertCanSeeTableRecords([$soon, $later], inOrder: true)
             ->assertCanNotSeeTableRecords([$far]);
+    }
+
+    public function test_expiring_contracts_hidden_when_none_expiring(): void
+    {
+        $this->actingAs($this->makeAdminUser());
+
+        $this->assertFalse(ExpiringContracts::canView());
+
+        ContractDocument::factory()->create(['end_date' => today()->addDays(10)]);
+
+        $this->assertTrue(ExpiringContracts::canView());
+    }
+
+    public function test_my_assigned_tasks_widget_hidden_when_none_assigned(): void
+    {
+        $admin = $this->makeAdminUser();
+        $this->actingAs($admin);
+
+        $this->assertFalse(MyAssignedTasksWidget::canView());
+
+        Task::factory()->create(['assigned_to' => $admin->id]);
+
+        $this->assertTrue(MyAssignedTasksWidget::canView());
     }
 
     public function test_latest_documents_merges_accessible_modules_only(): void
