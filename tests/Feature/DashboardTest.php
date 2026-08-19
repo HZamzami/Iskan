@@ -15,6 +15,7 @@ use App\Filament\Widgets\RecentActivity;
 use App\Filament\Widgets\SiteOverview;
 use App\Filament\Widgets\TasksOverviewStats;
 use App\Models\ContractDocument;
+use App\Models\Correspondence;
 use App\Models\FinancialFlow;
 use App\Models\GeoDocument;
 use App\Models\Minute;
@@ -235,6 +236,19 @@ class DashboardTest extends TestCase
             ->assertSee('محضر للاختبار')
             ->assertSee('خريطة للاختبار')
             ->assertDontSee('عقد لا يظهر');
+    }
+
+    public function test_latest_documents_renders_correspondences_which_have_no_site_scoping(): void
+    {
+        $this->actingAs($this->makeUserWithAccess([
+            Module::Correspondences->value => AccessLevel::Read,
+        ]));
+
+        Correspondence::factory()->create(['subject' => 'معاملة للاختبار']);
+
+        Livewire::test(LatestDocuments::class)
+            ->assertOk()
+            ->assertSee('معاملة للاختبار');
     }
 
     public function test_dashboard_shows_tasks_overview_stats(): void

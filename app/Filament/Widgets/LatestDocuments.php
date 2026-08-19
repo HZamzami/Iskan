@@ -53,7 +53,7 @@ class LatestDocuments extends Widget
                 $items->push([
                     'module' => $module,
                     'title' => $record->subject ?? $record->title,
-                    'sites' => $record->siteLocations(),
+                    'sites' => $module->isSiteScoped() ? $record->siteLocations() : collect(),
                     'created_at' => $record->created_at,
                     'url' => $module->resourceClass()::getUrl('view', ['record' => $record]),
                 ]);
