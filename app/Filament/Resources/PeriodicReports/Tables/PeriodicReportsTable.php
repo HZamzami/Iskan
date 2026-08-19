@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\PeriodicReports\Tables;
 
 use App\Enums\WorkflowStatus;
+use App\Filament\Support\FileActions;
 use App\Filament\Support\WorkflowActions;
 use App\Models\Location;
 use App\Models\PeriodicReport;
 use App\Models\PeriodicReportType;
-use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -23,7 +23,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 
 class PeriodicReportsTable
 {
@@ -120,21 +119,8 @@ class PeriodicReportsTable
                         ->when($data['until'], fn (Builder $q, $date) => $q->whereDate('document_date', '<=', $date))),
             ])
             ->recordActions([
-                Action::make('preview')
-                    ->label('معاينة')
-                    ->icon(Heroicon::Eye)
-                    ->color('gray')
-                    ->url(fn (PeriodicReport $record): string => Storage::disk('local')->temporaryUrl(
-                        $record->file_path,
-                        now()->addMinutes(5),
-                    ))
-                    ->openUrlInNewTab(),
-                Action::make('download')
-                    ->label('تنزيل')
-                    ->icon(Heroicon::ArrowDownTray)
-                    ->color('gray')
-                    ->action(fn (PeriodicReport $record) => Storage::disk('local')
-                        ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
+                FileActions::preview(),
+                FileActions::download(),
                 ViewAction::make(),
                 EditAction::make(),
                 ActionGroup::make(WorkflowActions::forRecord())

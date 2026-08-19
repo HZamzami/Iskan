@@ -145,6 +145,19 @@ class MinuteResourceTest extends TestCase
         $this->assertNull($task->requested_module);
     }
 
+    public function test_project_handover_rejects_word_file(): void
+    {
+        Livewire::test(CreateMinute::class)
+            ->fillForm([
+                'type' => 'project_handover',
+                'title' => 'محضر تسليم مشروع',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('minute.docx', 100),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['file_path']);
+    }
+
     public function test_create_validates_required_fields(): void
     {
         Livewire::test(CreateMinute::class)

@@ -138,7 +138,7 @@ class TaskForm
                             ->columnSpanFull(),
                         FileUpload::make('file_path')
                             ->label('المرفق')
-                            ->disk('local')
+                            ->disk(config('filesystems.default'))
                             ->directory('tasks')
                             ->acceptedFileTypes(FileTypes::mimeTypesFor(FileTypes::suggestions()))
                             ->rule('extensions:'.implode(',', FileTypes::suggestions()))

@@ -105,6 +105,21 @@ class PeriodicReportResourceTest extends TestCase
         $this->assertMatchesRegularExpression('/^تقرير-\d{4}-\d{4}$/', $report->reference_number);
     }
 
+    public function test_weekly_progress_report_rejects_word_file(): void
+    {
+        Livewire::test(CreatePeriodicReport::class)
+            ->fillForm([
+                'type' => 'weekly_progress',
+                'sites' => ['abraj_kudanah'],
+                'title' => 'تقرير إنجاز الأعمال الأسبوعي',
+                'period' => '2026-07-15',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('report.docx', 100),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['file_path']);
+    }
+
     public function test_create_validates_required_fields(): void
     {
         Livewire::test(CreatePeriodicReport::class)

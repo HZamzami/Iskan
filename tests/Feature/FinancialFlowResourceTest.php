@@ -106,6 +106,21 @@ class FinancialFlowResourceTest extends TestCase
         $this->assertMatchesRegularExpression('/^تدفق-\d{4}-\d{4}$/', $flow->reference_number);
     }
 
+    public function test_consultant_flow_rejects_word_file(): void
+    {
+        Livewire::test(CreateFinancialFlow::class)
+            ->fillForm([
+                'type' => 'consultant',
+                'title' => 'تدفق مالي لعقد الإستشاري',
+                'period_month' => '2026-07-01',
+                'amount' => 150000,
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('flow.docx', 100),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['file_path']);
+    }
+
     public function test_create_validates_required_fields(): void
     {
         Livewire::test(CreateFinancialFlow::class)

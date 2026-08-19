@@ -127,6 +127,20 @@ class ContractDocumentResourceTest extends TestCase
         $this->assertSame(['abraj_kudanah'], $document->sites);
     }
 
+    public function test_consultant_contract_rejects_word_file(): void
+    {
+        Livewire::test(CreateContractDocument::class)
+            ->fillForm([
+                'type' => 'consultant_contract',
+                'title' => 'عقد الإستشاري',
+                'contracting_party' => 'إيهاف',
+                'document_date' => '2026-07-20',
+                'file_path' => UploadedFile::fake()->create('contract.docx', 100),
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['file_path']);
+    }
+
     public function test_create_validates_required_fields(): void
     {
         Livewire::test(CreateContractDocument::class)

@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             EntitySeeder::class,
             CorrespondenceSeeder::class,
+            DemoDataSeeder::class,
         ]);
     }
 }

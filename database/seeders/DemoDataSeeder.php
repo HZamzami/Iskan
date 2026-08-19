@@ -13,6 +13,7 @@ use App\Models\GeoDocument;
 use App\Models\Minute;
 use App\Models\PeriodicReport;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * بيانات تجريبية لجميع وحدات الأرشيف؛ آمنة للتشغيل في بيئة الإنتاج
@@ -31,6 +32,15 @@ class DemoDataSeeder extends Seeder
         $this->seedContractualRequirements();
         $this->seedPeriodicReports();
         $this->seedGeoDocuments();
+    }
+
+    private function ensureDemoFile(string $path): void
+    {
+        $disk = Storage::disk(config('filesystems.default'));
+
+        if (! $disk->exists($path)) {
+            $disk->put($path, file_get_contents(__DIR__.'/assets/placeholder.pdf'));
+        }
     }
 
     private function seedCorrespondences(): void
@@ -70,6 +80,8 @@ class DemoDataSeeder extends Seeder
                 ['subject' => $row['subject']],
                 [...$row, 'entity_id' => $entity->id, 'file_path' => 'correspondence-files/placeholder.pdf'],
             );
+
+            $this->ensureDemoFile('correspondence-files/placeholder.pdf');
         }
     }
 
@@ -101,6 +113,8 @@ class DemoDataSeeder extends Seeder
                 ['title' => $row['title']],
                 [...$row, 'document_date' => '2026-01-15', 'file_path' => 'contract-documents/placeholder.pdf'],
             );
+
+            $this->ensureDemoFile('contract-documents/placeholder.pdf');
         }
     }
 
@@ -132,6 +146,8 @@ class DemoDataSeeder extends Seeder
                 ['title' => $row['title']],
                 [...$row, 'document_date' => '2026-06-10', 'file_path' => 'minutes-files/placeholder.pdf'],
             );
+
+            $this->ensureDemoFile('minutes-files/placeholder.pdf');
         }
     }
 
@@ -163,6 +179,8 @@ class DemoDataSeeder extends Seeder
                 ['title' => $row['title']],
                 [...$row, 'period_month' => '2026-06-01', 'document_date' => '2026-07-05', 'file_path' => 'financial-flows/placeholder.pdf'],
             );
+
+            $this->ensureDemoFile('financial-flows/placeholder.pdf');
         }
     }
 
@@ -191,6 +209,8 @@ class DemoDataSeeder extends Seeder
                 ['title' => $row['title']],
                 [...$row, 'period' => '2026-06-01', 'document_date' => '2026-07-01', 'file_path' => 'contractual-requirements/placeholder.pdf'],
             );
+
+            $this->ensureDemoFile('contractual-requirements/placeholder.pdf');
         }
     }
 
@@ -219,6 +239,8 @@ class DemoDataSeeder extends Seeder
                 ['title' => $row['title']],
                 [...$row, 'period' => '2026-06-01', 'document_date' => '2026-07-03', 'file_path' => 'periodic-reports/placeholder.pdf'],
             );
+
+            $this->ensureDemoFile('periodic-reports/placeholder.pdf');
         }
     }
 
@@ -244,6 +266,8 @@ class DemoDataSeeder extends Seeder
                 ['title' => $row['title']],
                 [...$row, 'document_date' => '2026-05-25', 'file_path' => 'geo-documents/placeholder.pdf'],
             );
+
+            $this->ensureDemoFile('geo-documents/placeholder.pdf');
         }
     }
 }

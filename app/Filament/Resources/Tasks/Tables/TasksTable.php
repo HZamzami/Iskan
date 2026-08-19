@@ -7,6 +7,7 @@ use App\Enums\TaskPriority;
 use App\Enums\TaskRecurrence;
 use App\Enums\TaskStatus;
 use App\Filament\Exports\TaskExporter;
+use App\Filament\Support\FileActions;
 use App\Models\Role;
 use App\Models\Task;
 use Filament\Actions\Action;
@@ -153,6 +154,8 @@ class TasksTable
                             ->title('تم إيقاف تكرار المهمة')
                             ->send();
                     }),
+                FileActions::preview(),
+                FileActions::download(nameColumn: 'title'),
                 ViewAction::make(),
                 EditAction::make(),
             ])

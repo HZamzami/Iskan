@@ -93,7 +93,7 @@ class CorrespondenceForm
                     ->schema([
                         FileUpload::make('file_path')
                             ->label('ملف المعاملة (PDF)')
-                            ->disk('local')
+                            ->disk(config('filesystems.default'))
                             ->directory('correspondence-files')
                             ->acceptedFileTypes(['application/pdf'])
                             ->rule('extensions:pdf')

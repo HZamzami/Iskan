@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Correspondences\Tables;
 
 use App\Enums\CorrespondenceStatus;
+use App\Filament\Support\FileActions;
 use App\Models\Correspondence;
-use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,7 +17,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 
 class CorrespondencesTable
 {
@@ -86,21 +85,8 @@ class CorrespondencesTable
                         ->when($data['until'], fn (Builder $q, $date) => $q->whereDate('document_date', '<=', $date))),
             ])
             ->recordActions([
-                Action::make('preview')
-                    ->label('معاينة')
-                    ->icon(Heroicon::Eye)
-                    ->color('gray')
-                    ->url(fn (Correspondence $record): string => Storage::disk('local')->temporaryUrl(
-                        $record->file_path,
-                        now()->addMinutes(5),
-                    ))
-                    ->openUrlInNewTab(),
-                Action::make('download')
-                    ->label('تنزيل')
-                    ->icon(Heroicon::ArrowDownTray)
-                    ->color('gray')
-                    ->action(fn (Correspondence $record) => Storage::disk('local')
-                        ->download($record->file_path, $record->reference_number.'.'.pathinfo($record->file_path, PATHINFO_EXTENSION))),
+                FileActions::preview(),
+                FileActions::download(),
                 ViewAction::make(),
                 EditAction::make(),
             ])

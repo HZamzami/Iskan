@@ -84,7 +84,7 @@ class PeriodicReportForm
                     ->schema([
                         FileUpload::make('file_path')
                             ->label('ملف المستند')
-                            ->disk('local')
+                            ->disk(config('filesystems.default'))
                             ->directory('periodic-reports')
                             ->acceptedFileTypes(fn (Get $get): array => FileTypes::mimeTypesFor(self::acceptedExtensions($get)))
                             ->rule(fn (Get $get): string => 'extensions:'.implode(',', self::acceptedExtensions($get)))
