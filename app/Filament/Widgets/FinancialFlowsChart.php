@@ -16,7 +16,7 @@ class FinancialFlowsChart extends ChartWidget
 
     protected ?string $heading = 'التدفقات المالية الشهرية';
 
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 6;
 
     protected int|string|array $columnSpan = ['default' => 1, 'xl' => 2];
 
@@ -77,12 +77,8 @@ class FinancialFlowsChart extends ChartWidget
     {
         return [
             'scales' => [
-                'x' => ['stacked' => true, 'reverse' => true, 'ticks' => ['maxRotation' => 0, 'autoSkipPadding' => 8]],
+                'x' => ['stacked' => true, 'ticks' => ['maxRotation' => 0, 'autoSkipPadding' => 8]],
                 'y' => ['stacked' => true, 'beginAtZero' => true],
-            ],
-            'plugins' => [
-                'legend' => ['rtl' => true, 'textDirection' => 'rtl'],
-                'tooltip' => ['rtl' => true, 'textDirection' => 'rtl'],
             ],
         ];
     }

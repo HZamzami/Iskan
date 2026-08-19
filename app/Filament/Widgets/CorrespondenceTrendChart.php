@@ -14,7 +14,7 @@ class CorrespondenceTrendChart extends ChartWidget
 
     protected ?string $heading = 'حركة المعاملات (٦ أشهر)';
 
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 7;
 
     protected int|string|array $columnSpan = ['default' => 1, 'xl' => 2];
 
@@ -84,12 +84,8 @@ class CorrespondenceTrendChart extends ChartWidget
     {
         return [
             'scales' => [
-                'x' => ['reverse' => true, 'ticks' => ['maxRotation' => 0, 'autoSkipPadding' => 8]],
+                'x' => ['ticks' => ['maxRotation' => 0, 'autoSkipPadding' => 8]],
                 'y' => ['beginAtZero' => true, 'ticks' => ['precision' => 0]],
-            ],
-            'plugins' => [
-                'legend' => ['rtl' => true, 'textDirection' => 'rtl'],
-                'tooltip' => ['rtl' => true, 'textDirection' => 'rtl'],
             ],
         ];
     }

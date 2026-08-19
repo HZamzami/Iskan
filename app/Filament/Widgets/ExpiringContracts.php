@@ -16,7 +16,7 @@ class ExpiringContracts extends TableWidget
 {
     use AppliesSiteScope;
 
-    protected static ?int $sort = 6;
+    protected static ?int $sort = 8;
 
     protected int|string|array $columnSpan = ['default' => 1, 'xl' => 2];
 

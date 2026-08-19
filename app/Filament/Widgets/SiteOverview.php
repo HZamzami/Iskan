@@ -16,7 +16,7 @@ class SiteOverview extends Widget
 
     protected string $view = 'filament.widgets.site-overview';
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 5;
 
     protected int|string|array $columnSpan = 'full';
 

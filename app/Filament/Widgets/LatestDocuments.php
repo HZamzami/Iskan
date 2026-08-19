@@ -14,7 +14,7 @@ class LatestDocuments extends Widget
 
     protected string $view = 'filament.widgets.latest-documents';
 
-    protected static ?int $sort = 7;
+    protected static ?int $sort = 9;
 
     protected int|string|array $columnSpan = ['default' => 1, 'xl' => 2];
 
