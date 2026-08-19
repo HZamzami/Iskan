@@ -60,15 +60,17 @@ class CorrespondenceForm
                     ->columnSpanFull()
                     ->schema([
                         Grid::make(3)->schema([
-                            TextInput::make('sender')
+                            Select::make('sender_user_id')
                                 ->label('من')
-                                ->required()
-                                ->maxLength(255)
+                                ->relationship('senderUser', 'name')
+                                ->searchable()
+                                ->preload()
                                 ->columnSpan(1),
-                            TextInput::make('recipient')
+                            Select::make('recipient_user_id')
                                 ->label('إلى')
-                                ->required()
-                                ->maxLength(255)
+                                ->relationship('recipientUser', 'name')
+                                ->searchable()
+                                ->preload()
                                 ->columnSpan(1),
                             Select::make('entity_id')
                                 ->label('الجهة')

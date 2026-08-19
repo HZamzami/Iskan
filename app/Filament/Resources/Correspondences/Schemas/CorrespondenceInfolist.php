@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Correspondences\Schemas;
 
+use App\Models\Correspondence;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -52,9 +53,13 @@ class CorrespondenceInfolist
                         Grid::make(3)->schema([
                             TextEntry::make('sender')
                                 ->label('من')
+                                ->state(fn (Correspondence $record): ?string => $record->senderLabel())
+                                ->placeholder('—')
                                 ->columnSpan(1),
                             TextEntry::make('recipient')
                                 ->label('إلى')
+                                ->state(fn (Correspondence $record): ?string => $record->recipientLabel())
+                                ->placeholder('—')
                                 ->columnSpan(1),
                             TextEntry::make('entity.name')
                                 ->label('الجهة')

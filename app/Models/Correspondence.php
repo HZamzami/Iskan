@@ -27,6 +27,8 @@ class Correspondence extends Model
         'status',
         'sender',
         'recipient',
+        'sender_user_id',
+        'recipient_user_id',
         'entity_id',
         'document_date',
         'file_path',
@@ -57,6 +59,26 @@ class Correspondence extends Model
     public function entity(): BelongsTo
     {
         return $this->belongsTo(Entity::class);
+    }
+
+    public function senderUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sender_user_id');
+    }
+
+    public function recipientUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recipient_user_id');
+    }
+
+    public function senderLabel(): ?string
+    {
+        return $this->senderUser?->name ?? $this->sender;
+    }
+
+    public function recipientLabel(): ?string
+    {
+        return $this->recipientUser?->name ?? $this->recipient;
     }
 
     /**

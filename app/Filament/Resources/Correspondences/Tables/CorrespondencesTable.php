@@ -47,11 +47,17 @@ class CorrespondencesTable
                     ->toggleable(),
                 TextColumn::make('sender')
                     ->label('من')
-                    ->searchable()
+                    ->state(fn (Correspondence $record): ?string => $record->senderLabel())
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query
+                        ->whereHas('senderUser', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"))
+                        ->orWhere('sender', 'like', "%{$search}%"))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('recipient')
                     ->label('إلى')
-                    ->searchable()
+                    ->state(fn (Correspondence $record): ?string => $record->recipientLabel())
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query
+                        ->whereHas('recipientUser', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"))
+                        ->orWhere('recipient', 'like', "%{$search}%"))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('document_date')
                     ->label('تاريخ الملف')
