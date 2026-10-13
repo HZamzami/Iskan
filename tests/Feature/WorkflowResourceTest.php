@@ -4,9 +4,11 @@ namespace Tests\Feature;
 
 use App\Enums\AccessLevel;
 use App\Enums\Module;
+use App\Enums\WorkflowAction;
 use App\Enums\WorkflowStatus;
 use App\Filament\Resources\FinancialFlows\Pages\CreateFinancialFlow;
 use App\Filament\Resources\FinancialFlows\Pages\ListFinancialFlows;
+use App\Filament\Resources\FinancialFlows\Pages\ViewFinancialFlow;
 use App\Filament\Support\WorkflowFormFields;
 use App\Models\FinancialFlow;
 use App\Models\FinancialFlowType;
@@ -243,5 +245,124 @@ class WorkflowResourceTest extends TestCase
             ->assertActionHidden(TestAction::make('workflowForward')->table($flow))
             ->assertActionHidden(TestAction::make('workflowReturn')->table($flow))
             ->assertActionHidden(TestAction::make('workflowApprove')->table($flow));
+    }
+
+    public function test_read_only_recipient_without_site_access_can_open_the_record_and_see_workflow_actions(): void
+    {
+        $contractor = $this->editUser(['site_a']);
+        $recipient = $this->makeUserWithAccess([Module::FinancialFlows->value => AccessLevel::Read]);
+        $recipient->update(['role_id' => Role::where('slug', 'consultant')->first()->id]);
+
+        $type = $this->workflowType();
+        $flow = FinancialFlow::factory()->create([
+            'type' => $type->slug,
+            'sites' => ['site_a'],
+            'workflow_status' => WorkflowStatus::Pending,
+            'assigned_to' => $recipient->id,
+            'created_by' => $contractor->id,
+        ]);
+        $flow->transitions()->create([
+            'from_status' => null,
+            'to_status' => WorkflowStatus::Pending,
+            'action' => WorkflowAction::Submit,
+            'actor_id' => $contractor->id,
+            'assigned_to_id' => $recipient->id,
+        ]);
+
+        $this->actingAs($recipient->fresh());
+
+        $this->get("/financial-flows/{$flow->id}")->assertOk();
+
+        Livewire::test(ViewFinancialFlow::class, ['record' => $flow->getKey()])
+            ->assertActionVisible('workflowForward')
+            ->assertActionVisible('workflowReturn')
+            ->assertActionHidden('workflowApprove');
+
+        Livewire::test(ListFinancialFlows::class)
+            ->assertCanSeeTableRecords([$flow]);
+    }
+
+    public function test_read_only_recipient_can_return_the_record_through_the_view_page(): void
+    {
+        $contractor = $this->editUser(['site_a']);
+        $recipient = $this->makeUserWithAccess([Module::FinancialFlows->value => AccessLevel::Read]);
+
+        $type = $this->workflowType();
+        $flow = FinancialFlow::factory()->create([
+            'type' => $type->slug,
+            'sites' => ['site_a'],
+            'workflow_status' => WorkflowStatus::Pending,
+            'assigned_to' => $recipient->id,
+            'created_by' => $contractor->id,
+        ]);
+        $flow->transitions()->create([
+            'from_status' => null,
+            'to_status' => WorkflowStatus::Pending,
+            'action' => WorkflowAction::Submit,
+            'actor_id' => $contractor->id,
+            'assigned_to_id' => $recipient->id,
+        ]);
+
+        $this->actingAs($recipient);
+
+        Livewire::test(ViewFinancialFlow::class, ['record' => $flow->getKey()])
+            ->callAction('workflowReturn', ['note' => 'ناقص توقيع'])
+            ->assertHasNoActionErrors()
+            ->assertNotified();
+
+        $this->assertSame($contractor->id, $flow->fresh()->assigned_to);
+    }
+
+    public function test_once_forwarded_away_a_site_restricted_former_holder_can_no_longer_open_the_record(): void
+    {
+        $holder = $this->makeUserWithAccess([Module::FinancialFlows->value => AccessLevel::Read]);
+        $someoneElse = $this->editUser(['site_a']);
+
+        $type = $this->workflowType();
+        $flow = FinancialFlow::factory()->create([
+            'type' => $type->slug,
+            'sites' => ['site_a'],
+            'workflow_status' => WorkflowStatus::Pending,
+            'assigned_to' => $someoneElse->id,
+            'created_by' => $someoneElse->id,
+        ]);
+
+        $this->actingAs($holder);
+
+        $this->get("/financial-flows/{$flow->id}")
+            ->assertNotFound()
+            ->assertSee('لم نعثر على ما تبحث عنه');
+    }
+
+    public function test_recipient_with_no_module_permission_can_still_open_a_record_forwarded_to_them(): void
+    {
+        $contractor = $this->editUser(['site_a']);
+        $recipient = $this->makeUserWithAccess([]);
+
+        $type = $this->workflowType();
+        $flow = FinancialFlow::factory()->create([
+            'type' => $type->slug,
+            'sites' => ['site_a'],
+            'workflow_status' => WorkflowStatus::Pending,
+            'assigned_to' => $recipient->id,
+            'created_by' => $contractor->id,
+        ]);
+
+        $this->actingAs($recipient);
+
+        $this->get("/financial-flows/{$flow->id}")->assertOk();
+
+        Livewire::test(ViewFinancialFlow::class, ['record' => $flow->getKey()])
+            ->assertActionVisible('workflowForward')
+            ->assertActionHidden('workflowApprove');
+
+        // Holding a record doesn't open the rest of the module: other records stay hidden.
+        $other = FinancialFlow::factory()->create(['type' => $type->slug, 'sites' => null]);
+
+        $this->get("/financial-flows/{$other->id}")->assertNotFound();
+
+        Livewire::test(ListFinancialFlows::class)
+            ->assertCanSeeTableRecords([$flow])
+            ->assertCanNotSeeTableRecords([$other]);
     }
 }

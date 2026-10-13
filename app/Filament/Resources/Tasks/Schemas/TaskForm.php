@@ -8,6 +8,7 @@ use App\Enums\TaskRecurrence;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\FileSize;
 use App\Support\FileTypes;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -143,7 +144,7 @@ class TaskForm
                             ->acceptedFileTypes(FileTypes::mimeTypesFor(FileTypes::suggestions()))
                             ->rule('extensions:'.implode(',', FileTypes::suggestions()))
                             ->maxSize(20480)
-                            ->helperText('الامتدادات المسموحة: '.implode('، ', FileTypes::suggestions()))
+                            ->helperText('الامتدادات المسموحة: '.implode('، ', FileTypes::suggestions()).' — الحد الأقصى للحجم: '.FileSize::label(20480))
                             ->downloadable()
                             ->columnSpanFull(),
                         Textarea::make('description')

@@ -279,4 +279,61 @@ class WorkflowServiceTest extends TestCase
 
         $this->assertSame(1, DatabaseNotification::query()->where('notifiable_id', $contractor->id)->count());
     }
+
+    public function test_workflow_notification_links_to_the_record_view_page_with_a_relative_url(): void
+    {
+        $contractor = $this->makeCategorizedUser('contractor');
+        $this->actingAs($contractor);
+        $consultant = $this->makeCategorizedUser('consultant');
+        $type = $this->workflowMinuteType();
+        $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
+
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
+
+        $notification = DatabaseNotification::query()->where('notifiable_id', $consultant->id)->firstOrFail();
+        $action = $notification->data['actions'][0];
+
+        $this->assertSame('عرض السجل', $action['label']);
+        $this->assertSame("/minutes/{$minute->id}", $action['url']);
+    }
+
+    public function test_assignee_without_edit_permission_can_still_forward_and_return(): void
+    {
+        $contractor = $this->makeCategorizedUser('contractor');
+        $this->actingAs($contractor);
+        $assetManager = $this->makeCategorizedUser('asset_manager');
+
+        $readOnlyConsultant = $this->makeUserWithAccess([Module::Minutes->value => AccessLevel::Read]);
+        $readOnlyConsultant->update(['role_id' => Role::where('slug', 'consultant')->firstOrFail()->id]);
+        $readOnlyConsultant = $readOnlyConsultant->fresh();
+
+        $type = $this->workflowMinuteType();
+        $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => ['site_a']]);
+
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $readOnlyConsultant);
+
+        $this->assertTrue($minute->fresh()->canBeActedOnBy($readOnlyConsultant));
+
+        $this->service->forward($minute->fresh(), $readOnlyConsultant, Role::where('slug', 'asset_manager')->firstOrFail(), $assetManager);
+        $this->assertSame($assetManager->id, $minute->fresh()->assigned_to);
+
+        $this->service->returnToPrevious($minute->fresh(), $assetManager);
+        $this->assertSame($readOnlyConsultant->id, $minute->fresh()->assigned_to);
+    }
+
+    public function test_former_holder_loses_workflow_rights_once_record_moves_on(): void
+    {
+        $contractor = $this->makeCategorizedUser('contractor');
+        $this->actingAs($contractor);
+        $consultant = $this->makeCategorizedUser('consultant');
+        $type = $this->workflowMinuteType();
+        $minute = Minute::factory()->create(['type' => $type->slug, 'sites' => null]);
+
+        $this->service->submit($minute, $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
+
+        $this->assertFalse($minute->fresh()->canBeActedOnBy($contractor));
+
+        $this->expectException(LogicException::class);
+        $this->service->forward($minute->fresh(), $contractor, Role::where('slug', 'consultant')->firstOrFail(), $consultant);
+    }
 }

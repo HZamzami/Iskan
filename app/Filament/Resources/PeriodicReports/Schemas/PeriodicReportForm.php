@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PeriodicReports\Schemas;
 use App\Filament\Support\WorkflowFormFields;
 use App\Models\Location;
 use App\Models\PeriodicReportType;
+use App\Support\FileSize;
 use App\Support\FileTypes;
 use Closure;
 use Filament\Facades\Filament;
@@ -89,7 +90,8 @@ class PeriodicReportForm
                             ->acceptedFileTypes(fn (Get $get): array => FileTypes::mimeTypesFor(self::acceptedExtensions($get)))
                             ->rule(fn (Get $get): string => 'extensions:'.implode(',', self::acceptedExtensions($get)))
                             ->maxSize(fn (Get $get): int => self::selectedType($get)?->maxFileSizeKb() ?? 20480)
-                            ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get)))
+                            ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get))
+                                .' — الحد الأقصى للحجم: '.FileSize::label(self::selectedType($get)?->maxFileSizeKb() ?? 20480))
                             ->downloadable()
                             ->required()
                             ->columnSpanFull(),

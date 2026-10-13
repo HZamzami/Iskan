@@ -34,7 +34,7 @@ class TaskAssignedNotification extends Notification
             ->actions([
                 Action::make('view')
                     ->label('عرض المهمة')
-                    ->url(TaskResource::getUrl('view', ['record' => $this->task]))
+                    ->url(TaskResource::getUrl('view', ['record' => $this->task], isAbsolute: false))
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();

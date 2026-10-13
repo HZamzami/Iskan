@@ -5,6 +5,7 @@ namespace App\Filament\Resources\GeoDocuments\Schemas;
 use App\Filament\Support\WorkflowFormFields;
 use App\Models\GeoDocumentType;
 use App\Models\Location;
+use App\Support\FileSize;
 use App\Support\FileTypes;
 use Closure;
 use Filament\Facades\Filament;
@@ -88,7 +89,8 @@ class GeoDocumentForm
                             ->acceptedFileTypes(fn (Get $get): array => FileTypes::mimeTypesFor(self::acceptedExtensions($get)))
                             ->rule(fn (Get $get): string => 'extensions:'.implode(',', self::acceptedExtensions($get)))
                             ->maxSize(fn (Get $get): int => self::selectedType($get)?->maxFileSizeKb() ?? 51200)
-                            ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get)))
+                            ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get))
+                                .' — الحد الأقصى للحجم: '.FileSize::label(self::selectedType($get)?->maxFileSizeKb() ?? 51200))
                             ->downloadable()
                             ->required()
                             ->columnSpanFull(),

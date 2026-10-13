@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Concerns;
 use App\Enums\PaletteColor;
 use App\Enums\SiteScope;
 use App\Models\Location;
+use App\Support\FileSize;
 use App\Support\FileTypes;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
@@ -135,11 +136,16 @@ class DocumentTypeForm
                                     ? collect($state)->map(fn (string $ext): string => strtolower(ltrim(trim($ext), '.')))->unique()->values()->all()
                                     : null)
                                 ->columnSpan(1),
+                            // يُخزَّن بالكيلوبايت (كما يتوقعه FileUpload::maxSize)، ويُعرض ويُدخَل بالميجابايت.
                             TextInput::make('max_file_size')
-                                ->label('الحد الأقصى لحجم الملف (كيلوبايت)')
+                                ->label('الحد الأقصى لحجم الملف (ميجابايت)')
                                 ->numeric()
-                                ->minValue(1)
-                                ->placeholder('20480 (الافتراضي)')
+                                ->minValue(0.1)
+                                ->step(0.1)
+                                ->suffix('MB')
+                                ->placeholder('20 (الافتراضي)')
+                                ->formatStateUsing(fn (mixed $state): ?float => filled($state) ? FileSize::kbToMb((int) $state) : null)
+                                ->dehydrateStateUsing(fn (mixed $state): ?int => filled($state) ? FileSize::mbToKb((float) $state) : null)
                                 ->columnSpan(1),
                         ]),
                     ]),

@@ -48,11 +48,11 @@ class CommentAddedNotification extends Notification
         $commentable = $this->comment->commentable;
 
         if ($commentable instanceof Task) {
-            return TaskResource::getUrl('view', ['record' => $commentable->id]);
+            return TaskResource::getUrl('view', ['record' => $commentable->id], isAbsolute: false);
         }
 
         $module = Module::fromModelClass($commentable::class);
 
-        return $module?->resourceClass()::getUrl('view', ['record' => $commentable->id]);
+        return $module?->resourceClass()::getUrl('view', ['record' => $commentable->id], isAbsolute: false);
     }
 }

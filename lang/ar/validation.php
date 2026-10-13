@@ -35,7 +35,7 @@ return [
     ],
     'max' => [
         'array' => 'يجب ألا يحتوي :attribute على أكثر من :max عناصر.',
-        'file' => 'يجب ألا يتجاوز حجم :attribute :max كيلوبايت.',
+        'file' => 'يجب ألا يتجاوز حجم :attribute :max_mb.',
         'numeric' => 'يجب ألا تتجاوز قيمة :attribute :max.',
         'string' => 'يجب ألا يتجاوز طول :attribute :max حرفاً.',
     ],

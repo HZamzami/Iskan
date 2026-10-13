@@ -18,10 +18,12 @@ use App\Observers\LocationObserver;
 use App\Policies\ActivityPolicy;
 use App\Policies\AdminOnlyPolicy;
 use App\Policies\TaskPolicy;
+use App\Support\FileSize;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
 
@@ -68,5 +70,12 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Location::observe(LocationObserver::class);
+
+        // قاعدة max للملفات تعمل بالكيلوبايت؛ :max_mb يعرض الحد للمستخدم بالميجابايت.
+        Validator::replacer('max', fn (string $message, string $attribute, string $rule, array $parameters): string => str_replace(
+            [':max_mb', ':max'],
+            [FileSize::label((int) $parameters[0]), $parameters[0]],
+            $message,
+        ));
     }
 }

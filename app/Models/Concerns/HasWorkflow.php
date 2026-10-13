@@ -57,9 +57,13 @@ trait HasWorkflow
         return $this->documentType?->requiresWorkflow() ?? false;
     }
 
+    /**
+     * حامل السجل الحالي (من رُحِّل إليه) هو من يملك الترحيل/الإعادة، دون
+     * اشتراط صلاحية "تعديل" على الوحدة — فالمستلم غالباً يملك صلاحية عرض فقط.
+     */
     public function canBeActedOnBy(User $user): bool
     {
-        return ($user->isAdmin() || $this->assigned_to === $user->id) && $user->can('update', $this);
+        return $user->isAdmin() || $this->assigned_to === $user->id;
     }
 
     public function canApprove(User $user): bool

@@ -6,6 +6,7 @@ use App\Filament\Support\WorkflowFormFields;
 use App\Models\Location;
 use App\Models\Minute;
 use App\Models\MinuteType;
+use App\Support\FileSize;
 use App\Support\FileTypes;
 use Closure;
 use Filament\Facades\Filament;
@@ -105,7 +106,8 @@ class MinuteForm
                             ->acceptedFileTypes(fn (Get $get): array => FileTypes::mimeTypesFor(self::acceptedExtensions($get)))
                             ->rule(fn (Get $get): string => 'extensions:'.implode(',', self::acceptedExtensions($get)))
                             ->maxSize(fn (Get $get): int => self::selectedType($get)?->maxFileSizeKb() ?? 20480)
-                            ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get)))
+                            ->helperText(fn (Get $get): string => 'الامتدادات المسموحة: '.implode('، ', self::acceptedExtensions($get))
+                                .' — الحد الأقصى للحجم: '.FileSize::label(self::selectedType($get)?->maxFileSizeKb() ?? 20480))
                             ->downloadable()
                             ->required()
                             ->columnSpanFull(),

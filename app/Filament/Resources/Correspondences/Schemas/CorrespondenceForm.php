@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Correspondences\Schemas;
 
 use App\Enums\CorrespondenceDirection;
 use App\Enums\CorrespondenceStatus;
+use App\Support\FileSize;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -100,6 +101,7 @@ class CorrespondenceForm
                             ->acceptedFileTypes(['application/pdf'])
                             ->rule('extensions:pdf')
                             ->maxSize(10240)
+                            ->helperText('الحد الأقصى للحجم: '.FileSize::label(10240))
                             ->downloadable()
                             ->required()
                             ->columnSpanFull(),
